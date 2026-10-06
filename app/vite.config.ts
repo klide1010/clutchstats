@@ -34,7 +34,7 @@ export default defineConfig({
       },
     }),
   ],
-  build: { target: 'es2018' },
+  build: { target: 'es2018', cssTarget: 'chrome70' },
   server: { proxy: { '/api': 'http://localhost:8787' } },
   test: {
     environment: 'jsdom',
