@@ -22,9 +22,14 @@ function baseValid(x: unknown): x is { id: string; updatedAt: number } {
 
 export const teamMapper: Mapper<Team> = {
   table: 'teams',
-  columns: ['id', 'name', 'short_name', 'color', 'updated_at', 'deleted'],
-  toRow: (t) => [t.id, t.name, t.shortName, t.color, t.updatedAt, toDb(!!t.deleted)],
-  fromRow: (r) => ({ id: r.id as string, name: r.name as string, shortName: r.short_name as string, color: r.color as string, updatedAt: r.updated_at as number, deleted: bool(r.deleted) }),
+  columns: ['id', 'name', 'short_name', 'color', 'logo_url', 'updated_at', 'deleted'],
+  toRow: (t) => [t.id, t.name, t.shortName, t.color, toDb(t.logoUrl), t.updatedAt, toDb(!!t.deleted)],
+  fromRow: (r) => {
+    const t: Team = { id: r.id as string, name: r.name as string, shortName: r.short_name as string, color: r.color as string, updatedAt: r.updated_at as number, deleted: bool(r.deleted) };
+    const logo = opt<string>(r.logo_url);
+    if (logo !== undefined) t.logoUrl = logo;
+    return t;
+  },
   validate: (x): x is Team => baseValid(x) && typeof (x as Team).name === 'string',
 };
 

@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { parseIcs, proposeGames, type GameProposal } from '../model/ics';
-import { myTeam } from '../state/team';
+import { DEFAULT_TEAM_NAME, myTeam, saveTeam, shortNameFor } from '../state/team';
 import { findOrCreateOpponent, opponents } from '../state/opponents';
 import { importProposals } from '../state/games';
 import { toast } from '../ui/Toast';
@@ -18,6 +18,14 @@ export function IcsImport({ onDone }: { onDone: () => void }) {
   const [errors, setErrors] = useState<{ line: number; reason: string }[]>([]);
   const [useClock, setUseClock] = useState(false);
   const [busy, setBusy] = useState(false);
+  const needsName = !myTeam.value || myTeam.value.name === DEFAULT_TEAM_NAME;
+  const [teamName, setTeamName] = useState('');
+
+  const confirmName = async () => {
+    const name = teamName.trim();
+    if (!name) return;
+    await saveTeam({ name, shortName: shortNameFor(name) });
+  };
 
   const onFile = async (e: Event) => {
     const file = (e.target as HTMLInputElement).files?.[0];
@@ -57,11 +65,25 @@ export function IcsImport({ onDone }: { onDone: () => void }) {
     }
   };
 
+  if (!rows && needsName) {
+    return (
+      <div class="card stack">
+        <strong>Prima di importare</strong>
+        <p class="muted">Serve il nome della tua squadra per capire quali partite sono in casa e chi sono gli avversari.</p>
+        <label>Come si chiama la tua squadra?<input value={teamName} onInput={(e) => setTeamName((e.target as HTMLInputElement).value)} /></label>
+        <div class="row">
+          <button class="btn" onClick={onDone}>Annulla</button>
+          <button class="btn btn-primary" disabled={!teamName.trim()} onClick={confirmName}>Avanti</button>
+        </div>
+      </div>
+    );
+  }
+
   if (!rows) {
     return (
       <div class="card stack">
         <strong>Importa calendario (.ics)</strong>
-        <p class="muted">Esporta il calendario da Google Calendar o Outlook e carica il file. Le partite già importate vengono aggiornate, non duplicate.</p>
+        <p class="muted">Squadra: <b>{myTeam.value?.name}</b>. Esporta il calendario da Google Calendar o Outlook e carica il file. Gli avversari nuovi vengono creati in automatico; le partite già importate vengono aggiornate, non duplicate.</p>
         <div class="row">
           <button class="btn" onClick={onDone}>Annulla</button>
           <label class="btn btn-primary" style="margin:0">Scegli file<input type="file" accept=".ics,text/calendar" style="display:none" onChange={onFile} /></label>

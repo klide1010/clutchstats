@@ -90,3 +90,10 @@ it('a push rejected by the server is followed by a pull that brings the newer co
   expect((await teamsRepo.get('t1'))!.name).toBe('Nuovo server');
   expect(await teamsRepo.dirty()).toEqual([]);
 });
+
+it('concurrent runSync calls share one in-flight sync instead of failing', async () => {
+  fetchMock.mockResolvedValueOnce(res(200, emptyPull(100)));
+  const [a, b] = await Promise.all([runSync(), runSync()]);
+  expect(a).toBe(b);
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+});

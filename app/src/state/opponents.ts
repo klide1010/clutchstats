@@ -1,6 +1,7 @@
 import { signal } from '@preact/signals';
 import { newId, type Opponent } from '@bkstats/shared';
 import { opponentsRepo, type PutInput } from '../db';
+import { shortNameFor } from './team';
 
 export const opponents = signal<Opponent[]>([]);
 
@@ -19,11 +20,6 @@ export async function saveOpponent(o: PutInput<Opponent>): Promise<Opponent> {
 export async function removeOpponent(id: string): Promise<void> {
   await opponentsRepo.softDelete(id);
   await loadOpponents();
-}
-
-function shortNameFor(name: string): string {
-  const letters = name.replace(/[^\p{L}\p{N}]/gu, '').toUpperCase();
-  return letters.slice(0, 3) || 'AVV';
 }
 
 export async function findOrCreateOpponent(name: string): Promise<Opponent> {

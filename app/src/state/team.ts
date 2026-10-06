@@ -15,7 +15,7 @@ export async function ensureTeam(): Promise<Team> {
     for (const t of teams) counts.set(t.id, (await playersRepo.byTeam(t.id)).length);
     team = [...teams].sort((a, b) => (counts.get(b.id)! - counts.get(a.id)!) || a.id.localeCompare(b.id))[0];
   } else {
-    team = await teamsRepo.put({ id: newId(), name: 'La mia squadra', shortName: 'NOI', color: '#e63946' });
+    team = await teamsRepo.put({ id: newId(), name: DEFAULT_TEAM_NAME, shortName: 'NOI', color: '#e63946' });
   }
   myTeam.value = team;
   return team;
@@ -25,7 +25,14 @@ export async function hasLocalTeam(): Promise<boolean> {
   return (await teamsRepo.all()).length > 0;
 }
 
-export async function saveTeam(patch: Partial<Pick<Team, 'name' | 'shortName' | 'color'>>): Promise<void> {
+export const DEFAULT_TEAM_NAME = 'La mia squadra';
+
+export function shortNameFor(name: string): string {
+  const letters = name.replace(/[^\p{L}\p{N}]/gu, '').toUpperCase();
+  return letters.slice(0, 3) || 'NOI';
+}
+
+export async function saveTeam(patch: Partial<Pick<Team, 'name' | 'shortName' | 'color' | 'logoUrl'>>): Promise<void> {
   const t = await ensureTeam();
   myTeam.value = await teamsRepo.put({ ...t, ...patch });
 }

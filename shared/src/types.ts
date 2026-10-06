@@ -20,6 +20,7 @@ export interface Team extends SyncMeta {
   name: string;
   shortName: string;
   color: string;
+  logoUrl?: string;
 }
 
 export interface Player extends SyncMeta {

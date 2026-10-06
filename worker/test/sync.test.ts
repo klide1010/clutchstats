@@ -78,3 +78,10 @@ it('pull cursor is server time: a record with an old client updatedAt pushed lat
   const later = (await (await get(`/api/sync/pull?since=${pulled.serverTime}`, auth)).json()) as { teams: Team[] };
   expect(later.teams).toEqual([]);
 });
+
+it('team logoUrl roundtrips through push and pull', async () => {
+  await post('/api/sync/push', { teams: [{ ...team({ id: 'tl' }), logoUrl: '/logo-team.png' }] }, auth);
+  const pulled = (await (await get('/api/sync/pull?since=0', auth)).json()) as { teams: (Team & { logoUrl?: string })[] };
+  expect(pulled.teams.find((t) => t.id === 'tl')!.logoUrl).toBe('/logo-team.png');
+  expect(pulled.teams.find((t) => t.id === 'tl')).not.toHaveProperty('logo_url');
+});

@@ -37,7 +37,10 @@ export function Home() {
 
   return (
     <main class="page stack">
-      <h1>{myTeam.value?.name ?? 'BKStats'}</h1>
+      <div class="row" style="justify-content:flex-start">
+        {myTeam.value?.logoUrl && <img src={myTeam.value.logoUrl} alt="" class="team-logo" style="flex:0 0 auto" />}
+        <h1 style="margin:0">{myTeam.value?.name ?? 'BKStats'}</h1>
+      </div>
       {live && (
         <div class="card stack" style="border-color:var(--primary)">
           <strong>Partita in corso</strong>

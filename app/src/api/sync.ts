@@ -44,8 +44,15 @@ function describeError(err: unknown): string {
 }
 
 /** Push dei record dirty, poi pull incrementale. I dirty non inviati restano tali in caso di errore. */
-export async function runSync(): Promise<SyncResult> {
-  if (syncState.value.running) throw new Error('Sync già in corso');
+let inFlight: Promise<SyncResult> | null = null;
+
+export function runSync(): Promise<SyncResult> {
+  if (inFlight) return inFlight;
+  inFlight = doSync().finally(() => { inFlight = null; });
+  return inFlight;
+}
+
+async function doSync(): Promise<SyncResult> {
   syncState.value = { ...syncState.value, running: true, lastError: null };
   try {
     const dirtyByName: Record<string, SyncMeta[]> = {};

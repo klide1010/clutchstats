@@ -1,6 +1,7 @@
 import { periodLabel } from '@bkstats/shared';
 import type { LiveGame } from '../state/liveGame';
 import { useRef } from 'preact/hooks';
+import { myTeam } from '../state/team';
 
 interface Props {
   lg: LiveGame;
@@ -40,7 +41,8 @@ export function TopBar({ lg, onSubs, onMenu }: Props) {
   return (
     <header class="topbar">
       <div class="score">
-        <span class="score-team">{lg.players.value.length ? 'NOI' : 'NOI'}</span>
+        {myTeam.value?.logoUrl ? <img src={myTeam.value.logoUrl} alt="" class="score-logo" /> : null}
+        <span class="score-team">{myTeam.value?.shortName ?? 'NOI'}</span>
         <span class="score-num">{bs.score.us}</span>
         <span class={`fouls${usFouls >= 5 ? ' bonus' : ''}`}>F{usFouls}</span>
       </div>
