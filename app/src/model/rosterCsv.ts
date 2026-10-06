@@ -1,4 +1,4 @@
-import { newId, ROLE_LABELS, ROLES, type Player, type Role } from '@bkstats/shared';
+import { newId, parseRole, type Player, type Role } from '@bkstats/shared';
 
 export interface RosterRow {
   number: number;
@@ -12,17 +12,7 @@ export interface RosterCsvResult {
   errors: { line: number; reason: string }[];
 }
 
-function norm(s: string): string {
-  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[\s_-]+/g, ' ').trim();
-}
-
-export function parseRole(input: string): Role | null {
-  const n = norm(input);
-  for (const r of ROLES) {
-    if (norm(r) === n || norm(ROLE_LABELS[r]) === n) return r;
-  }
-  return null;
-}
+export { parseRole };
 
 export function parseRosterCsv(text: string): RosterCsvResult {
   const rows: RosterRow[] = [];

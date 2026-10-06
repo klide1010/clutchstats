@@ -118,3 +118,14 @@ export const THEM_ALLOWED_TYPES: ReadonlySet<EventType> = new Set<EventType>([
 ]);
 
 export const OT_LENGTH_MIN = 5;
+
+function normRole(s: string): string {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[\s_-]+/g, ' ').trim();
+}
+
+/** Accetta il codice (`ALA_GRANDE`) o l'etichetta italiana (`ala grande`), case-insensitive. */
+export function parseRole(input: string): Role | null {
+  const n = normRole(input);
+  for (const r of ROLES) if (normRole(r) === n || normRole(ROLE_LABELS[r]) === n) return r;
+  return null;
+}
