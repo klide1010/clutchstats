@@ -3,6 +3,7 @@ import { isLoggedIn } from './state/session';
 import { Login } from './pages/Login';
 import { Home } from './pages/Home';
 import { Roster } from './pages/Roster';
+import { Opponents } from './pages/Opponents';
 import { Nav } from './ui/Nav';
 import { ToastHost } from './ui/Toast';
 
@@ -10,6 +11,8 @@ function Page() {
   switch (route.value.name) {
     case 'roster':
       return <Roster />;
+    case 'opponents':
+      return <Opponents />;
     case 'home':
     default:
       return <Home />;
