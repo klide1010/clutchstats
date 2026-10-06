@@ -1,8 +1,9 @@
 import { signal } from '@preact/signals';
 
-interface ToastState { message: string; kind: 'ok' | 'error' }
+export interface ToastState { message: string; kind: 'ok' | 'error' }
 
-const current = signal<ToastState | null>(null);
+export const toastState = signal<ToastState | null>(null);
+const current = toastState;
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 export function toast(message: string, kind: 'ok' | 'error' = 'ok', ms?: number): void {
