@@ -1,12 +1,20 @@
 {
   "name": "bkstats",
   "private": true,
-  "workspaces": ["shared", "app", "worker"],
+  "workspaces": [
+    "shared",
+    "app",
+    "worker"
+  ],
   "scripts": {
     "test": "npm run test --workspaces --if-present",
     "build": "npm run build -w app",
     "dev": "concurrently -k \"npm run dev -w app\" \"npm run dev -w worker\"",
-    "deploy": "npm run build -w app && npm run deploy -w worker"
+    "deploy": "npm run build -w app && npm run deploy -w worker",
+    "typecheck": "tsc -p shared --noEmit && tsc -p app --noEmit && tsc -p worker --noEmit"
   },
-  "devDependencies": { "concurrently": "^9", "typescript": "^5.6" }
+  "devDependencies": {
+    "concurrently": "^9",
+    "typescript": "^5.6"
+  }
 }
