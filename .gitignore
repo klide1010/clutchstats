@@ -1,0 +1,8 @@
+node_modules
+dist
+.wrangler
+worker/public
+*.local
+.dev.vars
+.superpowers
+.DS_Store
