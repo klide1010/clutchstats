@@ -7,6 +7,8 @@ import { Opponents } from './pages/Opponents';
 import { Calendar } from './pages/Calendar';
 import { Game } from './pages/Game';
 import { GameStats } from './pages/GameStats';
+import { Season } from './pages/Season';
+import { Settings } from './pages/Settings';
 import { Nav } from './ui/Nav';
 import { ToastHost } from './ui/Toast';
 
@@ -22,6 +24,10 @@ function Page() {
       return <Game id={route.value.params.id} />;
     case 'stats':
       return <GameStats id={route.value.params.id} />;
+    case 'season':
+      return <Season />;
+    case 'settings':
+      return <Settings />;
     case 'home':
     default:
       return <Home />;

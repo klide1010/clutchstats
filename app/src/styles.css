@@ -30,6 +30,7 @@ h1 { font-size: 1.4rem; margin: 0 0 12px; }
 h2 { font-size: 1.1rem; margin: 16px 0 8px; color: var(--muted); }
 .page { padding: 16px 16px calc(var(--nav-h) + 16px); max-width: 720px; margin: 0 auto; }
 .stack > * + * { margin-top: 12px; }
+.stack > strong, .stack > span { display: block; }
 label { display: block; color: var(--muted); font-size: 0.9rem; }
 input, select {
   display: block; width: 100%; margin-top: 4px; padding: 10px 12px; font-size: 1rem;
