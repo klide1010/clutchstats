@@ -2,6 +2,9 @@ import { signal } from '@preact/signals';
 import type { Game, GameEvent, Opponent, Player, SyncMeta, Team } from '@bkstats/shared';
 import { eventsRepo, gamesRepo, meta, opponentsRepo, playersRepo, teamsRepo, type Repo } from '../db';
 import { ApiError, apiFetch } from './client';
+import { ensureTeam, loadPlayers, myTeam } from '../state/team';
+import { loadOpponents } from '../state/opponents';
+import { loadGames } from '../state/games';
 
 export interface SyncResult { pushed: number; pulled: number; at: number }
 
@@ -77,6 +80,7 @@ async function doSync(): Promise<SyncResult> {
       if (list && list.length) pulled += await repo.applyRemote(list);
     }
     await meta.set('lastPulledAt', data.serverTime);
+    if (pulled > 0) await refreshStores();
 
     const at = Date.now();
     await meta.set('lastSyncAt', at);
@@ -86,6 +90,13 @@ async function doSync(): Promise<SyncResult> {
     syncState.value = { ...syncState.value, running: false, pending: await countPending(), lastError: describeError(err) };
     throw err;
   }
+}
+
+/** Dopo una pull ricarica squadra e liste in memoria, così la UI riflette subito i dati del server. */
+async function refreshStores(): Promise<void> {
+  myTeam.value = null;
+  await ensureTeam();
+  await Promise.all([loadPlayers(), loadOpponents(), loadGames()]);
 }
 
 /** Tenta la sync senza propagare errori (uso dopo la chiusura partita). */

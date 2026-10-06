@@ -2,6 +2,7 @@ import { it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { resetDb, teamsRepo, meta } from '../src/db';
 import { setToken } from '../src/state/session';
 import { runSync, syncState, countPending } from '../src/api/sync';
+import { myTeam } from '../src/state/team';
 
 const fetchMock = vi.fn();
 const res = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -13,6 +14,7 @@ beforeEach(async () => {
   fetchMock.mockReset();
   vi.stubGlobal('fetch', fetchMock);
   syncState.value = { running: false, pending: 0, lastAt: null, lastError: null };
+  myTeam.value = null;
 });
 afterEach(() => vi.unstubAllGlobals());
 
@@ -96,4 +98,34 @@ it('concurrent runSync calls share one in-flight sync instead of failing', async
   const [a, b] = await Promise.all([runSync(), runSync()]);
   expect(a).toBe(b);
   expect(fetchMock).toHaveBeenCalledTimes(1);
+});
+
+it('after a pull the local team signal reflects the renamed server team and players are reloaded', async () => {
+  const { ensureTeam, myTeam, players } = await import('../src/state/team');
+  const local = await ensureTeam();
+  expect(myTeam.value?.name).toBe('La mia squadra');
+  await teamsRepo.clearDirty([{ id: local.id, updatedAt: local.updatedAt }]);
+  const later = local.updatedAt + 1000;
+  fetchMock.mockResolvedValueOnce(res(200, {
+    ...emptyPull(later + 1),
+    teams: [{ ...local, name: 'Fiore Outlanders', shortName: 'FIO', logoUrl: '/logo-team.png', updatedAt: later }],
+    players: [{ id: 'pz', teamId: local.id, firstName: 'Matteo', lastName: 'Chiesa', number: 4, role: 'GUARDIA', active: true, updatedAt: later, deleted: false }],
+  }));
+  await runSync();
+  expect(myTeam.value?.name).toBe('Fiore Outlanders');
+  expect(myTeam.value?.logoUrl).toBe('/logo-team.png');
+  expect(players.value.map((p) => p.lastName)).toEqual(['Chiesa']);
+});
+
+it('after a pull that deletes the local duplicate team, the surviving team is selected', async () => {
+  const { ensureTeam, myTeam } = await import('../src/state/team');
+  const dup = await ensureTeam();
+  await teamsRepo.clearDirty([{ id: dup.id, updatedAt: dup.updatedAt }]);
+  const later = dup.updatedAt + 1000;
+  fetchMock.mockResolvedValueOnce(res(200, {
+    ...emptyPull(later + 1),
+    teams: [{ ...dup, updatedAt: later, deleted: true }, { id: 'real', name: 'Fiore Outlanders', shortName: 'FIO', color: '#e63946', updatedAt: later, deleted: false }],
+  }));
+  await runSync();
+  expect(myTeam.value?.id).toBe('real');
 });
