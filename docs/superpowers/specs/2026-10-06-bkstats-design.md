@@ -75,7 +75,6 @@ Tipi di evento:
 ```
 SHOT_2, SHOT_3, FREE_THROW
 REBOUND_OFF, REBOUND_DEF
-ASSIST (solo implicito via assistPlayerId; nessun evento separato)
 TURNOVER, STEAL
 BLOCK, BLOCK_RECEIVED
 FOUL, FOUL_DRAWN
@@ -236,8 +235,8 @@ Binding: `ASSETS` (static assets dalla build Vite, con fallback SPA a
   events[]}` → upsert per id se `updatedAt` ricevuto ≥ quello salvato
   (last‑write‑wins). Gli eventi sono immutabili tranne `deleted`. Risposta:
   `{accepted: n, serverTime}`.
-- `GET /api/sync/pull?since=<ms>` → tutti i record con `updatedAt > since`,
-  escluse le coordinate inutili. Il client applica lo stesso last‑write‑wins
+- `GET /api/sync/pull?since=<ms>` → tutti i record con `updatedAt > since`.
+  Il client applica lo stesso last‑write‑wins
   in locale e aggiorna il proprio `lastPulledAt`.
 - Il client tiene un outbox: ogni scrittura locale segna il record come
   `dirty`; push invia i dirty e li pulisce al 200.
