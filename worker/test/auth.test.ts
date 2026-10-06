@@ -1,6 +1,8 @@
-import { it, expect } from 'vitest';
+import { it, expect, beforeEach } from 'vitest';
 import { signJwt, verifyJwt } from '../src/jwt';
-import { post, get, loginToken, bearer, coach } from './helpers';
+import { post, get, loginToken, bearer, coach, clearDb } from './helpers';
+
+beforeEach(async () => { await clearDb(); });
 
 it('login ok returns a token valid for requireUser', async () => {
   const r = await post('/api/login', { password: 'segreta' });
