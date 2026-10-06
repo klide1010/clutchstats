@@ -4,6 +4,7 @@ import { Login } from './pages/Login';
 import { Home } from './pages/Home';
 import { Roster } from './pages/Roster';
 import { Opponents } from './pages/Opponents';
+import { Calendar } from './pages/Calendar';
 import { Nav } from './ui/Nav';
 import { ToastHost } from './ui/Toast';
 
@@ -13,6 +14,8 @@ function Page() {
       return <Roster />;
     case 'opponents':
       return <Opponents />;
+    case 'calendar':
+      return <Calendar />;
     case 'home':
     default:
       return <Home />;
