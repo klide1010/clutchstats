@@ -123,3 +123,9 @@ input, select {
 .ft-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); display: inline-block; flex: 0 0 auto; }
 .ft-dot.made { background: var(--ok); border-color: var(--ok); }
 .ft-dot.missed { background: var(--err); border-color: var(--err); }
+.subs-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.subs-cols > div { display: flex; flex-direction: column; gap: 6px; }
+.sub-btn { min-height: 44px; font-size: 0.9rem; justify-content: flex-start; padding: 0 10px; gap: 6px; }
+.sub-btn.active { border-color: var(--primary); background: #3a1f24; }
+input[type="range"] { padding: 0; height: 40px; background: none; border: 0; }
+.history li { font-size: 0.9rem; }

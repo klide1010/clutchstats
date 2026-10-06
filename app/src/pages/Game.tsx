@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { shotValueFromPosition, type FoulKind } from '@bkstats/shared';
 import { openLiveGame, type LiveGame } from '../state/liveGame';
-import { side, selectedPlayerId, selectedJersey, pendingAction, pendingShot, pendingFoulKind, resetSelection, onPlayerTap, onActionTap, commit } from '../state/liveUi';
+import { side, selectedPlayerId, selectedJersey, pendingAction, pendingShot, pendingFoulKind, resetSelection, onPlayerTap, onActionTap } from '../state/liveUi';
 import { TopBar } from '../ui/TopBar';
 import { Court } from '../ui/Court';
 import { ShotPopup } from '../ui/ShotPopup';
@@ -12,6 +12,8 @@ import { ActionGrid } from '../ui/ActionGrid';
 import { PlayerPicker } from '../ui/PlayerPicker';
 import { toast } from '../ui/Toast';
 import { navigate } from '../router';
+import { SubsPanel } from '../ui/SubsPanel';
+import { GameMenu } from '../ui/GameMenu';
 
 const FOUL_KINDS: { kind: FoulKind; label: string }[] = [
   { kind: 'PERSONAL', label: 'Personale' },
@@ -43,11 +45,12 @@ function Lineup({ lg }: { lg: LiveGame }) {
   );
 }
 
-export function Game({ id, onSubs, onMenu, overlay }: { id: string; onSubs?: (lg: LiveGame) => void; onMenu?: (lg: LiveGame) => void; overlay?: (lg: LiveGame) => preact.JSX.Element | null }) {
+export function Game({ id }: { id: string }) {
   const [lg, setLg] = useState<LiveGame | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ft, setFt] = useState(false);
   const [foulChooser, setFoulChooser] = useState(false);
+  const [panel, setPanel] = useState<'none' | 'subs' | 'menu'>('none');
 
   useEffect(() => {
     let disposed = false;
@@ -102,7 +105,7 @@ export function Game({ id, onSubs, onMenu, overlay }: { id: string; onSubs?: (lg
 
   return (
     <div class="game">
-      <TopBar lg={lg} onSubs={() => onSubs?.(lg)} onMenu={() => onMenu?.(lg)} />
+      <TopBar lg={lg} onSubs={() => setPanel('subs')} onMenu={() => setPanel('menu')} />
       <div class="side-toggle seg">
         <button class={`seg-btn${side.value === 'US' ? ' active' : ''}`} onClick={() => { side.value = 'US'; resetSelection(); }}>Noi</button>
         <button class={`seg-btn${side.value === 'THEM' ? ' active' : ''}`} onClick={() => { side.value = 'THEM'; resetSelection(); }}>Loro</button>
@@ -140,9 +143,9 @@ export function Game({ id, onSubs, onMenu, overlay }: { id: string; onSubs?: (lg
           </div>
         </div>
       )}
-      {overlay?.(lg)}
+      {panel === 'subs' && <SubsPanel lg={lg} onClose={() => setPanel('none')} />}
+      {panel === 'menu' && <GameMenu lg={lg} onClose={() => setPanel('none')} />}
     </div>
   );
 }
 
-export { commit };
