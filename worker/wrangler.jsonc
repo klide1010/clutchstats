@@ -1,0 +1,19 @@
+{
+  "name": "bkstats",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-22",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bkstats",
+      "database_id": "c555478b-6221-4006-ae06-422b163d56d8",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": { "enabled": true }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@bkstats/worker",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "../scripts/wr.sh dev --port 8787",
+    "deploy": "../scripts/wr.sh deploy",
+    "test": "vitest run",
+    "migrate:local": "../scripts/wr.sh d1 migrations apply bkstats --local",
+    "migrate": "../scripts/wr.sh d1 migrations apply bkstats --remote"
+  },
+  "dependencies": {
+    "@bkstats/shared": "*",
+    "hono": "^4"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.22",
+    "@cloudflare/workers-types": "^4",
+    "vitest": "4.1.11",
+    "wrangler": "4.124.0"
+  }
+}

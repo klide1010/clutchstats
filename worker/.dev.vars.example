@@ -1,0 +1,4 @@
+# Copia in .dev.vars per lo sviluppo locale (wrangler dev). In produzione usa `wrangler secret put`.
+APP_PASSWORD=cambiami
+JWT_SECRET=una-stringa-lunga-e-casuale
+COACH_API_KEY=chiave-per-l-allenatore
