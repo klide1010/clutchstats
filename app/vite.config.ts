@@ -9,7 +9,7 @@ export default defineConfig({
     preact(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.png', 'icons/icon.svg'],
+      includeAssets: ['icons/*.png', 'icons/icon.svg', 'sw-polyfills.js'],
       manifest: {
         name: 'BKStats',
         short_name: 'BKStats',
@@ -27,6 +27,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        importScripts: ['sw-polyfills.js'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
@@ -34,7 +35,7 @@ export default defineConfig({
       },
     }),
   ],
-  build: { target: 'es2018', cssTarget: 'chrome70' },
+  build: { target: 'chrome65', cssTarget: 'chrome65' },
   server: { proxy: { '/api': 'http://localhost:8787' } },
   test: {
     environment: 'jsdom',
