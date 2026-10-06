@@ -4,13 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev --port 8787",
-    "deploy": "wrangler deploy",
+    "dev": "../scripts/wr.sh dev --port 8787",
+    "deploy": "../scripts/wr.sh deploy",
     "test": "vitest run",
-    "migrate:local": "wrangler d1 migrations apply bkstats --local",
-    "migrate": "wrangler d1 migrations apply bkstats --remote"
+    "migrate:local": "../scripts/wr.sh d1 migrations apply bkstats --local",
+    "migrate": "../scripts/wr.sh d1 migrations apply bkstats --remote"
   },
-  "dependencies": { "@bkstats/shared": "*", "hono": "^4" },
+  "dependencies": {
+    "@bkstats/shared": "*",
+    "hono": "^4"
+  },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.22",
     "@cloudflare/workers-types": "^4",

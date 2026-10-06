@@ -6,3 +6,4 @@ worker/public
 .dev.vars
 .superpowers
 .DS_Store
+.cf-profile

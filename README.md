@@ -33,14 +33,13 @@ npm run build     # build dell'app in worker/public
 Vedi [worker/scripts/setup.md](worker/scripts/setup.md). In breve:
 
 ```bash
-cd worker
-npx wrangler login                     # con l'account Cloudflare scelto
-npx wrangler d1 create bkstats         # copia database_id in wrangler.jsonc
-npm run migrate                        # applica le migrazioni al D1 remoto
-npx wrangler secret put APP_PASSWORD
-npx wrangler secret put JWT_SECRET     # es. openssl rand -base64 48
-npx wrangler secret put COACH_API_KEY
-cd .. && npm run deploy
+scripts/cf-profile.sh personal         # login con l'account scelto, senza toccare altri login wrangler
+scripts/wr.sh d1 create bkstats        # copia database_id in wrangler.jsonc
+npm run migrate -w worker              # applica le migrazioni al D1 remoto
+scripts/wr.sh secret put APP_PASSWORD
+scripts/wr.sh secret put JWT_SECRET    # es. openssl rand -base64 48
+scripts/wr.sh secret put COACH_API_KEY
+npm run deploy
 ```
 
 L'app risponde su `https://bkstats.<subdomain>.workers.dev`.

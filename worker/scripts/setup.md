@@ -1,21 +1,18 @@
 # Checklist primo deploy
 
-Da eseguire una volta sola, dalla cartella `worker/`, con l'account Cloudflare scelto per il progetto.
+Da eseguire una volta sola, con l'account Cloudflare scelto per il progetto. I comandi `npx wrangler …` qui sotto vanno lanciati come `scripts/wr.sh …` dalla root del repo, così usano il profilo selezionato.
 
-1. **Login** (apre il browser):
+1. **Scegli l'account** (dalla root del repo). Il profilo `personal` usa una cartella di configurazione separata,
+   così il login wrangler globale del Mac (account di lavoro) non viene toccato:
    ```bash
-   npx wrangler login
-   npx wrangler whoami      # verifica che l'email sia quella giusta
+   scripts/cf-profile.sh personal    # apre il browser per il login la prima volta
+   scripts/cf-profile.sh work        # torna al login globale
+   scripts/cf-profile.sh status      # mostra profilo e account attivi
    ```
-   Se su questo Mac wrangler è già collegato a un altro account e non vuoi cambiarlo, in alternativa crea un API token
-   (Cloudflare dashboard → My Profile → API Tokens → template "Edit Cloudflare Workers" + permesso D1 Edit) e usalo così:
-   ```bash
-   export CLOUDFLARE_API_TOKEN=...
-   export CLOUDFLARE_ACCOUNT_ID=...
-   ```
+   Tutti i comandi `npm run dev|deploy|migrate -w worker` usano il profilo selezionato (file `.cf-profile`, ignorato da git).
 2. **Database D1**:
    ```bash
-   npx wrangler d1 create bkstats
+   scripts/wr.sh d1 create bkstats
    ```
    Copia il `database_id` stampato in `wrangler.jsonc` al posto di `REPLACE_AFTER_D1_CREATE`, poi:
    ```bash
@@ -23,9 +20,9 @@ Da eseguire una volta sola, dalla cartella `worker/`, con l'account Cloudflare s
    ```
 3. **Secret**:
    ```bash
-   npx wrangler secret put APP_PASSWORD    # password condivisa della app
-   npx wrangler secret put JWT_SECRET      # openssl rand -base64 48
-   npx wrangler secret put COACH_API_KEY   # chiave da dare all'allenatore
+   scripts/wr.sh secret put APP_PASSWORD    # password condivisa della app
+   scripts/wr.sh secret put JWT_SECRET      # openssl rand -base64 48
+   scripts/wr.sh secret put COACH_API_KEY   # chiave da dare all'allenatore
    ```
 4. **Deploy** (dalla root del repo):
    ```bash
