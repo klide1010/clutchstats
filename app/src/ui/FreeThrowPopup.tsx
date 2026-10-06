@@ -8,7 +8,8 @@ interface Props {
   selectedPlayerId: string | null;
   jerseyNumbers?: number[];
   selectedJersey?: number | null;
-  onShot: (made: boolean, playerId?: string, jerseyNumber?: number) => Promise<void> | void;
+  /** Ritorna true se il tiro è stato salvato. */
+  onShot: (made: boolean, playerId?: string, jerseyNumber?: number) => Promise<boolean> | boolean;
   onClose: () => void;
 }
 
@@ -21,8 +22,17 @@ export function FreeThrowPopup(p: Props) {
 
   const needsPlayer = p.side === 'US' && !playerId;
 
+  const [busy, setBusy] = useState(false);
   const shot = async (made: boolean) => {
-    await p.onShot(made, p.side === 'US' ? playerId ?? undefined : undefined, p.side === 'THEM' ? jersey ?? undefined : undefined);
+    if (busy) return;
+    setBusy(true);
+    let ok = false;
+    try {
+      ok = await p.onShot(made, p.side === 'US' ? playerId ?? undefined : undefined, p.side === 'THEM' ? jersey ?? undefined : undefined);
+    } finally {
+      setBusy(false);
+    }
+    if (!ok) return;
     const n = done + 1;
     setDone(n);
     setResults([...results, made]);

@@ -88,12 +88,14 @@ export function Game({ id }: { id: string }) {
     }
   };
 
-  const freeThrow = async (made: boolean, playerId?: string, jerseyNumber?: number) => {
+  const freeThrow = async (made: boolean, playerId?: string, jerseyNumber?: number): Promise<boolean> => {
     try {
       await lg.addEvent({ type: 'FREE_THROW', side: side.value, playerId, jerseyNumber, made });
       toast(lg.lastEventLabel.peek(), 'ok');
-    } catch {
-      toast('Salvataggio fallito, riprova', 'error');
+      return true;
+    } catch (e) {
+      toast(e instanceof Error && (e.message === 'Periodo non aperto' || e.message === 'Partita chiusa') ? e.message : 'Salvataggio fallito, riprova', 'error');
+      return false;
     }
   };
 

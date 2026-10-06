@@ -84,3 +84,9 @@ it('successful commit toasts the event label', async () => {
   await onActionTap('BLOCK', lg);
   expect(lastToast.value).toMatchObject({ kind: 'ok', message: '#4 C0 · Stoppata' });
 });
+
+it('a double tap while a commit is in flight records one event', async () => {
+  await onPlayerTap(ids[0], lg);
+  await Promise.all([onActionTap('STEAL', lg), onActionTap('STEAL', lg)]);
+  expect(lg.events.value.filter((e) => e.type === 'STEAL')).toHaveLength(1);
+});

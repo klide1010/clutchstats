@@ -33,7 +33,11 @@ function buildInput(type: EventType): AddEventInput {
   return base;
 }
 
+let inFlight = false;
+
 export async function commit(lg: LiveGame, type: EventType): Promise<boolean> {
+  if (inFlight) return false; // doppio tap: il secondo viene ignorato
+  inFlight = true;
   try {
     const ev = await lg.addEvent(buildInput(type));
     toast(lg.lastEventLabel.peek() || ev.type, 'ok');
@@ -41,13 +45,16 @@ export async function commit(lg: LiveGame, type: EventType): Promise<boolean> {
     return true;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    toast(msg === 'Periodo non aperto' || msg === 'Seleziona il giocatore' ? msg : 'Salvataggio fallito, riprova', 'error');
+    toast(msg === 'Periodo non aperto' || msg === 'Seleziona il giocatore' || msg === 'Partita chiusa' ? msg : 'Salvataggio fallito, riprova', 'error');
     return false;
+  } finally {
+    inFlight = false;
   }
 }
 
 export async function onPlayerTap(id: string, lg: LiveGame): Promise<void> {
   if (pendingAction.value) {
+    if (inFlight) return;
     selectedPlayerId.value = id;
     await commit(lg, pendingAction.value);
     return;
@@ -57,8 +64,9 @@ export async function onPlayerTap(id: string, lg: LiveGame): Promise<void> {
 
 export async function onActionTap(type: EventType, lg: LiveGame): Promise<void> {
   if (side.value === 'THEM' || TEAM_ONLY.has(type) || selectedPlayerId.value) {
+    if (inFlight) return;
     const ok = await commit(lg, type);
-    if (!ok && side.value === 'US' && !TEAM_ONLY.has(type)) pendingAction.value = type; // il tap successivo ritenta
+    if (!ok && side.value === 'US' && !TEAM_ONLY.has(type) && selectedPlayerId.value) pendingAction.value = type; // il tap successivo ritenta
     return;
   }
   pendingAction.value = pendingAction.value === type ? null : type;

@@ -58,7 +58,7 @@ export async function runSync(): Promise<SyncResult> {
       await apiFetch<{ accepted: number; serverTime: number }>('/api/sync/push', { method: 'POST', json: dirtyByName });
       for (const { name, repo } of REPOS) {
         const d = dirtyByName[name];
-        if (d) await repo.clearDirty(d.map((r) => r.id));
+        if (d) await repo.clearDirty(d.map((r) => ({ id: r.id, updatedAt: r.updatedAt })));
       }
     }
 

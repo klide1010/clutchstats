@@ -1,5 +1,7 @@
-import { it, expect, beforeEach } from 'vitest';
-import { render, fireEvent, screen, waitFor } from '@testing-library/preact';
+import { it, expect, beforeEach, afterEach } from 'vitest';
+import { render, fireEvent, screen, waitFor, cleanup } from '@testing-library/preact';
+
+afterEach(cleanup);
 import { resetDb } from '../src/db';
 import { ensureTeam, savePlayer } from '../src/state/team';
 import { findOrCreateOpponent, opponents } from '../src/state/opponents';

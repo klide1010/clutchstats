@@ -28,3 +28,15 @@ it('removePlayer soft deletes and hides from the list', async () => {
   expect(players.value).toEqual([]);
   expect((await playersRepo.all(true))[0].deleted).toBe(true);
 });
+
+it('ensureTeam picks deterministically the team with players, then the smallest id', async () => {
+  const { teamsRepo } = await import('../src/db');
+  await teamsRepo.put({ id: 'zz', name: 'Vuota', shortName: 'V', color: '#000' });
+  await teamsRepo.put({ id: 'aa', name: 'Piena', shortName: 'P', color: '#000' });
+  await playersRepo.put({ id: 'p1', teamId: 'aa', firstName: 'A', lastName: 'B', number: 4, role: 'PLAY', active: true });
+  myTeam.value = null;
+  expect((await ensureTeam()).id).toBe('aa');
+  await playersRepo.softDelete('p1');
+  myTeam.value = null;
+  expect((await ensureTeam()).id).toBe('aa');
+});

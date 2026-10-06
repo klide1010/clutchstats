@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
 import { ApiError, login } from '../api/client';
+import { trySync } from '../api/sync';
 
 export function Login() {
   const [password, setPassword] = useState('');
@@ -12,6 +13,7 @@ export function Login() {
     setError(null);
     try {
       await login(password);
+      void trySync(); // riprende la sync dopo il login, senza bloccare
     } catch (err) {
       if (err instanceof ApiError) setError(err.status === 401 ? 'Password errata' : err.status === 429 ? 'Troppi tentativi, riprova tra qualche minuto' : `Errore server ${err.status}`);
       else setError('Rete assente');

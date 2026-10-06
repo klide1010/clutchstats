@@ -3,7 +3,9 @@ import { computeBoxScore, type Game, type GameEvent } from '@bkstats/shared';
 import { eventsRepo } from '../db';
 import { games, loadGames } from '../state/games';
 import { loadOpponents, opponents } from '../state/opponents';
-import { ensureTeam, loadPlayers, myTeam, players } from '../state/team';
+import { ensureTeam, hasLocalTeam, loadPlayers, myTeam, players } from '../state/team';
+import { trySync } from '../api/sync';
+import { isLoggedIn } from '../state/session';
 import { navigate } from '../router';
 import { fmtDate } from '../ui/IcsImport';
 import { SyncButton } from '../ui/SyncButton';
@@ -13,6 +15,8 @@ export function Home() {
 
   useEffect(() => {
     (async () => {
+      // Primo avvio su questo dispositivo: prova a scaricare i dati prima di creare una squadra vuota.
+      if (!(await hasLocalTeam()) && isLoggedIn.peek()) await trySync();
       await ensureTeam();
       await Promise.all([loadGames(), loadOpponents(), loadPlayers()]);
       const closed = games.value.filter((g) => g.status === 'CLOSED').slice(-3);

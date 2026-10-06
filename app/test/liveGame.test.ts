@@ -146,3 +146,32 @@ it('reopening a live game reloads persisted events', async () => {
   expect(again.periodOpen.value).toBe(true);
   expect(again.game.value.currentPeriod).toBe(1);
 });
+
+it('reopening a clock game restores the clock from the last stamped event', async () => {
+  await setup(true);
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  lg.clock.set(123);
+  await lg.addEvent({ type: 'STEAL', side: 'US', playerId: ids[0] });
+  const again = await openLiveGame(lg.game.value.id);
+  expect(again.clock.remainingSec.value).toBe(123);
+  expect(again.clock.running.value).toBe(false);
+});
+
+it('concurrent addEvent calls get distinct seq', async () => {
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  const [a, b] = await Promise.all([
+    lg.addEvent({ type: 'STEAL', side: 'US', playerId: ids[0] }),
+    lg.addEvent({ type: 'TURNOVER', side: 'US', playerId: ids[1] }),
+  ]);
+  expect(a.seq).not.toBe(b.seq);
+  expect(new Set(lg.events.value.map((e) => e.seq)).size).toBe(3);
+});
+
+it('addEvent on a CLOSED game is rejected with a clear message', async () => {
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  await lg.closeGame();
+  await expect(lg.addEvent({ type: 'STEAL', side: 'US', playerId: ids[0] })).rejects.toThrow('Partita chiusa');
+});

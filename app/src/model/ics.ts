@@ -55,12 +55,13 @@ function parseProperty(line: string): { name: string; params: Record<string, str
 function zoneOffsetMs(timeZone: string, utcMs: number): number {
   const fmt = new Intl.DateTimeFormat('en-US', {
     timeZone,
-    hourCycle: 'h23',
+    hour12: false,
     year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
   });
   const parts: Record<string, number> = {};
   for (const p of fmt.formatToParts(new Date(utcMs))) if (p.type !== 'literal') parts[p.type] = Number(p.value);
-  const asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
+  const hour = parts.hour === 24 ? 0 : parts.hour; // alcuni motori restituiscono 24 per la mezzanotte con hour12:false
+  const asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, hour, parts.minute, parts.second);
   return asUtc - utcMs;
 }
 

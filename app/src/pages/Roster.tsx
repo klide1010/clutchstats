@@ -3,6 +3,7 @@ import { newId, ROLE_LABELS, ROLES, type Player, type Role } from '@bkstats/shar
 import { ensureTeam, loadPlayers, myTeam, players, removePlayer, savePlayer, savePlayers, saveTeam } from '../state/team';
 import { mergeRoster, parseRosterCsv, type RosterCsvResult } from '../model/rosterCsv';
 import { toast } from '../ui/Toast';
+import { readFileText } from '../model/fileText';
 
 interface Draft { id: string; number: string; lastName: string; firstName: string; role: Role; active: boolean }
 
@@ -51,7 +52,11 @@ export function Roster() {
   const onCsvFile = async (e: Event) => {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    setCsv(parseRosterCsv(await file.text()));
+    try {
+      setCsv(parseRosterCsv(await readFileText(file)));
+    } catch {
+      toast('Impossibile leggere il file', 'error');
+    }
     (e.target as HTMLInputElement).value = '';
   };
 

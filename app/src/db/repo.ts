@@ -55,7 +55,8 @@ export interface Repo<T extends SyncMeta> {
   softDelete(id: string): Promise<void>;
   applyRemote(records: T[]): Promise<number>;
   dirty(): Promise<T[]>;
-  clearDirty(ids: string[]): Promise<void>;
+  /** Pulisce il flag dirty solo se il record non è cambiato dopo il push (stesso updatedAt). */
+  clearDirty(pushed: { id: string; updatedAt: number }[]): Promise<void>;
 }
 
 export function repo<T extends SyncMeta>(store: StoreName): Repo<T> {
@@ -100,13 +101,13 @@ export function repo<T extends SyncMeta>(store: StoreName): Repo<T> {
       const rows = (await db.getAllFromIndex(s, 'dirty', 1)) as unknown as Stored<T>[];
       return rows.map((r) => strip<T>(r)!);
     },
-    async clearDirty(ids) {
-      if (ids.length === 0) return;
+    async clearDirty(pushed) {
+      if (pushed.length === 0) return;
       const db = await getDb();
       const tx = db.transaction(s, 'readwrite');
-      for (const id of ids) {
+      for (const { id, updatedAt } of pushed) {
         const existing = (await tx.store.get(id)) as unknown as Stored<T> | undefined;
-        if (existing && existing.dirty === 1) await tx.store.put({ ...existing, dirty: 0 } as unknown as Stored<Team>);
+        if (existing && existing.dirty === 1 && existing.updatedAt === updatedAt) await tx.store.put({ ...existing, dirty: 0 } as unknown as Stored<Team>);
       }
       await tx.done;
     },

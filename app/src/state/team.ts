@@ -5,12 +5,24 @@ import { playersRepo, teamsRepo, type PutInput } from '../db';
 export const myTeam = signal<Team | null>(null);
 export const players = signal<Player[]>([]);
 
+/** Squadra locale: quella con più giocatori, a parità l'id più piccolo. Se non esiste la crea. */
 export async function ensureTeam(): Promise<Team> {
   if (myTeam.value) return myTeam.value;
-  const existing = (await teamsRepo.all())[0];
-  const team = existing ?? (await teamsRepo.put({ id: newId(), name: 'La mia squadra', shortName: 'NOI', color: '#e63946' }));
+  const teams = await teamsRepo.all();
+  let team: Team | undefined;
+  if (teams.length > 0) {
+    const counts = new Map<string, number>();
+    for (const t of teams) counts.set(t.id, (await playersRepo.byTeam(t.id)).length);
+    team = [...teams].sort((a, b) => (counts.get(b.id)! - counts.get(a.id)!) || a.id.localeCompare(b.id))[0];
+  } else {
+    team = await teamsRepo.put({ id: newId(), name: 'La mia squadra', shortName: 'NOI', color: '#e63946' });
+  }
   myTeam.value = team;
   return team;
+}
+
+export async function hasLocalTeam(): Promise<boolean> {
+  return (await teamsRepo.all()).length > 0;
 }
 
 export async function saveTeam(patch: Partial<Pick<Team, 'name' | 'shortName' | 'color'>>): Promise<void> {

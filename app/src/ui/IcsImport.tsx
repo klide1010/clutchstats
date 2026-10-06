@@ -4,6 +4,7 @@ import { myTeam } from '../state/team';
 import { findOrCreateOpponent, opponents } from '../state/opponents';
 import { importProposals } from '../state/games';
 import { toast } from '../ui/Toast';
+import { readFileText } from '../model/fileText';
 
 interface Row extends GameProposal { include: boolean; opponentChoice: string } // opponentChoice: id esistente oppure 'NEW'
 
@@ -21,7 +22,13 @@ export function IcsImport({ onDone }: { onDone: () => void }) {
   const onFile = async (e: Event) => {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    const parsed = parseIcs(await file.text());
+    let parsed: ReturnType<typeof parseIcs>;
+    try {
+      parsed = parseIcs(await readFileText(file));
+    } catch {
+      toast('Impossibile leggere il file', 'error');
+      return;
+    }
     const props = proposeGames(parsed.events, myTeam.value?.name ?? '');
     setErrors(parsed.errors);
     setRows(props.map((p) => {

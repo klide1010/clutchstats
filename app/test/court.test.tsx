@@ -1,5 +1,7 @@
-import { it, expect, vi } from 'vitest';
-import { render, fireEvent, screen } from '@testing-library/preact';
+import { it, expect, vi, afterEach } from 'vitest';
+import { render, fireEvent, screen, cleanup } from '@testing-library/preact';
+
+afterEach(cleanup);
 import type { Player } from '@bkstats/shared';
 import { Court } from '../src/ui/Court';
 import { ShotPopup } from '../src/ui/ShotPopup';
@@ -49,4 +51,19 @@ it('ShotPopup for THEM confirms a miss directly with the optional jersey', () =>
   fireEvent.click(screen.getByRole('button', { name: '#12' }));
   fireEvent.click(screen.getByRole('button', { name: 'Errore' }));
   expect(onConfirm).toHaveBeenCalledWith({ made: false, value: 3, playerId: undefined, assistPlayerId: undefined, jerseyNumber: 12 });
+});
+
+it('FreeThrowPopup does not advance when the save fails', async () => {
+  const { FreeThrowPopup } = await import('../src/ui/FreeThrowPopup');
+  const onShot = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+  const onClose = vi.fn();
+  const { container } = render(<FreeThrowPopup side="US" onCourt={five} selectedPlayerId="p0" onShot={onShot} onClose={onClose} />);
+  fireEvent.click(screen.getByRole('button', { name: '2' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Segnato' }));
+  await new Promise((r) => setTimeout(r, 0));
+  expect(container.querySelectorAll('.ft-dot.made')).toHaveLength(0);
+  fireEvent.click(screen.getByRole('button', { name: 'Segnato' }));
+  await new Promise((r) => setTimeout(r, 0));
+  expect(container.querySelectorAll('.ft-dot.made')).toHaveLength(1);
+  expect(onClose).not.toHaveBeenCalled();
 });

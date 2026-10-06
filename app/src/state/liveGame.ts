@@ -66,6 +66,16 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
   const players = signal<Player[]>(await playersRepo.byTeam(g.teamId));
   const opponent = signal<Opponent>(opp);
   const clock = createClock(periodLengthSec(g, Math.max(1, g.currentPeriod)));
+  // Ripristino del cronometro dopo un reload: ultimo evento del periodo corrente con tempo noto.
+  if (g.useClock && g.currentPeriod > 0) {
+    const live0 = events.value.filter((e) => !e.deleted && e.period === g.currentPeriod);
+    const lastP = [...live0].reverse().find((e) => e.type === 'PERIOD_START' || e.type === 'PERIOD_END');
+    if (lastP?.type === 'PERIOD_START') {
+      const stamped = [...live0].reverse().find((e) => e.clockSec !== undefined);
+      if (stamped?.clockSec !== undefined) clock.set(stamped.clockSec);
+    }
+  }
+  let seqCounter = events.value.reduce((m, e) => Math.max(m, e.seq), 0);
 
   const live = computed(() => events.value.filter((e) => !e.deleted));
   const periodOpen = computed(() => {
@@ -90,7 +100,7 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     void loadGames().catch(() => undefined);
   };
 
-  const nextSeq = () => events.value.reduce((m, e) => Math.max(m, e.seq), 0) + 1;
+  const nextSeq = () => ++seqCounter;
 
   const persist = async (partial: Omit<GameEvent, 'id' | 'gameId' | 'seq' | 'updatedAt' | 'deleted' | 'createdAt'>): Promise<GameEvent> => {
     const ev = await eventsRepo.put({ id: newId(), gameId, seq: nextSeq(), createdAt: Date.now(), ...partial });
@@ -163,6 +173,7 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
 
   const reload = async () => {
     events.value = await eventsRepo.byGame(gameId);
+    seqCounter = events.value.reduce((m, e) => Math.max(m, e.seq), seqCounter);
     const fresh = await gamesRepo.get(gameId);
     if (fresh) game.value = fresh;
   };

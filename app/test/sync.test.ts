@@ -81,3 +81,12 @@ it('nothing dirty skips the push call', async () => {
   expect(fetchMock).toHaveBeenCalledTimes(1);
   expect(fetchMock.mock.calls[0][0]).toBe('/api/sync/pull?since=0');
 });
+
+it('a push rejected by the server is followed by a pull that brings the newer copy', async () => {
+  const local = await teamsRepo.put({ id: 't1', name: 'Vecchio locale', shortName: 'L', color: '#000' });
+  fetchMock.mockResolvedValueOnce(res(200, { accepted: 0, serverTime: 9000 }));
+  fetchMock.mockResolvedValueOnce(res(200, { ...emptyPull(9000), teams: [{ ...local, name: 'Nuovo server', updatedAt: local.updatedAt + 1 }] }));
+  await runSync();
+  expect((await teamsRepo.get('t1'))!.name).toBe('Nuovo server');
+  expect(await teamsRepo.dirty()).toEqual([]);
+});

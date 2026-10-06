@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { teamsRepo, eventsRepo, meta, resetDb } from '../src/db';
 
 beforeEach(async () => { await resetDb(); });
@@ -13,7 +13,8 @@ describe('repo', () => {
 
   it('clearDirty empties the outbox', async () => {
     await teamsRepo.put({ id: 't1', name: 'Noi', shortName: 'NOI', color: '#000' });
-    await teamsRepo.clearDirty(['t1']);
+    const t = (await teamsRepo.get('t1'))!;
+    await teamsRepo.clearDirty([{ id: 't1', updatedAt: t.updatedAt }]);
     expect(await teamsRepo.dirty()).toEqual([]);
   });
 
@@ -39,8 +40,8 @@ describe('repo', () => {
   });
 
   it('softDelete hides from all() but keeps for sync', async () => {
-    await teamsRepo.put({ id: 't1', name: 'Noi', shortName: 'NOI', color: '#000' });
-    await teamsRepo.clearDirty(['t1']);
+    const t = await teamsRepo.put({ id: 't1', name: 'Noi', shortName: 'NOI', color: '#000' });
+    await teamsRepo.clearDirty([{ id: 't1', updatedAt: t.updatedAt }]);
     await teamsRepo.softDelete('t1');
     expect(await teamsRepo.all()).toEqual([]);
     expect(await teamsRepo.all(true)).toHaveLength(1);
@@ -59,5 +60,20 @@ describe('repo', () => {
     await meta.set('lastPulledAt', 5);
     expect(await meta.get<number>('lastPulledAt')).toBe(5);
     expect(await meta.get('missing')).toBeUndefined();
+  });
+});
+
+describe('clearDirty race', () => {
+  it('does not clear a record modified after the pushed snapshot', async () => {
+    const nowSpy = vi.spyOn(Date, 'now');
+    nowSpy.mockReturnValue(1000);
+    const first = await teamsRepo.put({ id: 't1', name: 'A', shortName: 'A', color: '#000' });
+    nowSpy.mockReturnValue(2000);
+    await teamsRepo.put({ id: 't1', name: 'B', shortName: 'B', color: '#000' });
+    await teamsRepo.clearDirty([{ id: 't1', updatedAt: first.updatedAt }]);
+    expect((await teamsRepo.dirty()).map((t) => t.name)).toEqual(['B']);
+    await teamsRepo.clearDirty([{ id: 't1', updatedAt: 2000 }]);
+    expect(await teamsRepo.dirty()).toEqual([]);
+    nowSpy.mockRestore();
   });
 });
