@@ -57,7 +57,7 @@ export function GameMenu({ lg, onClose, onClosed }: Props) {
         {view === 'history' && <EventHistory lg={lg} />}
         {view === 'lineup' && (
           <>
-            <PlayerPicker players={lg.players.value.filter((p) => p.active)} selected={sel} max={5} onChange={setSel} />
+            <PlayerPicker players={lg.players.value} selected={sel} max={5} onChange={setSel} />
             <button class="btn btn-primary btn-block" disabled={sel.length !== 5} onClick={() => run(() => lg.setStarters(sel), 'Quintetto salvato')}>Salva</button>
           </>
         )}

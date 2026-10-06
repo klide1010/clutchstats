@@ -38,11 +38,10 @@ it('ShotPopup for US without a selected player requires choosing one before conf
   expect(made.disabled).toBe(true);
   fireEvent.click(screen.getByRole('button', { name: /^#5/ }));
   expect(made.disabled).toBe(false);
-  fireEvent.click(screen.getByRole('button', { name: '2' }));
   fireEvent.click(made);
   // after "Canestro" on US side the assist chooser appears
   fireEvent.click(screen.getByRole('button', { name: 'Nessuno' }));
-  expect(onConfirm).toHaveBeenCalledWith({ made: true, value: 2, playerId: 'p1', assistPlayerId: undefined, jerseyNumber: undefined });
+  expect(onConfirm).toHaveBeenCalledWith({ made: true, value: 3, playerId: 'p1', assistPlayerId: undefined, jerseyNumber: undefined });
 });
 
 it('ShotPopup for THEM confirms a miss directly with the optional jersey', () => {
@@ -66,4 +65,26 @@ it('FreeThrowPopup does not advance when the save fails', async () => {
   await new Promise((r) => setTimeout(r, 0));
   expect(container.querySelectorAll('.ft-dot.made')).toHaveLength(1);
   expect(onClose).not.toHaveBeenCalled();
+});
+
+it('three point arc is the short arc below the basket', () => {
+  const { container } = render(<Court onTap={() => undefined} />);
+  const d = container.querySelector('path.court-line')!.getAttribute('d')!;
+  expect(d).toContain('A 67.5 67.5 0 0 0 141 29.9');
+});
+
+it('Court keeps its proportions (no stretching)', () => {
+  const { container } = render(<Court onTap={() => undefined} />);
+  const svg = container.querySelector('svg')!;
+  expect(svg.getAttribute('preserveAspectRatio')).toBe('xMidYMid meet');
+});
+
+it('ShotPopup shows the computed value and offers no 2/3 choice', () => {
+  const onConfirm = vi.fn();
+  render(<ShotPopup x={0.5} y={0.6} side="US" onCourt={five} initialValue={3} selectedPlayerId="p0" onConfirm={onConfirm} onCancel={() => undefined} />);
+  expect(screen.queryByRole('button', { name: '2' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '3' })).toBeNull();
+  expect(screen.getByText('Tiro da 3')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: 'Errore' }));
+  expect(onConfirm).toHaveBeenCalledWith({ made: false, value: 3, playerId: 'p0', assistPlayerId: undefined, jerseyNumber: undefined });
 });

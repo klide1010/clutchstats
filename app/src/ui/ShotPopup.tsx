@@ -24,7 +24,7 @@ interface Props {
 }
 
 export function ShotPopup(p: Props) {
-  const [value, setValue] = useState<2 | 3>(p.initialValue);
+  const value = p.initialValue;
   const [playerId, setPlayerId] = useState<string | null>(p.selectedPlayerId);
   const [jersey, setJersey] = useState<number | null>(p.selectedJersey ?? null);
   const [stage, setStage] = useState<'shot' | 'assist'>('shot');
@@ -42,10 +42,7 @@ export function ShotPopup(p: Props) {
           <>
             <div class="row">
               <span class="muted">{p.side === 'US' ? 'Tiro nostro' : 'Tiro avversario'}</span>
-              <div class="seg" style="flex:0 0 auto">
-                <button class={`seg-btn${value === 2 ? ' active' : ''}`} onClick={() => setValue(2)}>2</button>
-                <button class={`seg-btn${value === 3 ? ' active' : ''}`} onClick={() => setValue(3)}>3</button>
-              </div>
+              <strong class="shot-value" style="flex:0 0 auto">Tiro da {value}</strong>
             </div>
             {p.side === 'US' && (
               <div class="chips">

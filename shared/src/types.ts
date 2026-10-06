@@ -61,6 +61,8 @@ export interface Game extends SyncMeta {
   source: 'MANUAL' | 'ICS';
   icsUid?: string;
   starters: string[];
+  /** Convocati per la partita (id giocatori). Vuoto o assente = tutti gli attivi. */
+  roster?: string[];
   notes?: string;
 }
 

@@ -56,14 +56,16 @@ export const opponentMapper: Mapper<Opponent> = {
 
 export const gameMapper: Mapper<Game> = {
   table: 'games',
-  columns: ['id', 'team_id', 'opponent_id', 'date', 'home', 'competition', 'venue', 'status', 'use_clock', 'period_length_min', 'periods_regulation', 'current_period', 'source', 'ics_uid', 'starters', 'notes', 'updated_at', 'deleted'],
-  toRow: (g) => [g.id, g.teamId, g.opponentId, g.date, toDb(!!g.home), toDb(g.competition), toDb(g.venue), g.status, toDb(!!g.useClock), g.periodLengthMin, g.periodsRegulation, g.currentPeriod, g.source, toDb(g.icsUid), JSON.stringify(g.starters ?? []), toDb(g.notes), g.updatedAt, toDb(!!g.deleted)],
+  columns: ['id', 'team_id', 'opponent_id', 'date', 'home', 'competition', 'venue', 'status', 'use_clock', 'period_length_min', 'periods_regulation', 'current_period', 'source', 'ics_uid', 'starters', 'roster', 'notes', 'updated_at', 'deleted'],
+  toRow: (g) => [g.id, g.teamId, g.opponentId, g.date, toDb(!!g.home), toDb(g.competition), toDb(g.venue), g.status, toDb(!!g.useClock), g.periodLengthMin, g.periodsRegulation, g.currentPeriod, g.source, toDb(g.icsUid), JSON.stringify(g.starters ?? []), JSON.stringify(g.roster ?? []), toDb(g.notes), g.updatedAt, toDb(!!g.deleted)],
   fromRow: (r) => {
     const g: Game = {
       id: r.id as string, teamId: r.team_id as string, opponentId: r.opponent_id as string, date: r.date as string, home: bool(r.home),
       status: r.status as Game['status'], useClock: bool(r.use_clock), periodLengthMin: r.period_length_min as number, periodsRegulation: r.periods_regulation as number,
       currentPeriod: r.current_period as number, source: r.source as Game['source'], starters: JSON.parse((r.starters as string) || '[]'), updatedAt: r.updated_at as number, deleted: bool(r.deleted),
     };
+    const roster: string[] = JSON.parse((r.roster as string) || '[]');
+    if (roster.length) g.roster = roster;
     for (const [k, col] of [['competition', 'competition'], ['venue', 'venue'], ['icsUid', 'ics_uid'], ['notes', 'notes']] as const) {
       const v = opt<string>(r[col]);
       if (v !== undefined) (g as unknown as Record<string, unknown>)[k] = v;

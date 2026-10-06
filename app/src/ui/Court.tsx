@@ -11,21 +11,34 @@ export function Court({ onTap, shots, class: cls }: Props) {
   const handle = (e: MouseEvent) => {
     if (!onTap) return;
     const svg = e.currentTarget as SVGSVGElement;
-    const rect = svg.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
+    let x: number;
+    let y: number;
+    const ctm = typeof svg.getScreenCTM === 'function' ? svg.getScreenCTM() : null;
+    if (ctm && typeof svg.createSVGPoint === 'function') {
+      // Mappa il tap nelle coordinate del viewBox (gestisce i bordi vuoti del "meet").
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      const p = pt.matrixTransform(ctm.inverse());
+      x = p.x / 150;
+      y = p.y / 140;
+    } else {
+      const rect = svg.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      x = (e.clientX - rect.left) / rect.width;
+      y = (e.clientY - rect.top) / rect.height;
+    }
     if (x < 0 || x > 1 || y < 0 || y > 1) return;
     onTap(Math.round(x * 1000) / 1000, Math.round(y * 1000) / 1000);
   };
   return (
-    <svg class={`court${cls ? ' ' + cls : ''}`} viewBox="0 0 150 140" preserveAspectRatio="none" onClick={handle}>
+    <svg class={`court${cls ? ' ' + cls : ''}`} viewBox="0 0 150 140" preserveAspectRatio="xMidYMid meet" onClick={handle}>
       <rect x="0" y="0" width="150" height="140" class="court-floor" />
       {/* area dei 3 secondi */}
       <rect x="50.5" y="0" width="49" height="58" class="court-line" />
       <circle cx="75" cy="58" r="18" class="court-line" />
       {/* linea da 3 punti */}
-      <path d="M 9 0 L 9 29.9 A 67.5 67.5 0 1 0 141 29.9 L 141 0" class="court-line" />
+      <path d="M 9 0 L 9 29.9 A 67.5 67.5 0 0 0 141 29.9 L 141 0" class="court-line" />
       {/* semicerchio no sfondamento */}
       <path d="M 62.5 15.75 A 12.5 12.5 0 0 0 87.5 15.75" class="court-line" />
       {/* tabellone e canestro */}

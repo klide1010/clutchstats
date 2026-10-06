@@ -24,7 +24,8 @@ export function GameStats({ id }: { id: string }) {
     if (!game) return;
     const [events, players, opponent] = await Promise.all([eventsRepo.byGame(id), playersRepo.byTeam(game.teamId), opponentsRepo.get(game.opponentId)]);
     const opp = opponent ?? { id: game.opponentId, name: 'Avversario', shortName: 'AVV', roster: [], updatedAt: 0, deleted: false };
-    setData({ game, events, players, opponent: opp, bs: computeBoxScore(game, events, players) });
+    const called = game.roster && game.roster.length ? players.filter((p) => game.roster!.includes(p.id)) : players;
+    setData({ game, events, players: called, opponent: opp, bs: computeBoxScore(game, events, called) });
   };
   useEffect(() => { void load(); }, [id]);
 

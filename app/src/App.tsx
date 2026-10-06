@@ -1,5 +1,13 @@
 import { route } from './router';
 import { isLoggedIn } from './state/session';
+import { myTeam } from './state/team';
+import { effect } from '@preact/signals';
+
+// Il colore della squadra diventa il colore primario della app.
+effect(() => {
+  const c = myTeam.value?.color;
+  if (c && typeof document !== 'undefined') document.documentElement.style.setProperty('--primary', c);
+});
 import { Login } from './pages/Login';
 import { Home } from './pages/Home';
 import { Roster } from './pages/Roster';

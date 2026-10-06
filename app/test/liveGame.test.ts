@@ -175,3 +175,27 @@ it('addEvent on a CLOSED game is rejected with a clear message', async () => {
   await lg.closeGame();
   await expect(lg.addEvent({ type: 'STEAL', side: 'US', playerId: ids[0] })).rejects.toThrow('Partita chiusa');
 });
+
+it('setRoster limits bench, box score and starters to the called-up players', async () => {
+  await lg.setRoster(ids.slice(0, 7));
+  expect(lg.game.value.roster).toEqual(ids.slice(0, 7));
+  expect(lg.players.value.map((p) => p.id)).toEqual(ids.slice(0, 7));
+  await expect(lg.setStarters([ids[0], ids[1], ids[2], ids[3], ids[7]])).rejects.toThrow();
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  expect(lg.bench.value.map((p) => p.id)).toEqual([ids[5], ids[6]]);
+  expect(lg.boxScore.value.players.map((p) => p.playerId)).toEqual(ids.slice(0, 7));
+});
+
+it('setRoster requires at least 5 players and is locked after period 1', async () => {
+  await expect(lg.setRoster(ids.slice(0, 4))).rejects.toThrow();
+  await lg.setRoster(ids.slice(0, 6));
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  await expect(lg.setRoster(ids.slice(0, 7))).rejects.toThrow();
+});
+
+it('without a roster all active players are available', async () => {
+  expect(lg.allPlayers.value).toHaveLength(8);
+  expect(lg.players.value).toHaveLength(8);
+});

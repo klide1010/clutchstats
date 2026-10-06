@@ -20,6 +20,11 @@ async function loadGame(db: D1Database, id: string): Promise<Game | null> {
 const liveEvents = (db: D1Database, gameId: string) =>
   allRows<GameEvent>(db, 'SELECT * FROM events WHERE game_id = ? AND deleted = 0 ORDER BY seq ASC', eventMapper.fromRow, gameId);
 
+/** Convocati della partita; senza roster tutti i giocatori della squadra. */
+function gamePlayers(game: Game, players: Player[]): Player[] {
+  return game.roster && game.roster.length ? players.filter((p) => game.roster!.includes(p.id)) : players;
+}
+
 const teamPlayers = (db: D1Database, teamId: string) =>
   allRows<Player>(db, 'SELECT * FROM players WHERE team_id = ? AND deleted = 0 ORDER BY number ASC', playerMapper.fromRow, teamId);
 
@@ -31,7 +36,7 @@ export async function listGames(c: AppContext): Promise<Response> {
   const out = [];
   for (const g of games) {
     if (!playersByTeam.has(g.teamId)) playersByTeam.set(g.teamId, await teamPlayers(db, g.teamId));
-    const bs = computeBoxScore(g, await liveEvents(db, g.id), playersByTeam.get(g.teamId)!);
+    const bs = computeBoxScore(g, await liveEvents(db, g.id), gamePlayers(g, playersByTeam.get(g.teamId)!));
     out.push({ ...g, opponentName: opponents.get(g.opponentId)?.name ?? 'Avversario', score: bs.score });
   }
   return c.json({ games: out });
@@ -47,7 +52,8 @@ export async function gameBoxScore(c: AppContext): Promise<Response> {
     db.prepare('SELECT * FROM opponents WHERE id = ?').bind(game.opponentId).first<Row>(),
   ]);
   const opponent = oppRow ? opponentMapper.fromRow(oppRow) : null;
-  return c.json({ game, opponent, players, boxScore: computeBoxScore(game, events, players) });
+  const called = gamePlayers(game, players);
+  return c.json({ game, opponent, players: called, boxScore: computeBoxScore(game, events, called) });
 }
 
 export async function gameEvents(c: AppContext): Promise<Response> {

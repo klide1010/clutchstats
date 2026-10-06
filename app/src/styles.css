@@ -93,7 +93,7 @@ input, select {
 .seg { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 2px; }
 .seg-btn { flex: 1; background: none; border: 0; color: var(--muted); font-weight: 700; padding: 6px 12px; border-radius: 999px; min-height: 32px; }
 .seg-btn.active { background: var(--primary); color: #fff; }
-.court-wrap { position: relative; flex: 1 1 auto; min-height: 0; padding: 6px 8px; }
+.court-wrap { position: relative; flex: 1 1 auto; min-height: 0; padding: 6px 8px; display: flex; justify-content: center; }
 .court { width: 100%; height: 100%; display: block; touch-action: manipulation; }
 .court-floor { fill: #2b2117; }
 .court-line { fill: none; stroke: #e9dcc9; stroke-width: 0.8; }
@@ -156,3 +156,4 @@ table.stats tr.total td { font-weight: 700; background: var(--surface-2); }
 
 .team-logo { width: 40px; height: 40px; object-fit: contain; border-radius: 8px; }
 .score-logo { width: 22px; height: 22px; object-fit: contain; align-self: center; }
+.shot-value { color: var(--accent); font-size: 1.1rem; }

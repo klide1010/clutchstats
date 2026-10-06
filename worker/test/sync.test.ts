@@ -85,3 +85,10 @@ it('team logoUrl roundtrips through push and pull', async () => {
   expect(pulled.teams.find((t) => t.id === 'tl')!.logoUrl).toBe('/logo-team.png');
   expect(pulled.teams.find((t) => t.id === 'tl')).not.toHaveProperty('logo_url');
 });
+
+it('game roster (called-up players) roundtrips', async () => {
+  const g = { id: 'gr', teamId: 't1', opponentId: 'o1', date: '2026-10-18T18:30:00.000Z', home: true, status: 'SCHEDULED', useClock: false, periodLengthMin: 10, periodsRegulation: 4, currentPeriod: 0, source: 'MANUAL', starters: [], roster: ['p1', 'p2'], updatedAt: 2000, deleted: false };
+  await post('/api/sync/push', { games: [g] }, auth);
+  const pulled = (await (await get('/api/sync/pull?since=0', auth)).json()) as { games: { id: string; roster?: string[] }[] };
+  expect(pulled.games.find((x) => x.id === 'gr')!.roster).toEqual(['p1', 'p2']);
+});

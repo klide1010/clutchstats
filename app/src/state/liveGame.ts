@@ -13,7 +13,10 @@ export type AddEventInput = Omit<GameEvent, 'id' | 'gameId' | 'seq' | 'period' |
 export interface LiveGame {
   game: Signal<Game>;
   events: Signal<GameEvent[]>;
-  players: Signal<Player[]>;
+  /** Convocati (o tutti gli attivi se non impostati). */
+  players: ReadonlySignal<Player[]>;
+  /** Tutto il roster della squadra, per scegliere i convocati. */
+  allPlayers: Signal<Player[]>;
   opponent: Signal<Opponent>;
   clock: GameClock;
   boxScore: ReadonlySignal<BoxScore>;
@@ -29,6 +32,7 @@ export interface LiveGame {
   endPeriod(): Promise<void>;
   substitute(outId: string, inId: string, clockSec?: number): Promise<void>;
   setStarters(ids: string[]): Promise<void>;
+  setRoster(ids: string[]): Promise<void>;
   closeGame(): Promise<void>;
   reload(): Promise<void>;
   dispose(): void;
@@ -63,7 +67,11 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
 
   const game = signal<Game>(g);
   const events = signal<GameEvent[]>(await eventsRepo.byGame(gameId));
-  const players = signal<Player[]>(await playersRepo.byTeam(g.teamId));
+  const allPlayers = signal<Player[]>(await playersRepo.byTeam(g.teamId));
+  const players = computed(() => {
+    const r = game.value.roster;
+    return r && r.length ? allPlayers.value.filter((p) => r.includes(p.id)) : allPlayers.value.filter((p) => p.active);
+  });
   const opponent = signal<Opponent>(opp);
   const clock = createClock(periodLengthSec(g, Math.max(1, g.currentPeriod)));
   // Ripristino del cronometro dopo un reload: ultimo evento del periodo corrente con tempo noto.
@@ -163,7 +171,16 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
   const setStarters = async (ids: string[]) => {
     if (game.value.currentPeriod !== 0) throw new Error('Quintetto modificabile solo prima della partita');
     if (new Set(ids).size !== 5) throw new Error('Servono esattamente 5 giocatori');
+    const allowed = new Set(players.value.map((p) => p.id));
+    if (!ids.every((id) => allowed.has(id))) throw new Error('Il quintetto deve essere tra i convocati');
     await saveGame({ starters: ids });
+  };
+
+  const setRoster = async (ids: string[]) => {
+    if (game.value.currentPeriod !== 0) throw new Error('Convocati modificabili solo prima della partita');
+    if (new Set(ids).size < 5) throw new Error('Servono almeno 5 convocati');
+    const starters = game.value.starters.filter((id) => ids.includes(id));
+    await saveGame({ roster: ids, starters });
   };
 
   const closeGame = async () => {
@@ -185,8 +202,8 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
   });
 
   return {
-    game, events, players, opponent, clock, boxScore, onCourt, bench, periodOpen, canUndo, lastEventLabel,
-    addEvent, undo, deleteEvent, startPeriod, endPeriod, substitute, setStarters, closeGame, reload,
+    game, events, players, allPlayers, opponent, clock, boxScore, onCourt, bench, periodOpen, canUndo, lastEventLabel,
+    addEvent, undo, deleteEvent, startPeriod, endPeriod, substitute, setStarters, setRoster, closeGame, reload,
     dispose: () => { stopSyncWatch(); clock.dispose(); },
   };
 }

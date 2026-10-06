@@ -23,7 +23,21 @@ const FOUL_KINDS: { kind: FoulKind; label: string }[] = [
 ];
 
 function Lineup({ lg }: { lg: LiveGame }) {
+  const active = lg.allPlayers.value.filter((p) => p.active);
+  const initialRoster = lg.game.value.roster?.length ? lg.game.value.roster : active.map((p) => p.id);
+  const [step, setStep] = useState<'roster' | 'starters'>(lg.game.value.roster?.length ? 'starters' : 'roster');
+  const [roster, setRoster] = useState<string[]>(initialRoster);
   const [sel, setSel] = useState<string[]>(lg.game.value.starters);
+
+  const confirmRoster = async () => {
+    try {
+      await lg.setRoster(roster);
+      setSel((s) => s.filter((id) => roster.includes(id)));
+      setStep('starters');
+    } catch (e) {
+      toast(e instanceof Error ? e.message : 'Errore', 'error');
+    }
+  };
   const start = async () => {
     try {
       await lg.setStarters(sel);
@@ -32,14 +46,33 @@ function Lineup({ lg }: { lg: LiveGame }) {
       toast(e instanceof Error ? e.message : 'Errore', 'error');
     }
   };
+
+  if (step === 'roster') {
+    return (
+      <main class="page stack">
+        <div class="row">
+          <button class="btn btn-sm" style="flex:0 0 auto" onClick={() => navigate('#/calendar')}>‹</button>
+          <h1 style="margin:0">Convocati</h1>
+        </div>
+        <p class="muted">Chi c'è stasera? ({roster.length} selezionati, minimo 5). Le statistiche live mostreranno solo loro.</p>
+        <PlayerPicker players={lg.allPlayers.value} selected={roster} max={lg.allPlayers.value.length} onChange={setRoster} />
+        <div class="row">
+          <button class="btn" onClick={() => setRoster(active.map((p) => p.id))}>Tutti gli attivi</button>
+          <button class="btn btn-primary" disabled={roster.length < 5} onClick={confirmRoster}>Avanti</button>
+        </div>
+      </main>
+    );
+  }
+
+  const called = lg.players.value;
   return (
     <main class="page stack">
       <div class="row">
-        <button class="btn btn-sm" style="flex:0 0 auto" onClick={() => navigate('#/calendar')}>‹</button>
+        <button class="btn btn-sm" style="flex:0 0 auto" onClick={() => setStep('roster')}>‹ Convocati</button>
         <h1 style="margin:0">Quintetto iniziale</h1>
       </div>
-      <p class="muted">Scegli 5 giocatori ({sel.length}/5)</p>
-      <PlayerPicker players={lg.players.value.filter((p) => p.active)} selected={sel} max={5} onChange={setSel} />
+      <p class="muted">Scegli 5 tra i {called.length} convocati ({sel.length}/5)</p>
+      <PlayerPicker players={called} selected={sel} max={5} onChange={setSel} />
       <button class="btn btn-primary btn-block" disabled={sel.length !== 5} onClick={start}>Inizia partita</button>
     </main>
   );
