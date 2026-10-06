@@ -30,7 +30,7 @@ export default defineConfig({
         importScripts: ['sw-polyfills.js'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
-        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2,webmanifest}'],
         runtimeCaching: [],
       },
     }),

@@ -2,6 +2,7 @@ import { periodLabel } from '@bkstats/shared';
 import type { LiveGame } from '../state/liveGame';
 import { useRef } from 'preact/hooks';
 import { myTeam } from '../state/team';
+import { Icon } from './Icon';
 
 interface Props {
   lg: LiveGame;
@@ -60,9 +61,9 @@ export function TopBar({ lg, onSubs, onMenu }: Props) {
         <span class="score-team">{lg.opponent.value.shortName}</span>
       </div>
       <div class="topbar-actions">
-        <button class="btn btn-sm" disabled={!lg.canUndo.value} onClick={() => void lg.undo()}>Undo</button>
-        <button class="btn btn-sm" onClick={onSubs}>Cambi</button>
-        <button class="btn btn-sm" onClick={onMenu}>☰</button>
+        <button class="btn btn-sm btn-icon" disabled={!lg.canUndo.value} onClick={() => void lg.undo()}><Icon name="undo" size={18} /> Undo</button>
+        <button class="btn btn-sm btn-icon" onClick={onSubs}><Icon name="swap" size={18} /> Cambi</button>
+        <button class="btn btn-sm btn-icon" onClick={onMenu} aria-label="Menu"><Icon name="menu" size={18} /></button>
       </div>
     </header>
   );

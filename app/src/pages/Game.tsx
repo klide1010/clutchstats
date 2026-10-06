@@ -102,7 +102,7 @@ export function Game({ id }: { id: string }) {
   const playerFouls: Record<string, number> = {};
   for (const l of lg.boxScore.value.players) playerFouls[l.playerId] = l.pf;
   const jerseyNumbers = lg.opponent.value.roster.map((r) => r.number);
-  const liveShots = lg.events.value.filter((e) => !e.deleted && (e.type === 'SHOT_2' || e.type === 'SHOT_3') && e.period === lg.game.value.currentPeriod);
+  const liveShots = lg.events.value.filter((e) => !e.deleted && (e.type === 'SHOT_2' || e.type === 'SHOT_3' || e.type === 'FREE_THROW') && e.side === side.value && e.period === lg.game.value.currentPeriod);
 
   const onCourtTap = (x: number, y: number) => {
     if (!lg.periodOpen.value) { toast('Periodo non aperto', 'error'); return; }

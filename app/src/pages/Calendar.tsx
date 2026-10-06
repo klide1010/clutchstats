@@ -5,6 +5,7 @@ import { loadOpponents, opponents, findOrCreateOpponent } from '../state/opponen
 import { navigate } from '../router';
 import { IcsImport, fmtDate } from '../ui/IcsImport';
 import { toast } from '../ui/Toast';
+import { Icon } from '../ui/Icon';
 
 function NewGameForm({ onDone }: { onDone: () => void }) {
   const [opponentChoice, setOpponentChoice] = useState<string>(opponents.value[0]?.id ?? 'NEW');
@@ -73,8 +74,8 @@ export function Calendar() {
       <h1>Calendario</h1>
       {mode === 'list' && (
         <div class="row">
-          <button class="btn" onClick={() => setMode('new')}>Nuova partita</button>
-          <button class="btn" onClick={() => setMode('ics')}>Importa .ics</button>
+          <button class="btn btn-icon" onClick={() => setMode('new')}><Icon name="plus" size={18} /> Nuova partita</button>
+          <button class="btn btn-icon" onClick={() => setMode('ics')}><Icon name="upload" size={18} /> Importa .ics</button>
         </div>
       )}
       {mode === 'new' && <NewGameForm onDone={() => setMode('list')} />}
@@ -82,6 +83,7 @@ export function Calendar() {
       <ul class="list">
         {games.value.map((g) => (
           <li key={g.id}>
+            <span class={`game-dot ${g.status.toLowerCase()}`} aria-hidden="true" />
             <span style="flex:1" onClick={() => open(g)}>
               <b>{fmtDate(g.date)}</b> · {g.home ? 'vs' : '@'} {opponentName(g.opponentId)}<br />
               <span class="muted">{statusLabel(g)}{g.venue ? ` · ${g.venue}` : ''}{g.useClock ? ' · cronometro' : ''}</span>

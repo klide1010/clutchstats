@@ -4,6 +4,8 @@ import { ensureTeam, myTeam, saveTeam } from '../state/team';
 import { setToken } from '../state/session';
 import { navigate } from '../router';
 import { toast } from '../ui/Toast';
+import { Icon } from '../ui/Icon';
+import { theme, setTheme } from '../state/theme';
 
 export function Settings() {
   const [periodMin, setPeriodMin] = useState(10);
@@ -30,9 +32,16 @@ export function Settings() {
   return (
     <main class="page stack">
       <h1>Impostazioni</h1>
+      <div class="card stack">
+        <strong class="card-title"><Icon name="palette" size={18} /> Aspetto</strong>
+        <div class="seg">
+          <button class={`seg-btn btn-icon${theme.value === 'dark' ? ' active' : ''}`} onClick={() => void setTheme('dark')}><Icon name="moon" size={16} /> Scuro</button>
+          <button class={`seg-btn btn-icon${theme.value === 'light' ? ' active' : ''}`} onClick={() => void setTheme('light')}><Icon name="sun" size={16} /> Chiaro</button>
+        </div>
+      </div>
       {team && (
         <div class="card stack">
-          <strong>Squadra</strong>
+          <strong class="card-title"><Icon name="users" size={18} /> Squadra</strong>
           <label>Nome<input value={team.name} onChange={(e) => saveTeam({ name: (e.target as HTMLInputElement).value })} /></label>
           <div class="row">
             <label>Sigla<input value={team.shortName} maxLength={4} onChange={(e) => saveTeam({ shortName: (e.target as HTMLInputElement).value.toUpperCase() })} /></label>
@@ -41,14 +50,14 @@ export function Settings() {
         </div>
       )}
       <div class="card stack">
-        <strong>Partite</strong>
+        <strong class="card-title"><Icon name="calendar" size={18} /> Partite</strong>
         <label>Durata periodo di default (minuti)<input type="number" inputMode="numeric" min={1} max={20} value={periodMin} onChange={(e) => savePeriod(Number((e.target as HTMLInputElement).value))} /></label>
         <button class="btn btn-block" onClick={() => navigate('#/opponents')}>Squadre avversarie</button>
       </div>
       <div class="card stack">
-        <strong>Account</strong>
-        <button class="btn btn-block" onClick={() => { void setToken(null); }}>Esci</button>
-        <button class="btn btn-block" style="border-color:var(--err)" onClick={wipe}>Cancella dati locali</button>
+        <strong class="card-title"><Icon name="key" size={18} /> Account</strong>
+        <button class="btn btn-block btn-icon" onClick={() => { void setToken(null); }}><Icon name="logout" size={18} /> Esci</button>
+        <button class="btn btn-block btn-icon btn-danger" onClick={wipe}><Icon name="trash" size={18} /> Cancella dati locali</button>
       </div>
       <p class="muted" style="text-align:center">BKStats · {__APP_VERSION__}</p>
     </main>

@@ -1,20 +1,21 @@
 import type { EventType, Side } from '@bkstats/shared';
 import { useRef } from 'preact/hooks';
+import { Icon, type IconName } from './Icon';
 
-interface Action { type: EventType | 'FREE_THROW'; label: string; usOnly?: boolean }
+interface Action { type: EventType | 'FREE_THROW'; label: string; icon: IconName; usOnly?: boolean }
 
 const ACTIONS: Action[] = [
-  { type: 'REBOUND_OFF', label: 'Rimb O' },
-  { type: 'REBOUND_DEF', label: 'Rimb D' },
-  { type: 'TURNOVER', label: 'Persa' },
-  { type: 'STEAL', label: 'Recup' },
-  { type: 'BLOCK', label: 'Stoppata' },
-  { type: 'BLOCK_RECEIVED', label: 'Stopp. subita', usOnly: true },
-  { type: 'FOUL', label: 'Fallo' },
-  { type: 'FOUL_DRAWN', label: 'Fallo subito', usOnly: true },
-  { type: 'SCREEN', label: 'Blocco', usOnly: true },
-  { type: 'TIMEOUT', label: 'Timeout' },
-  { type: 'FREE_THROW', label: 'Tiro libero' },
+  { type: 'REBOUND_OFF', label: 'Rimb O', icon: 'arrowUpCircle' },
+  { type: 'REBOUND_DEF', label: 'Rimb D', icon: 'arrowDownCircle' },
+  { type: 'TURNOVER', label: 'Persa', icon: 'xCircle' },
+  { type: 'STEAL', label: 'Recup', icon: 'zap' },
+  { type: 'BLOCK', label: 'Stoppata', icon: 'shield' },
+  { type: 'BLOCK_RECEIVED', label: 'Stopp. subita', icon: 'shieldOff', usOnly: true },
+  { type: 'FOUL', label: 'Fallo', icon: 'alert' },
+  { type: 'FOUL_DRAWN', label: 'Fallo subito', icon: 'alertCircle', usOnly: true },
+  { type: 'SCREEN', label: 'Blocco', icon: 'square', usOnly: true },
+  { type: 'TIMEOUT', label: 'Timeout', icon: 'pause' },
+  { type: 'FREE_THROW', label: 'Tiro libero', icon: 'target' },
 ];
 
 interface Props {
@@ -53,7 +54,8 @@ export function ActionGrid({ side, pending, onAction, onFreeThrow, onFoulLongPre
           onPointerCancel={up}
           onClick={() => click(a)}
         >
-          {a.label}
+          <Icon name={a.icon} size={18} />
+          <span>{a.label}</span>
         </button>
       ))}
     </div>

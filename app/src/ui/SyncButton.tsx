@@ -1,6 +1,7 @@
 import { useEffect } from 'preact/hooks';
 import { initSyncState, runSync, syncState } from '../api/sync';
 import { toast } from './Toast';
+import { Icon } from './Icon';
 
 function fmtTime(ms: number): string {
   const d = new Date(ms);
@@ -21,8 +22,8 @@ export function SyncButton({ label = 'Sincronizza' }: { label?: string }) {
   };
   return (
     <div class="card stack">
-      <button class="btn btn-block" disabled={s.running} onClick={go}>
-        {s.running ? 'Sincronizzazione…' : label}
+      <button class="btn btn-block btn-icon" disabled={s.running} onClick={go}>
+        <Icon name="sync" size={18} class={s.running ? 'spin' : ''} /> {s.running ? 'Sincronizzazione…' : label}
         {s.pending > 0 && <span class="badge">{s.pending}</span>}
       </button>
       <span class="muted" style="font-size:0.85rem">

@@ -4,6 +4,7 @@ import { ensureTeam, loadPlayers, myTeam, players, removePlayer, savePlayer, sav
 import { mergeRoster, parseRosterCsv, type RosterCsvResult } from '../model/rosterCsv';
 import { toast } from '../ui/Toast';
 import { readFileText } from '../model/fileText';
+import { Icon } from '../ui/Icon';
 
 interface Draft { id: string; number: string; lastName: string; firstName: string; role: Role; active: boolean }
 
@@ -87,9 +88,9 @@ export function Roster() {
       )}
 
       <div class="row">
-        <button class="btn" onClick={() => startEdit()}>Aggiungi</button>
-        <label class="btn" style="margin:0">
-          Importa CSV
+        <button class="btn btn-icon" onClick={() => startEdit()}><Icon name="plus" size={18} /> Aggiungi</button>
+        <label class="btn btn-icon" style="margin:0">
+          <Icon name="upload" size={18} /> Importa CSV
           <input type="file" accept=".csv,text/csv" style="display:none" onChange={onCsvFile} />
         </label>
       </div>

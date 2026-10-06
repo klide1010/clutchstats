@@ -11,6 +11,7 @@ import { navigate } from '../router';
 import { updateGame } from '../state/games';
 import { toast } from '../ui/Toast';
 import { SyncButton } from '../ui/SyncButton';
+import { Icon } from '../ui/Icon';
 
 interface Loaded { game: Game; events: GameEvent[]; players: Player[]; opponent: Opponent; bs: BoxScore }
 
@@ -81,8 +82,8 @@ export function GameStats({ id }: { id: string }) {
         </ul>
       )}
       <div class="row">
-        <button class="btn" onClick={() => { downloadText(`bkstats_${slug}.csv`, 'text/csv;charset=utf-8', boxScoreToCsv(bs, players)); toast('CSV esportato'); }}>Esporta CSV</button>
-        <button class="btn" onClick={() => { downloadText(`bkstats_${slug}.json`, 'application/json', gameToJson(game, events, players, opponent, bs)); toast('JSON esportato'); }}>Esporta JSON</button>
+        <button class="btn btn-icon" onClick={() => { downloadText(`bkstats_${slug}.csv`, 'text/csv;charset=utf-8', boxScoreToCsv(bs, players)); toast('CSV esportato'); }}><Icon name="download" size={18} /> CSV</button>
+        <button class="btn btn-icon" onClick={() => { downloadText(`bkstats_${slug}.json`, 'application/json', gameToJson(game, events, players, opponent, bs)); toast('JSON esportato'); }}><Icon name="download" size={18} /> JSON</button>
       </div>
       {game.status === 'CLOSED' && <SyncButton label="Sincronizza ora" />}
       {game.status === 'CLOSED' ? <button class="btn btn-block" onClick={reopen}>Riapri partita</button>

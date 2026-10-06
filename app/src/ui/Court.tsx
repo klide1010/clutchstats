@@ -6,6 +6,19 @@ interface Props {
   class?: string;
 }
 
+/** Linea del tiro libero: 5,80 m dalla linea di fondo → 58 nel viewBox. */
+export const FT_LINE_Y = 58;
+
+/** Posizione nel viewBox di un tiro: coordinate registrate, oppure la lunetta per i liberi (con un piccolo scarto per non sovrapporli). */
+export function shotPosition(s: GameEvent): [number, number] | null {
+  if (s.type === 'FREE_THROW') {
+    const jitter = ((s.seq % 7) - 3) * 1.6;
+    return [75 + jitter, FT_LINE_Y];
+  }
+  if (s.x === undefined || s.y === undefined) return null;
+  return [s.x * 150, s.y * 140];
+}
+
 /** Mezzo campo FIBA, viewBox in decimetri (150 × 140), canestro in alto. */
 export function Court({ onTap, shots, class: cls }: Props) {
   const handle = (e: MouseEvent) => {
@@ -46,11 +59,19 @@ export function Court({ onTap, shots, class: cls }: Props) {
       <circle cx="75" cy="15.75" r="2.25" class="court-rim" />
       {/* metà campo */}
       <path d="M 57 140 A 18 18 0 0 1 93 140" class="court-line" />
-      {shots?.map((s) =>
-        s.x !== undefined && s.y !== undefined ? (
-          <circle key={s.id} cx={s.x * 150} cy={s.y * 140} r="3" class={s.made ? 'shot-made' : 'shot-missed'} />
-        ) : null,
-      )}
+      {shots?.map((s) => {
+        const pos = shotPosition(s);
+        if (!pos) return null;
+        const [cx, cy] = pos;
+        const ft = s.type === 'FREE_THROW';
+        const r = ft ? 2.2 : 3;
+        const cls = (s.made ? 'shot-made' : 'shot-missed') + (ft ? ' shot-ft' : '');
+        return s.made ? (
+          <circle key={s.id} cx={cx} cy={cy} r={r} class={cls} data-cy={cy} />
+        ) : (
+          <path key={s.id} d={`M ${cx - r} ${cy - r} L ${cx + r} ${cy + r} M ${cx + r} ${cy - r} L ${cx - r} ${cy + r}`} class={cls} data-cy={cy} />
+        );
+      })}
     </svg>
   );
 }

@@ -9,6 +9,7 @@ import { isLoggedIn } from '../state/session';
 import { navigate } from '../router';
 import { fmtDate } from '../ui/IcsImport';
 import { SyncButton } from '../ui/SyncButton';
+import { Icon } from '../ui/Icon';
 
 export function Home() {
   const [scores, setScores] = useState<Record<string, { us: number; them: number }>>({});
@@ -38,19 +39,19 @@ export function Home() {
   return (
     <main class="page stack">
       <div class="row" style="justify-content:flex-start">
-        {myTeam.value?.logoUrl && <img src={myTeam.value.logoUrl} alt="" class="team-logo" style="flex:0 0 auto" />}
+        {myTeam.value?.logoUrl ? <img src={myTeam.value.logoUrl} alt="" class="team-logo" style="flex:0 0 auto" /> : <span class="team-logo placeholder"><Icon name="ball" size={24} /></span>}
         <h1 style="margin:0">{myTeam.value?.name ?? 'BKStats'}</h1>
       </div>
       {live && (
         <div class="card stack" style="border-color:var(--primary)">
-          <strong>Partita in corso</strong>
+          <strong class="card-title"><Icon name="play" size={18} /> Partita in corso</strong>
           <span>{live.home ? 'vs' : '@'} {oppName(live)} · {fmtDate(live.date)}</span>
           <button class="btn btn-primary btn-block" onClick={() => navigate(`#/game/${live.id}`)}>Riprendi</button>
         </div>
       )}
       {next && (
         <div class="card stack">
-          <strong>Prossima partita</strong>
+          <strong class="card-title"><Icon name="calendar" size={18} /> Prossima partita</strong>
           <span>{next.home ? 'vs' : '@'} {oppName(next)} · {fmtDate(next.date)}{next.venue ? ` · ${next.venue}` : ''}</span>
           <button class="btn btn-block" onClick={() => navigate(`#/game/${next.id}`)}>Apri</button>
         </div>
@@ -63,7 +64,7 @@ export function Home() {
       )}
       {recent.length > 0 && (
         <>
-          <h2>Ultime partite {record.won + record.lost > 0 ? `· ${record.won}V ${record.lost}P` : ''}</h2>
+          <h2 class="with-icon"><Icon name="trophy" size={16} /> Ultime partite {record.won + record.lost > 0 ? `· ${record.won}V ${record.lost}P` : ''}</h2>
           <ul class="list">
             {recent.map((g) => (
               <li key={g.id} onClick={() => navigate(`#/stats/${g.id}`)}>

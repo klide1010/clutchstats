@@ -17,7 +17,7 @@ export function ShotChart({ game, events, players }: Props) {
   const [outcome, setOutcome] = useState<'ALL' | 'MADE' | 'MISSED'>('ALL');
   const [sideSel, setSideSel] = useState<'US' | 'THEM'>('US');
 
-  const shots = events.filter((e) => !e.deleted && (e.type === 'SHOT_2' || e.type === 'SHOT_3') && e.x !== undefined && e.y !== undefined
+  const shots = events.filter((e) => !e.deleted && (e.type === 'FREE_THROW' || ((e.type === 'SHOT_2' || e.type === 'SHOT_3') && e.x !== undefined && e.y !== undefined))
     && e.side === sideSel
     && (playerId === 'ALL' || e.playerId === playerId)
     && (period === 'ALL' || e.period === Number(period))
@@ -25,9 +25,10 @@ export function ShotChart({ game, events, players }: Props) {
 
   const periods = [...new Set(events.filter((e) => !e.deleted).map((e) => e.period))].sort((a, b) => a - b);
   const zone = (pred: (e: GameEvent) => boolean) => { const z = shots.filter(pred); return { m: z.filter((e) => e.made).length, a: z.length }; };
-  const paint = zone((e) => distanceM(e) < 2);
+  const paint = zone((e) => e.type !== 'FREE_THROW' && distanceM(e) < 2);
   const mid = zone((e) => e.type === 'SHOT_2' && distanceM(e) >= 2);
   const three = zone((e) => e.type === 'SHOT_3');
+  const ft = zone((e) => e.type === 'FREE_THROW');
 
   return (
     <div class="stack">
@@ -57,7 +58,9 @@ export function ShotChart({ game, events, players }: Props) {
         <div class="card"><span class="muted">Sotto canestro</span><br /><b>{paint.m}/{paint.a}</b> · {fmtPct(paint.m, paint.a)}</div>
         <div class="card"><span class="muted">Da 2</span><br /><b>{mid.m}/{mid.a}</b> · {fmtPct(mid.m, mid.a)}</div>
         <div class="card"><span class="muted">Da 3</span><br /><b>{three.m}/{three.a}</b> · {fmtPct(three.m, three.a)}</div>
+        <div class="card"><span class="muted">Liberi</span><br /><b>{ft.m}/{ft.a}</b> · {fmtPct(ft.m, ft.a)}</div>
       </div>
+      <p class="muted legend"><span class="legend-made" /> canestro <span class="legend-missed">✕</span> errore · i liberi sono sulla lunetta</p>
     </div>
   );
 }

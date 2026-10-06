@@ -1,11 +1,12 @@
 import { route, navigate } from '../router';
+import { Icon, type IconName } from './Icon';
 
-const ITEMS: { hash: string; label: string; names: string[] }[] = [
-  { hash: '#/', label: 'Home', names: ['home'] },
-  { hash: '#/calendar', label: 'Calendario', names: ['calendar', 'stats'] },
-  { hash: '#/roster', label: 'Roster', names: ['roster'] },
-  { hash: '#/season', label: 'Stagione', names: ['season'] },
-  { hash: '#/settings', label: 'Altro', names: ['settings', 'opponents'] },
+const ITEMS: { hash: string; label: string; icon: IconName; names: string[] }[] = [
+  { hash: '#/', label: 'Home', icon: 'home', names: ['home'] },
+  { hash: '#/calendar', label: 'Calendario', icon: 'calendar', names: ['calendar', 'stats'] },
+  { hash: '#/roster', label: 'Roster', icon: 'users', names: ['roster'] },
+  { hash: '#/season', label: 'Stagione', icon: 'trophy', names: ['season'] },
+  { hash: '#/settings', label: 'Altro', icon: 'settings', names: ['settings', 'opponents'] },
 ];
 
 export function Nav() {
@@ -14,7 +15,8 @@ export function Nav() {
     <nav class="nav">
       {ITEMS.map((it) => (
         <button key={it.hash} class={`nav-item${it.names.includes(name) ? ' active' : ''}`} onClick={() => navigate(it.hash)}>
-          {it.label}
+          <Icon name={it.icon} size={22} />
+          <span>{it.label}</span>
         </button>
       ))}
     </nav>

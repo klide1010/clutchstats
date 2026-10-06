@@ -88,3 +88,31 @@ it('ShotPopup shows the computed value and offers no 2/3 choice', () => {
   fireEvent.click(screen.getByRole('button', { name: 'Errore' }));
   expect(onConfirm).toHaveBeenCalledWith({ made: false, value: 3, playerId: 'p0', assistPlayerId: undefined, jerseyNumber: undefined });
 });
+
+it('draws made shots as green circles, misses as X marks and free throws at the line', () => {
+  const base = { gameId: 'g', period: 1, side: 'US' as const, createdAt: 1, updatedAt: 1, deleted: false };
+  const shots = [
+    { ...base, id: 'a', seq: 1, type: 'SHOT_2' as const, made: true, x: 0.5, y: 0.2 },
+    { ...base, id: 'b', seq: 2, type: 'SHOT_3' as const, made: false, x: 0.5, y: 0.7 },
+    { ...base, id: 'c', seq: 3, type: 'FREE_THROW' as const, made: true },
+    { ...base, id: 'd', seq: 4, type: 'FREE_THROW' as const, made: false },
+  ];
+  const { container } = render(<Court onTap={() => undefined} shots={shots} />);
+  const made = container.querySelectorAll('.shot-made');
+  const missed = container.querySelectorAll('.shot-missed');
+  expect(made).toHaveLength(2);
+  expect(missed).toHaveLength(2);
+  expect(made[0].tagName.toLowerCase()).toBe('circle');
+  expect(missed[0].tagName.toLowerCase()).toBe('path');
+  const fts = container.querySelectorAll('.shot-ft');
+  expect(fts).toHaveLength(2);
+  for (const ft of fts) expect(Number(ft.getAttribute('data-cy'))).toBeCloseTo(58, 0);
+});
+
+it('Icon renders an inline svg with the icon class', async () => {
+  const { Icon } = await import('../src/ui/Icon');
+  const { container } = render(<Icon name="home" />);
+  const svg = container.querySelector('svg.icon')!;
+  expect(svg).toBeTruthy();
+  expect(svg.getAttribute('aria-hidden')).toBe('true');
+});
