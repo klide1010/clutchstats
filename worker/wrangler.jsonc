@@ -11,7 +11,7 @@
     {
       "binding": "DB",
       "database_name": "bkstats",
-      "database_id": "REPLACE_AFTER_D1_CREATE",
+      "database_id": "c555478b-6221-4006-ae06-422b163d56d8",
       "migrations_dir": "migrations"
     }
   ],
