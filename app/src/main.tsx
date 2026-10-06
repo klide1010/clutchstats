@@ -1,4 +1,8 @@
 import { render } from 'preact';
 import './styles.css';
+import { App } from './App';
+import { initSession } from './state/session';
 
-render(<h1>BKStats</h1>, document.getElementById('app')!);
+initSession().finally(() => {
+  render(<App />, document.getElementById('app')!);
+});
