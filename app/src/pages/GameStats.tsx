@@ -10,6 +10,7 @@ import { fmtDate } from '../ui/IcsImport';
 import { navigate } from '../router';
 import { updateGame } from '../state/games';
 import { toast } from '../ui/Toast';
+import { SyncButton } from '../ui/SyncButton';
 
 interface Loaded { game: Game; events: GameEvent[]; players: Player[]; opponent: Opponent; bs: BoxScore }
 
@@ -82,6 +83,7 @@ export function GameStats({ id }: { id: string }) {
         <button class="btn" onClick={() => { downloadText(`bkstats_${slug}.csv`, 'text/csv;charset=utf-8', boxScoreToCsv(bs, players)); toast('CSV esportato'); }}>Esporta CSV</button>
         <button class="btn" onClick={() => { downloadText(`bkstats_${slug}.json`, 'application/json', gameToJson(game, events, players, opponent, bs)); toast('JSON esportato'); }}>Esporta JSON</button>
       </div>
+      {game.status === 'CLOSED' && <SyncButton label="Sincronizza ora" />}
       {game.status === 'CLOSED' ? <button class="btn btn-block" onClick={reopen}>Riapri partita</button>
         : <button class="btn btn-block btn-primary" onClick={() => navigate(`#/game/${game.id}`)}>{game.status === 'LIVE' ? 'Torna alla partita' : 'Apri partita'}</button>}
     </main>

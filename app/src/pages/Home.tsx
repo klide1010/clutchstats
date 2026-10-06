@@ -6,6 +6,7 @@ import { loadOpponents, opponents } from '../state/opponents';
 import { ensureTeam, loadPlayers, myTeam, players } from '../state/team';
 import { navigate } from '../router';
 import { fmtDate } from '../ui/IcsImport';
+import { SyncButton } from '../ui/SyncButton';
 
 export function Home() {
   const [scores, setScores] = useState<Record<string, { us: number; them: number }>>({});
@@ -66,7 +67,7 @@ export function Home() {
           </ul>
         </>
       )}
-      <div id="sync-slot" />
+      <SyncButton />
     </main>
   );
 }

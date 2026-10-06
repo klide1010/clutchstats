@@ -1,4 +1,4 @@
-import { computed, signal, type ReadonlySignal, type Signal } from '@preact/signals';
+import { computed, effect, signal, type ReadonlySignal, type Signal } from '@preact/signals';
 import {
   computeBoxScore, elapsedSec, newId, onCourtAfter, periodLengthSec, THEM_ALLOWED_TYPES,
   type BoxScore, type Game, type GameEvent, type Opponent, type Player,
@@ -6,6 +6,7 @@ import {
 import { eventsRepo, gamesRepo, opponentsRepo, playersRepo } from '../db';
 import { createClock, type GameClock } from './clock';
 import { loadGames } from './games';
+import { syncState } from '../api/sync';
 
 export type AddEventInput = Omit<GameEvent, 'id' | 'gameId' | 'seq' | 'period' | 'updatedAt' | 'deleted' | 'createdAt' | 'clockSec'> & { clockSec?: number };
 
@@ -166,9 +167,15 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     if (fresh) game.value = fresh;
   };
 
+  let lastSeenSync = syncState.peek().lastAt;
+  const stopSyncWatch = effect(() => {
+    const at = syncState.value.lastAt;
+    if (at !== lastSeenSync) { lastSeenSync = at; void reload(); }
+  });
+
   return {
     game, events, players, opponent, clock, boxScore, onCourt, bench, periodOpen, canUndo, lastEventLabel,
     addEvent, undo, deleteEvent, startPeriod, endPeriod, substitute, setStarters, closeGame, reload,
-    dispose: () => clock.dispose(),
+    dispose: () => { stopSyncWatch(); clock.dispose(); },
   };
 }

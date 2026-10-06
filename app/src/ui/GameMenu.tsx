@@ -4,6 +4,7 @@ import { navigate } from '../router';
 import { EventHistory } from './EventHistory';
 import { PlayerPicker } from './PlayerPicker';
 import { toast } from './Toast';
+import { trySync } from '../api/sync';
 
 interface Props {
   lg: LiveGame;
@@ -25,6 +26,7 @@ export function GameMenu({ lg, onClose, onClosed }: Props) {
   const closeGame = async () => {
     if (!confirm('Chiudere la partita? Potrai riaprirla dalle statistiche.')) return;
     await run(async () => { await lg.closeGame(); onClosed?.(); });
+    void trySync();
     navigate(`#/stats/${g.id}`);
   };
 
