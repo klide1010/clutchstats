@@ -21,3 +21,17 @@ it('saveOpponent updates roster and removeOpponent hides it', async () => {
   await removeOpponent(o.id);
   expect(opponents.value).toEqual([]);
 });
+
+it('parseJerseyNumbers accepts comma, space and semicolon separated lists', async () => {
+  const { parseJerseyNumbers } = await import('../src/state/opponents');
+  expect(parseJerseyNumbers('7, 12 23;00 x 7')).toEqual([7, 12, 23, 0]);
+  expect(parseJerseyNumbers('')).toEqual([]);
+});
+
+it('addNumbers merges new jersey numbers into the opponent roster', async () => {
+  const { addNumbers } = await import('../src/state/opponents');
+  const o = await findOrCreateOpponent('Verdi');
+  await saveOpponent({ ...o, roster: [{ number: 7, name: 'Bianchi' }] });
+  const saved = await addNumbers(o.id, [7, 9]);
+  expect(saved.roster).toEqual([{ number: 7, name: 'Bianchi' }, { number: 9 }]);
+});

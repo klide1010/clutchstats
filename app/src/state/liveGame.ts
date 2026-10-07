@@ -7,6 +7,8 @@ import { eventsRepo, gamesRepo, opponentsRepo, playersRepo } from '../db';
 import { createClock, type GameClock } from './clock';
 import { loadGames } from './games';
 import { syncState } from '../api/sync';
+import { getDeviceId } from './device';
+import { addNumbers } from './opponents';
 
 export type AddEventInput = Omit<GameEvent, 'id' | 'gameId' | 'seq' | 'period' | 'updatedAt' | 'deleted' | 'createdAt' | 'clockSec'> & { clockSec?: number };
 
@@ -23,6 +25,8 @@ export interface LiveGame {
   onCourt: ReadonlySignal<string[]>;
   bench: ReadonlySignal<Player[]>;
   periodOpen: ReadonlySignal<boolean>;
+  /** Partita in corso registrata da un altro dispositivo: chiedere se prenderla in carico. */
+  foreignLive: ReadonlySignal<boolean>;
   canUndo: ReadonlySignal<boolean>;
   lastEventLabel: ReadonlySignal<string>;
   addEvent(input: AddEventInput): Promise<GameEvent>;
@@ -33,6 +37,9 @@ export interface LiveGame {
   substitute(outId: string, inId: string, clockSec?: number): Promise<void>;
   setStarters(ids: string[]): Promise<void>;
   setRoster(ids: string[]): Promise<void>;
+  takeOver(): Promise<void>;
+  restartFromScratch(): Promise<void>;
+  addOpponentNumber(n: number): Promise<void>;
   closeGame(): Promise<void>;
   reload(): Promise<void>;
   dispose(): void;
@@ -65,6 +72,7 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
   if (!g) throw new Error('Partita non trovata');
   const opp = (await opponentsRepo.get(g.opponentId)) ?? { id: g.opponentId, name: 'Avversario', shortName: 'AVV', roster: [], updatedAt: 0, deleted: false };
 
+  const deviceId = await getDeviceId();
   const game = signal<Game>(g);
   const events = signal<GameEvent[]>(await eventsRepo.byGame(gameId));
   const allPlayers = signal<Player[]>(await playersRepo.byTeam(g.teamId));
@@ -99,6 +107,7 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     return gm.useClock ? elapsedSec(gm, gm.currentPeriod, clock.remainingSec.value) : undefined;
   });
   const boxScore = computed(() => computeBoxScore(game.value, live.value, players.value, nowElapsed.value));
+  const foreignLive = computed(() => game.value.status === 'LIVE' && !!game.value.ownerDevice && game.value.ownerDevice !== deviceId);
   const undoable = computed(() => [...live.value].reverse().find((e) => e.type !== 'PERIOD_START' && e.type !== 'PERIOD_END') ?? null);
   const canUndo = computed(() => undoable.value !== null);
   const lastEventLabel = computed(() => { const l = live.value; return l.length ? eventLabel(l[l.length - 1], players.value) : ''; });
@@ -150,7 +159,7 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     if (game.value.status === 'CLOSED') throw new Error('Partita chiusa');
     if (game.value.currentPeriod === 0 && game.value.starters.length !== 5) throw new Error('Scegli il quintetto iniziale');
     const period = game.value.currentPeriod + 1;
-    await saveGame({ currentPeriod: period, status: 'LIVE' });
+    await saveGame({ currentPeriod: period, status: 'LIVE', ownerDevice: game.value.ownerDevice ?? deviceId });
     clock.reset(periodLengthSec(game.value, period));
     await persist({ type: 'PERIOD_START', side: 'US', period, clockSec: stampClock() });
   };
@@ -183,6 +192,23 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     await saveGame({ roster: ids, starters });
   };
 
+  const takeOver = async () => {
+    await saveGame({ ownerDevice: deviceId });
+  };
+
+  /** Ignora la partita registrata altrove: cancella gli eventi e riporta la gara a programmata (la cancellazione si propaga con la sync). */
+  const restartFromScratch = async () => {
+    const now = Date.now();
+    for (const e of events.value) if (!e.deleted) await eventsRepo.softDelete(e.id);
+    events.value = events.value.map((e) => (e.deleted ? e : { ...e, deleted: true, updatedAt: now }));
+    clock.reset(periodLengthSec(game.value, 1));
+    await saveGame({ status: 'SCHEDULED', currentPeriod: 0, starters: [], ownerDevice: deviceId });
+  };
+
+  const addOpponentNumber = async (n: number) => {
+    opponent.value = await addNumbers(opponent.value.id, [n]);
+  };
+
   const closeGame = async () => {
     if (periodOpen.value) await endPeriod();
     await saveGame({ status: 'CLOSED' });
@@ -202,8 +228,8 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
   });
 
   return {
-    game, events, players, allPlayers, opponent, clock, boxScore, onCourt, bench, periodOpen, canUndo, lastEventLabel,
-    addEvent, undo, deleteEvent, startPeriod, endPeriod, substitute, setStarters, setRoster, closeGame, reload,
+    game, events, players, allPlayers, opponent, clock, boxScore, onCourt, bench, periodOpen, foreignLive, canUndo, lastEventLabel,
+    addEvent, undo, deleteEvent, startPeriod, endPeriod, substitute, setStarters, setRoster, takeOver, restartFromScratch, addOpponentNumber, closeGame, reload,
     dispose: () => { stopSyncWatch(); clock.dispose(); },
   };
 }

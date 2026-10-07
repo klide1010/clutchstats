@@ -63,6 +63,8 @@ export interface Game extends SyncMeta {
   starters: string[];
   /** Convocati per la partita (id giocatori). Vuoto o assente = tutti gli attivi. */
   roster?: string[];
+  /** Dispositivo che sta registrando la partita (presa in carico tra telefoni). */
+  ownerDevice?: string;
   notes?: string;
 }
 

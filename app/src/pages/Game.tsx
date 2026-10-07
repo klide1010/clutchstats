@@ -14,6 +14,7 @@ import { toast } from '../ui/Toast';
 import { navigate } from '../router';
 import { SubsPanel } from '../ui/SubsPanel';
 import { GameMenu } from '../ui/GameMenu';
+import { Icon } from '../ui/Icon';
 
 const FOUL_KINDS: { kind: FoulKind; label: string }[] = [
   { kind: 'PERSONAL', label: 'Personale' },
@@ -96,6 +97,26 @@ export function Game({ id }: { id: string }) {
 
   if (error) return <main class="page"><p class="error">{error}</p></main>;
   if (!lg) return <main class="page"><p class="muted">Caricamento…</p></main>;
+  if (lg.foreignLive.value) {
+    const run = async (fn: () => Promise<void>) => { try { await fn(); } catch (e) { toast(e instanceof Error ? e.message : 'Errore', 'error'); } };
+    return (
+      <main class="page stack">
+        <h1>Partita in corso su un altro telefono</h1>
+        <p class="muted">Questa gara è stata registrata da un altro dispositivo e sincronizzata. Cosa vuoi fare?</p>
+        <div class="card stack">
+          <strong class="card-title"><Icon name="swap" size={18} /> Continua da qui</strong>
+          <span class="muted">Prendi in carico la partita con tutti gli eventi già registrati. L'altro telefono dovrà sincronizzare prima di continuare.</span>
+          <button class="btn btn-primary btn-block" onClick={() => run(() => lg.takeOver())}>Prendi in carico</button>
+        </div>
+        <div class="card stack">
+          <strong class="card-title"><Icon name="undo" size={18} /> Riparti da zero</strong>
+          <span class="muted">Ignora quanto registrato dall'altro telefono: gli eventi vengono cancellati e la partita torna "programmata". Alla prossima sync la cancellazione arriva anche agli altri dispositivi.</span>
+          <button class="btn btn-danger btn-block" onClick={() => { if (confirm('Cancellare gli eventi registrati dall\'altro telefono?')) void run(() => lg.restartFromScratch()); }}>Riparti da zero</button>
+        </div>
+        <button class="btn btn-block" onClick={() => navigate('#/calendar')}>Torna al calendario</button>
+      </main>
+    );
+  }
   if (lg.game.value.currentPeriod === 0) return <Lineup lg={lg} />;
 
   const onCourtPlayers = lg.players.value.filter((p) => lg.onCourt.value.includes(p.id)).sort((a, b) => a.number - b.number);
@@ -153,7 +174,7 @@ export function Game({ id }: { id: string }) {
         <PlayerBar players={onCourtPlayers} selectedId={selectedPlayerId.value} fouls={playerFouls} onTap={(pid) => void onPlayerTap(pid, lg)} />
       ) : (
         <div class="player-bar them-bar">
-          <JerseyPad numbers={jerseyNumbers} selected={selectedJersey.value} onSelect={(n) => (selectedJersey.value = n)} />
+          <JerseyPad numbers={jerseyNumbers} selected={selectedJersey.value} onSelect={(n) => { selectedJersey.value = n; if (n !== null && !jerseyNumbers.includes(n)) void lg.addOpponentNumber(n); }} />
         </div>
       )}
       <ActionGrid side={side.value} pending={pendingAction.value} onAction={(t) => void onActionTap(t, lg)} onFreeThrow={() => setFt(true)} onFoulLongPress={() => setFoulChooser(true)} />

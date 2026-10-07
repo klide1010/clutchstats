@@ -92,3 +92,10 @@ it('game roster (called-up players) roundtrips', async () => {
   const pulled = (await (await get('/api/sync/pull?since=0', auth)).json()) as { games: { id: string; roster?: string[] }[] };
   expect(pulled.games.find((x) => x.id === 'gr')!.roster).toEqual(['p1', 'p2']);
 });
+
+it('game ownerDevice roundtrips', async () => {
+  const g = { id: 'go', teamId: 't1', opponentId: 'o1', date: '2026-10-18T18:30:00.000Z', home: true, status: 'LIVE', useClock: false, periodLengthMin: 10, periodsRegulation: 4, currentPeriod: 1, source: 'MANUAL', starters: [], ownerDevice: 'dev-a', updatedAt: 2000, deleted: false };
+  await post('/api/sync/push', { games: [g] }, auth);
+  const pulled = (await (await get('/api/sync/pull?since=0', auth)).json()) as { games: { id: string; ownerDevice?: string }[] };
+  expect(pulled.games.find((x) => x.id === 'go')!.ownerDevice).toBe('dev-a');
+});

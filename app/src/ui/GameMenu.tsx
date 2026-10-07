@@ -4,7 +4,8 @@ import { navigate } from '../router';
 import { EventHistory } from './EventHistory';
 import { PlayerPicker } from './PlayerPicker';
 import { toast } from './Toast';
-import { trySync } from '../api/sync';
+import { trySync, syncState } from '../api/sync';
+import { Icon } from './Icon';
 
 interface Props {
   lg: LiveGame;
@@ -41,12 +42,13 @@ export function GameMenu({ lg, onClose, onClosed }: Props) {
         {view === 'menu' && (
           <>
             {open
-              ? <button class="btn btn-block" onClick={() => run(() => lg.endPeriod(), 'Periodo chiuso')}>Fine periodo</button>
+              ? <button class="btn btn-block" onClick={() => run(async () => { await lg.endPeriod(); void trySync(); }, 'Periodo chiuso')}>Fine periodo</button>
               : <button class="btn btn-block btn-primary" onClick={() => run(() => lg.startPeriod())}>{g.currentPeriod >= g.periodsRegulation ? 'Inizia supplementare' : 'Inizia periodo'}</button>}
             <div class="row">
               <button class="btn" onClick={() => run(() => lg.addEvent({ type: 'TIMEOUT', side: 'US' }).then(() => undefined), 'Timeout noi')}>Timeout noi</button>
               <button class="btn" onClick={() => run(() => lg.addEvent({ type: 'TIMEOUT', side: 'THEM' }).then(() => undefined), 'Timeout loro')}>Timeout loro</button>
             </div>
+            <button class="btn btn-block btn-icon" disabled={syncState.value.running} onClick={() => run(async () => { const r = await trySync(); if (!r) throw new Error(syncState.value.lastError ?? 'Sync non riuscita'); }, 'Partita inviata: un altro telefono può prenderla in carico')}><Icon name="sync" size={18} /> Invia partita (sync)</button>
             <button class="btn btn-block" onClick={() => setView('history')}>Cronologia eventi</button>
             {g.currentPeriod === 0 && <button class="btn btn-block" onClick={() => setView('lineup')}>Modifica quintetto</button>}
             <button class="btn btn-block" onClick={() => navigate(`#/stats/${g.id}`)}>Statistiche</button>

@@ -106,7 +106,7 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 0
 /* ---- Navigazione ---- */
 .nav {
   position: fixed; left: 0; right: 0; bottom: 0; height: var(--nav-h); display: flex;
-  background: var(--surface); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom);
+  background: var(--surface); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); z-index: 30;
 }
 .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: 0; color: var(--muted); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.02em; }
 .nav-item > span { margin-top: 2px; }
@@ -139,6 +139,8 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 0
 .score-num { font-size: 2rem; font-weight: 700; line-height: 1; font-family: var(--font-display); font-variant-numeric: tabular-nums; }
 .fouls { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
 .fouls.bonus { color: var(--err); font-weight: 700; }
+.timeouts { font-size: 0.75rem; color: var(--muted); display: inline-flex; align-items: center; }
+.timeouts > .icon { margin-right: 2px; }
 .center { display: flex; flex-direction: column; align-items: center; }
 .center > * + * { margin-top: 2px; }
 .period { font-size: 0.85rem; font-weight: 700; color: var(--accent); font-family: var(--font-display); letter-spacing: 0.06em; }

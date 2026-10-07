@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { Opponent } from '@bkstats/shared';
-import { findOrCreateOpponent, loadOpponents, opponents, removeOpponent, saveOpponent } from '../state/opponents';
+import { addNumbers, findOrCreateOpponent, loadOpponents, opponents, parseJerseyNumbers, removeOpponent, saveOpponent } from '../state/opponents';
+import { Icon } from '../ui/Icon';
 import { toast } from '../ui/Toast';
 
 function OpponentDetail({ o, onBack }: { o: Opponent; onBack: () => void }) {
@@ -8,13 +9,19 @@ function OpponentDetail({ o, onBack }: { o: Opponent; onBack: () => void }) {
   const [name, setName] = useState('');
   const roster = [...o.roster].sort((a, b) => a.number - b.number);
 
+  const parsed = parseJerseyNumbers(num);
   const addRow = async () => {
-    if (!/^\d+$/.test(num)) return;
-    const n = Number(num);
-    const next = o.roster.filter((r) => r.number !== n).concat([{ number: n, name: name.trim() || undefined }]);
-    await saveOpponent({ ...o, roster: next });
+    if (parsed.length === 0) return;
+    if (parsed.length === 1 && name.trim()) {
+      const n = parsed[0];
+      await saveOpponent({ ...o, roster: o.roster.filter((r) => r.number !== n).concat([{ number: n, name: name.trim() }]) });
+    } else {
+      await addNumbers(o.id, parsed);
+    }
     setNum(''); setName('');
+    toast(parsed.length === 1 ? `#${parsed[0]} aggiunto` : `${parsed.length} numeri aggiunti`);
   };
+  const onKey = (e: KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); void addRow(); } };
 
   return (
     <main class="page stack">
@@ -27,11 +34,10 @@ function OpponentDetail({ o, onBack }: { o: Opponent; onBack: () => void }) {
         <label>Sigla<input value={o.shortName} maxLength={4} onChange={(e) => saveOpponent({ ...o, shortName: (e.target as HTMLInputElement).value.toUpperCase() })} /></label>
       </div>
       <h2>Numeri di maglia</h2>
-      <div class="row">
-        <label style="flex:0 0 5em">N.<input inputMode="numeric" value={num} onInput={(e) => setNum((e.target as HTMLInputElement).value)} /></label>
-        <label>Nome (opzionale)<input value={name} onInput={(e) => setName((e.target as HTMLInputElement).value)} /></label>
-        <button class="btn" style="flex:0 0 auto;align-self:flex-end" disabled={!/^\d+$/.test(num)} onClick={addRow}>+</button>
-      </div>
+      <p class="muted" style="margin:0">Servono per attribuire punti e falli. Puoi inserirne più d'uno insieme: <b>7 12 23</b>.</p>
+      <label>Numero (o lista di numeri)<input type="tel" value={num} placeholder="es. 7 12 23" onInput={(e) => setNum((e.target as HTMLInputElement).value)} onKeyDown={onKey} /></label>
+      <label>Nome (opzionale, solo per un numero)<input value={name} onInput={(e) => setName((e.target as HTMLInputElement).value)} onKeyDown={onKey} /></label>
+      <button class="btn btn-primary btn-block btn-icon" disabled={parsed.length === 0} onClick={addRow}><Icon name="plus" size={18} /> {parsed.length > 1 ? `Aggiungi ${parsed.length} numeri` : 'Aggiungi numero'}</button>
       <ul class="list">
         {roster.map((r) => (
           <li key={r.number}>

@@ -22,6 +22,8 @@ export function TopBar({ lg, onSubs, onMenu }: Props) {
   const period = Math.max(1, g.currentPeriod);
   const usFouls = bs.team.foulsByPeriod[period] ?? 0;
   const themFouls = bs.opponent.foulsByPeriod[period] ?? 0;
+  const usTO = bs.team.timeouts;
+  const themTO = bs.opponent.timeouts;
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const long = useRef(false);
 
@@ -46,6 +48,7 @@ export function TopBar({ lg, onSubs, onMenu }: Props) {
         <span class="score-team">{myTeam.value?.shortName ?? 'NOI'}</span>
         <span class="score-num">{bs.score.us}</span>
         <span class={`fouls${usFouls >= 5 ? ' bonus' : ''}`}>F{usFouls}</span>
+        <span class="timeouts" title="Timeout noi"><Icon name="pause" size={12} /> {usTO}</span>
       </div>
       <div class="center">
         <span class="period">{g.currentPeriod === 0 ? '—' : periodLabel(g.currentPeriod, g.periodsRegulation)}</span>
@@ -56,6 +59,7 @@ export function TopBar({ lg, onSubs, onMenu }: Props) {
         )}
       </div>
       <div class="score them">
+        <span class="timeouts" title="Timeout loro"><Icon name="pause" size={12} /> {themTO}</span>
         <span class={`fouls${themFouls >= 5 ? ' bonus' : ''}`}>F{themFouls}</span>
         <span class="score-num">{bs.score.them}</span>
         <span class="score-team">{lg.opponent.value.shortName}</span>

@@ -199,3 +199,48 @@ it('without a roster all active players are available', async () => {
   expect(lg.allPlayers.value).toHaveLength(8);
   expect(lg.players.value).toHaveLength(8);
 });
+
+it('startPeriod stamps the game with this device id', async () => {
+  const { getDeviceId } = await import('../src/state/device');
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  expect(lg.game.value.ownerDevice).toBe(await getDeviceId());
+});
+
+it('a live game owned by another device is flagged and can be taken over', async () => {
+  const { gamesRepo } = await import('../src/db');
+  const { getDeviceId } = await import('../src/state/device');
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  await lg.addEvent({ type: 'STEAL', side: 'US', playerId: ids[0] });
+  await gamesRepo.put({ ...lg.game.value, ownerDevice: 'other-device' });
+  const again = await openLiveGame(lg.game.value.id);
+  expect(again.foreignLive.value).toBe(true);
+  await again.takeOver();
+  expect(again.game.value.ownerDevice).toBe(await getDeviceId());
+  expect(again.foreignLive.value).toBe(false);
+  expect(again.events.value.filter((e) => !e.deleted)).toHaveLength(2);
+});
+
+it('restartFromScratch soft-deletes all events and resets the game to scheduled', async () => {
+  const { gamesRepo } = await import('../src/db');
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  await lg.addEvent({ type: 'STEAL', side: 'US', playerId: ids[0] });
+  await gamesRepo.put({ ...lg.game.value, ownerDevice: 'other-device' });
+  const again = await openLiveGame(lg.game.value.id);
+  await again.restartFromScratch();
+  expect(again.game.value).toMatchObject({ status: 'SCHEDULED', currentPeriod: 0, starters: [] });
+  expect(again.events.value.every((e) => e.deleted)).toBe(true);
+  expect(again.events.value).toHaveLength(2);
+  expect(again.foreignLive.value).toBe(false);
+  expect(again.periodOpen.value).toBe(false);
+});
+
+it('addOpponentNumber persists a new jersey number on the opponent', async () => {
+  const { opponentsRepo } = await import('../src/db');
+  await lg.addOpponentNumber(12);
+  await lg.addOpponentNumber(12);
+  expect(lg.opponent.value.roster.map((r) => r.number)).toEqual([12]);
+  expect((await opponentsRepo.get(lg.opponent.value.id))!.roster).toEqual([{ number: 12 }]);
+});
