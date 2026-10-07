@@ -10,6 +10,7 @@ Webapp per registrare le statistiche di una squadra di basket in tempo reale da 
 
 - Node 22
 - Un account Cloudflare (piano gratuito sufficiente)
+- Sul telefono: Chrome Android dalla versione 65 in su (la app è testata per un Samsung datato)
 
 ## Sviluppo locale
 
@@ -50,9 +51,29 @@ L'app risponde su `https://bkstats.<subdomain>.workers.dev`.
 2. **Roster**: aggiungi i giocatori o importa un CSV `numero;cognome;nome;ruolo` (ruoli: Play, Guardia, Ala, Ala grande, Centro).
 3. **Avversari**: crea la squadra avversaria e, se vuoi, i numeri di maglia (servono per attribuire punti e falli).
 4. **Calendario**: importa un file `.ics` esportato da Google Calendar o Outlook, oppure crea la partita a mano. Scegli se usare il cronometro.
-5. **Partita**: quintetto iniziale, poi tap sul campo per i tiri (la app propone 2 o 3 punti dalla posizione), pulsanti per rimbalzi, perse, recuperi, stoppate, falli, blocchi. Undo annulla l'ultimo evento. Cambi dal pulsante dedicato; senza cronometro viene chiesto il minuto.
-6. **Statistiche**: box score, mappa tiri, cronologia, export CSV e JSON.
+5. **Partita**: convocati, quintetto iniziale, poi tap sul campo per i tiri (2 o 3 punti decisi dalla posizione), pulsanti per rimbalzi, perse, recuperi, stoppate, falli, blocchi, timeout e tiri liberi. Undo annulla l'ultimo evento. Cambi dal pulsante dedicato; senza cronometro viene chiesto il minuto.
+6. **Statistiche**: box score, mappa tiri (cerchio verde canestro, X rossa errore, liberi sulla lunetta), cronologia, export CSV e JSON.
 7. **Sincronizza** dalla Home o a fine partita: i dati vanno sul Worker e tornano disponibili alle API.
+
+### Convocati e quintetto
+
+Aprendo una partita si scelgono prima i **convocati** (minimo 5, di default tutti gli attivi) e poi il **quintetto** tra di loro. Barra giocatori, panchina, box score e API dell'allenatore mostrano solo i convocati di quella partita.
+
+### Trasferire una partita da un telefono all'altro
+
+Ogni partita in corso è "in carico" al dispositivo che l'ha iniziata.
+
+1. Sul telefono che sta registrando: menu ☰ → **Invia partita (sync)**. La sync parte comunque da sola a ogni fine periodo e alla chiusura.
+2. Sull'altro telefono: **Sincronizza** in Home, poi apri la partita. La app segnala che è in corso su un altro dispositivo e chiede:
+   - **Prendi in carico**: continua con tutti gli eventi già registrati.
+   - **Riparti da zero**: cancella gli eventi dell'altro telefono e riporta la gara a "programmata"; la cancellazione arriva agli altri dispositivi alla loro prossima sync.
+3. Chi ha ceduto la partita, riaprendola, riceve la stessa domanda: così non si registra due volte lo stesso quarto.
+
+L'identificativo del dispositivo è salvato nella app; "Cancella dati locali" lo azzera e il telefono conta come nuovo.
+
+### Aspetto
+
+In Impostazioni → Aspetto si sceglie tema **Scuro** o **Chiaro**. Il colore della squadra è il colore primario della app.
 
 ### Installare la PWA su Android
 
