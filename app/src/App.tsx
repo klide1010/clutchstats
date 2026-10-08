@@ -26,6 +26,7 @@ import { Season } from './pages/Season';
 import { Settings } from './pages/Settings';
 import { Nav } from './ui/Nav';
 import { ToastHost } from './ui/Toast';
+import { AppHeader } from './ui/AppHeader';
 
 function Page() {
   switch (route.value.name) {
@@ -61,6 +62,7 @@ export function App() {
   const showNav = route.value.name !== 'game';
   return (
     <>
+      {showNav && <AppHeader />}
       <Page />
       {showNav && <Nav />}
       <ToastHost />

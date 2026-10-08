@@ -6,7 +6,6 @@ const ITEMS: { hash: string; label: string; icon: IconName; names: string[] }[] 
   { hash: '#/calendar', label: 'Calendario', icon: 'calendar', names: ['calendar', 'stats'] },
   { hash: '#/roster', label: 'Roster', icon: 'users', names: ['roster'] },
   { hash: '#/season', label: 'Stagione', icon: 'trophy', names: ['season'] },
-  { hash: '#/settings', label: 'Altro', icon: 'settings', names: ['settings', 'opponents'] },
 ];
 
 export function Nav() {

@@ -71,6 +71,14 @@ h2.with-icon, .card-title { display: flex; align-items: center; }
 h2.with-icon > .icon, .card-title > .icon { margin-right: 6px; color: var(--data); flex: 0 0 auto; }
 .card-title { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; }
 .page { padding: 16px 16px calc(var(--nav-h) + 20px); max-width: 720px; margin: 0 auto; }
+.app-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 20; }
+.brand-btn { background: none; border: 0; padding: 0; margin: 0; color: var(--fg); cursor: pointer; }
+.header-settings { min-height: 40px; width: 40px; padding: 0; color: var(--muted); }
+.header-settings.active { color: var(--primary); border-color: var(--primary); }
+.game-head { display: flex; align-items: baseline; justify-content: space-between; }
+.game-opp { font-family: var(--font-display); font-weight: 700; font-size: 1.45rem; line-height: 1.1; }
+.game-date { font-size: 0.8rem; font-weight: 600; white-space: nowrap; margin-left: 8px; }
+.game-venue { font-size: 0.8rem; }
 .stack > * + * { margin-top: 12px; }
 .stack > strong, .stack > span { display: block; }
 label { display: block; color: var(--muted); font-size: 0.9rem; }
@@ -119,7 +127,7 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 0
 .badge { margin-left: 8px; background: var(--accent); color: #1A1200; border-radius: 999px; padding: 1px 8px; font-size: 0.8rem; font-family: var(--font-display); font-weight: 700; }
 .team-logo { width: 44px; height: 44px; flex: 0 0 auto; object-fit: contain; border-radius: 10px; }
 .team-logo.placeholder { display: inline-flex; align-items: center; justify-content: center; background: var(--primary); color: var(--on-primary); }
-.brand { display: flex; align-items: center; margin-bottom: 14px; }
+.brand { display: flex; align-items: center; }
 .brand-mark { width: 40px; height: 40px; border-radius: 10px; background: #F2F3F5; display: inline-flex; align-items: center; justify-content: center; overflow: hidden; margin-right: 10px; border: 1px solid var(--border); }
 .brand-mark img { display: block; }
 .brand-name { font-family: var(--font-body); font-weight: 700; font-size: 1.25rem; letter-spacing: 0.02em; text-transform: uppercase; font-style: italic; }

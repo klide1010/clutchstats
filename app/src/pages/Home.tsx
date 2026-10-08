@@ -45,10 +45,6 @@ export function Home() {
 
   return (
     <main class="page stack">
-      <div class="brand">
-        <span class="brand-mark"><img src="/clutchstats-mark.png" alt="" width="34" height="34" /></span>
-        <span class="brand-name">Clutch<span>Stats</span></span>
-      </div>
       <div class="row" style="justify-content:flex-start">
         {myTeam.value?.logoUrl ? <img src={myTeam.value.logoUrl} alt="" class="team-logo" style="flex:0 0 auto" /> : <span class="team-logo placeholder"><Icon name="ball" size={24} /></span>}
         <div style="flex:1;display:flex;flex-direction:column">
@@ -66,14 +62,15 @@ export function Home() {
       {live && (
         <div class="card stack" style="border-color:var(--primary)">
           <strong class="card-title"><Icon name="play" size={18} /> Partita in corso</strong>
-          <span>{live.home ? 'vs' : '@'} {oppName(live)} · {fmtDate(live.date)}</span>
+          <span class="game-head"><span class="game-opp">{live.home ? 'vs' : '@'} {oppName(live)}</span><span class="muted game-date">{fmtDate(live.date)}</span></span>
           <button class="btn btn-primary btn-block" onClick={() => navigate(`#/game/${live.id}`)}>Riprendi</button>
         </div>
       )}
       {next && (
         <div class="card stack">
           <strong class="card-title"><Icon name="calendar" size={18} /> Prossima partita</strong>
-          <span>{next.home ? 'vs' : '@'} {oppName(next)} · {fmtDate(next.date)}{next.venue ? ` · ${next.venue}` : ''}</span>
+          <span class="game-head"><span class="game-opp">{next.home ? 'vs' : '@'} {oppName(next)}</span><span class="muted game-date">{fmtDate(next.date)}</span></span>
+          {next.venue && <span class="muted game-venue">{next.venue.replace(/^Campo:\s*\d+\s*-\s*/i, '')}</span>}
           <button class="btn btn-block" onClick={() => navigate(`#/game/${next.id}`)}>Apri</button>
         </div>
       )}
