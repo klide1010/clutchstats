@@ -5,6 +5,7 @@ import { games, loadGames } from '../state/games';
 import { loadPlayers, players } from '../state/team';
 import { computeSeason, type Season as SeasonData } from '../model/season';
 import { fmtMinutes, fmtPct } from '../model/export';
+import { PageTitle } from '../ui/PageTitle';
 
 export function Season() {
   const [season, setSeason] = useState<SeasonData | null>(null);
@@ -28,7 +29,7 @@ export function Season() {
 
   return (
     <main class="page stack">
-      <h1>Stagione</h1>
+      <PageTitle icon="trophy">Stagione</PageTitle>
       <div class="card">
         <div class="final-score"><b>{season.record.won}</b><span class="muted">V</span><span class="muted">–</span><b>{season.record.lost}</b><span class="muted">P</span></div>
         <p class="muted" style="text-align:center;margin:4px 0 0">{gp} partite chiuse · PT {season.team.pts} fatti, {season.opponentPts} subiti{gp ? ` · media ${(season.team.pts / gp).toFixed(1)} – ${(season.opponentPts / gp).toFixed(1)}` : ''}</p>

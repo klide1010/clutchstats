@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import type { Opponent } from '@bkstats/shared';
 import { addNumbers, findOrCreateOpponent, loadOpponents, opponents, parseJerseyNumbers, removeOpponent, saveOpponent } from '../state/opponents';
 import { Icon } from '../ui/Icon';
+import { PageTitle } from '../ui/PageTitle';
 import { toast } from '../ui/Toast';
 
 function OpponentDetail({ o, onBack }: { o: Opponent; onBack: () => void }) {
@@ -71,7 +72,7 @@ export function Opponents() {
 
   return (
     <main class="page stack">
-      <h1>Avversari</h1>
+      <PageTitle icon="shield">Avversari</PageTitle>
       <div class="row">
         <input placeholder="Nome squadra avversaria" value={newName} onInput={(e) => setNewName((e.target as HTMLInputElement).value)} style="margin:0" />
         <button class="btn" style="flex:0 0 auto" disabled={!newName.trim()} onClick={create}>Aggiungi</button>

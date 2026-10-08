@@ -5,6 +5,7 @@ import { mergeRoster, parseRosterCsv, type RosterCsvResult } from '../model/rost
 import { toast } from '../ui/Toast';
 import { readFileText } from '../model/fileText';
 import { Icon } from '../ui/Icon';
+import { PageTitle } from '../ui/PageTitle';
 
 interface Draft { id: string; number: string; lastName: string; firstName: string; role: Role; active: boolean }
 
@@ -73,10 +74,7 @@ export function Roster() {
 
   return (
     <main class="page stack">
-      <div class="row">
-        <h1 style="margin:0">{team?.name ?? 'Roster'}</h1>
-        <button class="btn btn-sm" style="flex:0 0 auto" onClick={() => setEditTeam(!editTeam)}>Squadra</button>
-      </div>
+      <PageTitle icon="users" right={<button class="btn btn-sm btn-icon" onClick={() => setEditTeam(!editTeam)}><Icon name="edit" size={16} /> Squadra</button>}>{team?.name ?? 'Roster'}</PageTitle>
       {editTeam && team && (
         <div class="card stack">
           <label>Nome squadra<input value={team.name} onChange={(e) => saveTeam({ name: (e.target as HTMLInputElement).value })} /></label>

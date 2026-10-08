@@ -6,6 +6,7 @@ import { navigate } from '../router';
 import { IcsImport, fmtDate } from '../ui/IcsImport';
 import { toast } from '../ui/Toast';
 import { Icon } from '../ui/Icon';
+import { PageTitle } from '../ui/PageTitle';
 
 function NewGameForm({ onDone }: { onDone: () => void }) {
   const [opponentChoice, setOpponentChoice] = useState<string>(opponents.value[0]?.id ?? 'NEW');
@@ -71,7 +72,7 @@ export function Calendar() {
 
   return (
     <main class="page stack">
-      <h1>Calendario</h1>
+      <PageTitle icon="calendar">Calendario</PageTitle>
       {mode === 'list' && (
         <div class="row">
           <button class="btn btn-icon" onClick={() => setMode('new')}><Icon name="plus" size={18} /> Nuova partita</button>

@@ -71,7 +71,7 @@ export function TopBar({ lg, onSubs, onMenu }: Props) {
       <div class="topbar-actions">
         <button class="btn btn-sm btn-icon" disabled={!lg.canUndo.value} onClick={() => void lg.undo()}><Icon name="undo" size={16} class="ic-data" /> Undo</button>
         <button class="btn btn-sm btn-icon" onClick={onSubs}><Icon name="swap" size={16} class="ic-data" /> Cambi</button>
-        <button class="btn btn-sm btn-icon" onClick={onMenu} aria-label="Menu"><Icon name="menu" size={18} /></button>
+        <button class="btn btn-sm btn-icon icon-only" onClick={onMenu} aria-label="Menu"><Icon name="menu" size={18} /></button>
       </div>
     </header>
   );

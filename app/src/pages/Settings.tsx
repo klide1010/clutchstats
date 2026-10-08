@@ -5,6 +5,7 @@ import { setToken } from '../state/session';
 import { navigate } from '../router';
 import { toast } from '../ui/Toast';
 import { Icon } from '../ui/Icon';
+import { PageTitle } from '../ui/PageTitle';
 import { theme, setTheme } from '../state/theme';
 
 export function Settings() {
@@ -31,7 +32,7 @@ export function Settings() {
 
   return (
     <main class="page stack">
-      <h1>Impostazioni</h1>
+      <PageTitle icon="settings">Impostazioni</PageTitle>
       <div class="card stack">
         <strong class="card-title"><Icon name="palette" size={18} /> Aspetto</strong>
         <div class="seg">

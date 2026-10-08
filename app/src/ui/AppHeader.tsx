@@ -10,7 +10,7 @@ export function AppHeader() {
         <span class="brand-mark"><img src="/clutchstats-mark.png" alt="" width="34" height="34" /></span>
         <span class="brand-name">Clutch<span>Stats</span></span>
       </button>
-      <button class={`btn btn-sm btn-icon header-settings${onSettings ? ' active' : ''}`} aria-label="Impostazioni" onClick={() => navigate('#/settings')}>
+      <button class={`btn btn-sm btn-icon icon-only header-settings${onSettings ? ' active' : ''}`} aria-label="Impostazioni" onClick={() => navigate('#/settings')}>
         <Icon name="settings" size={18} />
       </button>
     </header>
