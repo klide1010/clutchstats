@@ -1,6 +1,6 @@
-# BKStats
+# HoopMetrics (BKStats)
 
-Webapp per registrare le statistiche di una squadra di basket in tempo reale da un telefono, anche senza rete, con sincronizzazione su Cloudflare e API di lettura per l'allenatore.
+Webapp per registrare le statistiche di una squadra di basket in tempo reale da un telefono, anche senza rete, con sincronizzazione su Cloudflare e API di lettura per l'allenatore. Il nome pubblico della app è **HoopMetrics**; `bkstats` resta il nome tecnico del progetto, del Worker e dell'URL.
 
 - **App** (`app/`): PWA Preact + TypeScript, dati in IndexedDB, installabile da Chrome Android.
 - **Worker** (`worker/`): Cloudflare Worker con Hono, database D1, serve anche i file statici dell'app.
@@ -73,7 +73,7 @@ L'identificativo del dispositivo è salvato nella app; "Cancella dati locali" lo
 
 ### Aspetto
 
-In Impostazioni → Aspetto si sceglie tema **Scuro** o **Chiaro**. Il colore della squadra è il colore primario della app.
+In Impostazioni → Aspetto si sceglie tema **Scuro** o **Chiaro** (stile "Analytics Mono": fondi neutri, blu e arancione del logo solo sui dati). Il colore della squadra governa pulsanti primari, selezioni e voce attiva della barra: la app ne corregge automaticamente la luminosità se contrasta poco con il tema (per esempio bianco su chiaro) e sceglie da sola testo bianco o scuro sopra di esso, quindi qualsiasi colore sociale funziona.
 
 ### Installare la PWA su Android
 

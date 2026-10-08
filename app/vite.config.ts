@@ -9,16 +9,16 @@ export default defineConfig({
     preact(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.png', 'icons/icon.svg', 'sw-polyfills.js'],
+      includeAssets: ['icons/*.png', 'hoopmetrics-mark.png', 'logo-team.png', 'sw-polyfills.js'],
       manifest: {
-        name: 'BKStats',
-        short_name: 'BKStats',
-        description: 'Statistiche basket in tempo reale',
+        name: 'HoopMetrics',
+        short_name: 'HoopMetrics',
+        description: 'Live basketball analytics',
         lang: 'it',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#111318',
-        theme_color: '#111318',
+        background_color: '#0E1116',
+        theme_color: '#0E1116',
         start_url: '/',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },

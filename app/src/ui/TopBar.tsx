@@ -1,4 +1,4 @@
-import { periodLabel } from '@bkstats/shared';
+import { periodLengthSec } from '@bkstats/shared';
 import type { LiveGame } from '../state/liveGame';
 import { useRef } from 'preact/hooks';
 import { myTeam } from '../state/team';
@@ -14,6 +14,11 @@ export function fmtClock(sec: number): string {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
   return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+export function periodName(period: number, regulation: number): string {
+  if (period <= 0) return 'PRE-PARTITA';
+  return period <= regulation ? `${period}º QUARTO` : `SUPPL. ${period - regulation}`;
 }
 
 export function TopBar({ lg, onSubs, onMenu }: Props) {
@@ -41,32 +46,31 @@ export function TopBar({ lg, onSubs, onMenu }: Props) {
     if (m) lg.clock.set(Number(m[1]) * 60 + Number(m[2]));
   };
 
+  const len = periodLengthSec(g, period);
+  const progress = g.useClock ? Math.max(0, Math.min(1, 1 - lg.clock.remainingSec.value / len)) : 0;
+
   return (
     <header class="topbar">
       <div class="score">
-        {myTeam.value?.logoUrl ? <img src={myTeam.value.logoUrl} alt="" class="score-logo" /> : null}
-        <span class="score-team">{myTeam.value?.shortName ?? 'NOI'}</span>
-        <span class="score-num">{bs.score.us}</span>
-        <span class={`fouls${usFouls >= 5 ? ' bonus' : ''}`}>F{usFouls}</span>
-        <span class="timeouts" title="Timeout noi"><Icon name="pause" size={12} /> {usTO}</span>
+        <span class="score-team">{myTeam.value?.logoUrl ? <img src={myTeam.value.logoUrl} alt="" class="score-logo" /> : null}{myTeam.value?.name ?? 'Noi'}</span>
+        <span class="score-row"><span class="score-num">{bs.score.us}</span><span class="score-meta"><span class={`fouls${usFouls >= 5 ? ' bonus' : ''}`}>F{usFouls}</span> · <span class="timeouts" title="Timeout noi">TO {usTO}</span></span></span>
       </div>
       <div class="center">
-        <span class="period">{g.currentPeriod === 0 ? '—' : periodLabel(g.currentPeriod, g.periodsRegulation)}</span>
+        <span class="period">{periodName(g.currentPeriod, g.periodsRegulation)}</span>
         {g.useClock && (
           <button class={`clock${lg.clock.running.value ? ' running' : ''}`} onPointerDown={clockDown} onPointerUp={clockUp} onPointerLeave={clockUp} onClick={clockClick}>
             {fmtClock(lg.clock.remainingSec.value)}
           </button>
         )}
+        {g.useClock && <span class="period-bar"><span class="period-bar-fill" style={`width:${Math.round(progress * 100)}%`} /></span>}
       </div>
       <div class="score them">
-        <span class="timeouts" title="Timeout loro"><Icon name="pause" size={12} /> {themTO}</span>
-        <span class={`fouls${themFouls >= 5 ? ' bonus' : ''}`}>F{themFouls}</span>
-        <span class="score-num">{bs.score.them}</span>
-        <span class="score-team">{lg.opponent.value.shortName}</span>
+        <span class="score-team">{lg.opponent.value.name}</span>
+        <span class="score-row"><span class="score-meta"><span class="timeouts" title="Timeout loro">TO {themTO}</span> · <span class={`fouls${themFouls >= 5 ? ' bonus' : ''}`}>F{themFouls}</span></span><span class="score-num">{bs.score.them}</span></span>
       </div>
       <div class="topbar-actions">
-        <button class="btn btn-sm btn-icon" disabled={!lg.canUndo.value} onClick={() => void lg.undo()}><Icon name="undo" size={18} /> Undo</button>
-        <button class="btn btn-sm btn-icon" onClick={onSubs}><Icon name="swap" size={18} /> Cambi</button>
+        <button class="btn btn-sm btn-icon" disabled={!lg.canUndo.value} onClick={() => void lg.undo()}><Icon name="undo" size={16} class="ic-data" /> Undo</button>
+        <button class="btn btn-sm btn-icon" onClick={onSubs}><Icon name="swap" size={16} class="ic-data" /> Cambi</button>
         <button class="btn btn-sm btn-icon" onClick={onMenu} aria-label="Menu"><Icon name="menu" size={18} /></button>
       </div>
     </header>

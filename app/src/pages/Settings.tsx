@@ -59,7 +59,7 @@ export function Settings() {
         <button class="btn btn-block btn-icon" onClick={() => { void setToken(null); }}><Icon name="logout" size={18} /> Esci</button>
         <button class="btn btn-block btn-icon btn-danger" onClick={wipe}><Icon name="trash" size={18} /> Cancella dati locali</button>
       </div>
-      <p class="muted" style="text-align:center">BKStats · {__APP_VERSION__}</p>
+      <p class="muted" style="text-align:center">HoopMetrics · {__APP_VERSION__}</p>
     </main>
   );
 }

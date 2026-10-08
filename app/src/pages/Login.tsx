@@ -1,7 +1,6 @@
 import { useState } from 'preact/hooks';
 import { ApiError, login } from '../api/client';
 import { trySync } from '../api/sync';
-import { Icon } from '../ui/Icon';
 
 export function Login() {
   const [password, setPassword] = useState('');
@@ -25,8 +24,8 @@ export function Login() {
 
   return (
     <main class="page login">
-      <div class="login-brand"><span class="team-logo placeholder"><Icon name="ball" size={28} /></span><h1>BKStats</h1></div>
-      <p class="muted">Statistiche live della tua squadra</p>
+      <div class="brand brand-lg"><span class="brand-mark"><img src="/hoopmetrics-mark.png" alt="" width="56" height="56" /></span><span class="brand-name">Hoop<span>Metrics</span></span></div>
+      <p class="muted" style="letter-spacing:0.12em;text-transform:uppercase;font-size:0.75rem;font-weight:600">Live basketball analytics</p>
       <form onSubmit={submit} class="stack">
         <label>
           Password

@@ -1,12 +1,19 @@
 import { route } from './router';
 import { isLoggedIn } from './state/session';
 import { myTeam } from './state/team';
+import { theme } from './state/theme';
+import { deriveTeamPalette, BRAND_NAVY } from './model/color';
 import { effect } from '@preact/signals';
 
-// Il colore della squadra diventa il colore primario della app.
+// Il colore della squadra governa i pulsanti primari, corretto per contrasto sul tema attivo.
 effect(() => {
-  const c = myTeam.value?.color;
-  if (c && typeof document !== 'undefined') document.documentElement.style.setProperty('--primary', c);
+  if (typeof document === 'undefined') return;
+  const p = deriveTeamPalette(myTeam.value?.color ?? BRAND_NAVY, theme.value);
+  const st = document.documentElement.style;
+  st.setProperty('--primary', p.primary);
+  st.setProperty('--on-primary', p.onPrimary);
+  st.setProperty('--primary-soft', p.soft);
+  st.setProperty('--primary-border', p.border);
 });
 import { Login } from './pages/Login';
 import { Home } from './pages/Home';

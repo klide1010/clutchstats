@@ -9,7 +9,7 @@ function apply(t: Theme): void {
   if (typeof document === 'undefined') return;
   document.documentElement.setAttribute('data-theme', t);
   const m = document.querySelector('meta[name="theme-color"]');
-  if (m) m.setAttribute('content', t === 'dark' ? '#111318' : '#f4f5f8');
+  if (m) m.setAttribute('content', t === 'dark' ? '#0E1116' : '#FAFBFC');
 }
 
 export async function initTheme(): Promise<void> {
