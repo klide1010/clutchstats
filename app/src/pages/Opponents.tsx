@@ -41,7 +41,7 @@ function OpponentDetail({ o, onBack }: { o: Opponent; onBack: () => void }) {
           <li key={r.number}>
             <b style="width:2.2em">#{r.number}</b>
             <span style="flex:1">{r.name ?? <span class="muted">—</span>}</span>
-            <button class="btn btn-sm btn-icon icon-only" aria-label="Rimuovi" onClick={() => saveOpponent({ ...o, roster: o.roster.filter((x) => x.number !== r.number) })}><Icon name="x" size={16} /></button>
+            <button class="btn btn-sm btn-icon icon-only btn-ghost danger" aria-label="Rimuovi" onClick={() => saveOpponent({ ...o, roster: o.roster.filter((x) => x.number !== r.number) })}><Icon name="x" size={16} /></button>
           </li>
         ))}
         {roster.length === 0 && <li class="muted">Nessun numero. Servono per attribuire punti e falli.</li>}
@@ -81,7 +81,7 @@ export function Opponents() {
               <b>{o.name}</b> <span class="muted">{o.shortName}</span><br />
               <span class="muted">{o.roster.length} numeri</span>
             </span>
-            <button class="btn btn-sm btn-icon icon-only" aria-label="Elimina" onClick={() => { if (confirm(`Eliminare ${o.name}?`)) void removeOpponent(o.id); }}><Icon name="trash" size={16} /></button>
+            <button class="btn btn-sm btn-icon icon-only btn-ghost danger" aria-label="Elimina" onClick={() => { if (confirm(`Eliminare ${o.name}?`)) void removeOpponent(o.id); }}><Icon name="trash" size={16} /></button>
           </li>
         ))}
         {opponents.value.length === 0 && <li class="muted">Nessun avversario.</li>}

@@ -35,9 +35,9 @@ export function GameMenu({ lg, onClose, onClosed }: Props) {
     <div class="popup-backdrop" onClick={onClose}>
       <div class="popup" onClick={(e) => e.stopPropagation()} style="max-height:85vh;overflow:auto">
         <div class="row">
-          {view !== 'menu' && <button class="btn btn-sm btn-icon icon-only" style="flex:0 0 auto" aria-label="Indietro" onClick={() => setView('menu')}><Icon name="back" size={18} /></button>}
+          {view !== 'menu' && <button class="btn btn-sm btn-icon icon-only btn-ghost" style="flex:0 0 auto" aria-label="Indietro" onClick={() => setView('menu')}><Icon name="back" size={18} /></button>}
           <strong class="card-title"><Icon name={view === 'menu' ? 'menu' : view === 'history' ? 'list' : 'users'} size={18} /> {view === 'menu' ? 'Menu partita' : view === 'history' ? 'Cronologia' : 'Quintetto'}</strong>
-          <button class="btn btn-sm btn-icon icon-only" style="flex:0 0 auto" aria-label="Chiudi" onClick={onClose}><Icon name="x" size={18} /></button>
+          <button class="btn btn-sm btn-icon icon-only btn-ghost" style="flex:0 0 auto" aria-label="Chiudi" onClick={onClose}><Icon name="x" size={18} /></button>
         </div>
         {view === 'menu' && (
           <>

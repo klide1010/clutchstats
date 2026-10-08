@@ -116,7 +116,7 @@ export function Roster() {
             <b style="width:2.2em">#{p.number}</b>
             <span style="flex:1" onClick={() => startEdit(p)}>{p.lastName} {p.firstName}<br /><span class="muted">{ROLE_LABELS[p.role]}</span></span>
             <button class={`btn btn-sm btn-icon${p.active ? ' ok-text' : ''}`} onClick={() => savePlayer({ ...p, active: !p.active })}><Icon name={p.active ? 'check' : 'x'} size={16} /> {p.active ? 'Attivo' : 'Inattivo'}</button>
-            <button class="btn btn-sm btn-icon icon-only" aria-label="Elimina" onClick={() => { if (confirm(`Eliminare #${p.number} ${p.lastName}?`)) void removePlayer(p.id); }}><Icon name="trash" size={16} /></button>
+            <button class="btn btn-sm btn-icon icon-only btn-ghost danger" aria-label="Elimina" onClick={() => { if (confirm(`Eliminare #${p.number} ${p.lastName}?`)) void removePlayer(p.id); }}><Icon name="trash" size={16} /></button>
           </li>
         ))}
         {players.value.length === 0 && <li class="muted">Nessun giocatore. Aggiungi o importa un CSV.</li>}

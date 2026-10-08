@@ -55,7 +55,7 @@ export function SubsPanel({ lg, onClose, initialOut = null }: Props) {
       <div class="popup" onClick={(e) => e.stopPropagation()}>
         <div class="row">
           <strong class="card-title"><Icon name="swap" size={18} /> Cambi</strong>
-          <button class="btn btn-sm btn-icon icon-only" style="flex:0 0 auto" aria-label="Chiudi" onClick={onClose}><Icon name="x" size={18} /></button>
+          <button class="btn btn-sm btn-icon icon-only btn-ghost" style="flex:0 0 auto" aria-label="Chiudi" onClick={onClose}><Icon name="x" size={18} /></button>
         </div>
         {askMinute && outId && inId ? (
           <MinutePicker maxMin={periodLen / 60} defaultMin={defaultMin} onConfirm={(m) => perform(periodLen - m * 60)} onCancel={() => setAskMinute(false)} />

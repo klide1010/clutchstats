@@ -89,7 +89,7 @@ export function Calendar() {
               <b>{fmtDate(g.date)}</b> · {g.home ? 'vs' : '@'} {opponentName(g.opponentId)}<br />
               <span class="muted">{statusLabel(g)}{g.venue ? ` · ${g.venue}` : ''}{g.useClock ? ' · cronometro' : ''}</span>
             </span>
-            {g.status === 'SCHEDULED' && <button class="btn btn-sm btn-icon icon-only" aria-label="Elimina" onClick={() => { if (confirm('Eliminare la partita?')) void removeGame(g.id); }}><Icon name="trash" size={16} /></button>}
+            {g.status === 'SCHEDULED' && <button class="btn btn-sm btn-icon icon-only btn-ghost danger" aria-label="Elimina" onClick={() => { if (confirm('Eliminare la partita?')) void removeGame(g.id); }}><Icon name="trash" size={16} /></button>}
           </li>
         ))}
         {games.value.length === 0 && <li class="muted">Nessuna partita. Creane una o importa un calendario.</li>}
