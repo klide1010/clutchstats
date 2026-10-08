@@ -24,8 +24,8 @@ export function Login() {
 
   return (
     <main class="page login">
-      <div class="brand brand-lg"><span class="brand-mark"><img src="/hoopmetrics-mark.png" alt="" width="56" height="56" /></span><span class="brand-name">Hoop<span>Metrics</span></span></div>
-      <p class="muted" style="letter-spacing:0.12em;text-transform:uppercase;font-size:0.75rem;font-weight:600">Live basketball analytics</p>
+      <div class="brand brand-lg"><span class="brand-mark"><img src="/clutchstats-mark.png" alt="" width="56" height="56" /></span><span class="brand-name">Clutch<span>Stats</span></span></div>
+      <p class="muted" style="letter-spacing:0.12em;text-transform:uppercase;font-size:0.75rem;font-weight:600">Basketball analytics</p>
       <form onSubmit={submit} class="stack">
         <label>
           Password

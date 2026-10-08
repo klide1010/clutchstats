@@ -9,11 +9,11 @@ export default defineConfig({
     preact(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.png', 'hoopmetrics-mark.png', 'logo-team.png', 'sw-polyfills.js'],
+      includeAssets: ['icons/*.png', 'clutchstats-mark.png', 'logo-team.png', 'sw-polyfills.js'],
       manifest: {
-        name: 'HoopMetrics',
-        short_name: 'HoopMetrics',
-        description: 'Live basketball analytics',
+        name: 'ClutchStats',
+        short_name: 'ClutchStats',
+        description: 'Basketball analytics',
         lang: 'it',
         display: 'standalone',
         orientation: 'portrait',

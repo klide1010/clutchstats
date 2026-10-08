@@ -1,6 +1,6 @@
-# HoopMetrics (BKStats)
+# ClutchStats (BKStats)
 
-Webapp per registrare le statistiche di una squadra di basket in tempo reale da un telefono, anche senza rete, con sincronizzazione su Cloudflare e API di lettura per l'allenatore. Il nome pubblico della app è **HoopMetrics**; `bkstats` resta il nome tecnico del progetto, del Worker e dell'URL.
+Webapp per registrare le statistiche di una squadra di basket in tempo reale da un telefono, anche senza rete, con sincronizzazione su Cloudflare e API di lettura per l'allenatore. Il nome pubblico della app è **ClutchStats**; `bkstats` resta il nome tecnico del progetto, del Worker e dell'URL.
 
 - **App** (`app/`): PWA Preact + TypeScript, dati in IndexedDB, installabile da Chrome Android.
 - **Worker** (`worker/`): Cloudflare Worker con Hono, database D1, serve anche i file statici dell'app.

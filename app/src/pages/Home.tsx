@@ -46,8 +46,8 @@ export function Home() {
   return (
     <main class="page stack">
       <div class="brand">
-        <span class="brand-mark"><img src="/hoopmetrics-mark.png" alt="" width="34" height="34" /></span>
-        <span class="brand-name">Hoop<span>Metrics</span></span>
+        <span class="brand-mark"><img src="/clutchstats-mark.png" alt="" width="34" height="34" /></span>
+        <span class="brand-name">Clutch<span>Stats</span></span>
       </div>
       <div class="row" style="justify-content:flex-start">
         {myTeam.value?.logoUrl ? <img src={myTeam.value.logoUrl} alt="" class="team-logo" style="flex:0 0 auto" /> : <span class="team-logo placeholder"><Icon name="ball" size={24} /></span>}
