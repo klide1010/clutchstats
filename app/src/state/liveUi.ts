@@ -45,7 +45,7 @@ export async function commit(lg: LiveGame, type: EventType): Promise<boolean> {
     return true;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    toast(msg === 'Periodo non aperto' || msg === 'Seleziona il giocatore' || msg === 'Partita chiusa' ? msg : 'Salvataggio fallito, riprova', 'error');
+    toast(msg === 'Periodo non aperto' || msg === 'Seleziona il giocatore' || msg === 'Partita chiusa' || msg.includes('5 falli') ? msg : 'Salvataggio fallito, riprova', 'error');
     return false;
   } finally {
     inFlight = false;

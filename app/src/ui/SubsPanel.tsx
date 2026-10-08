@@ -8,10 +8,12 @@ import { FoulDots } from './FoulDots';
 interface Props {
   lg: LiveGame;
   onClose: () => void;
+  /** Giocatore in campo già selezionato per uscire (es. dopo il quinto fallo). */
+  initialOut?: string | null;
 }
 
-export function SubsPanel({ lg, onClose }: Props) {
-  const [outId, setOutId] = useState<string | null>(null);
+export function SubsPanel({ lg, onClose, initialOut = null }: Props) {
+  const [outId, setOutId] = useState<string | null>(initialOut);
   const [inId, setInId] = useState<string | null>(null);
   const [askMinute, setAskMinute] = useState(false);
 
@@ -69,7 +71,7 @@ export function SubsPanel({ lg, onClose }: Props) {
             <div>
               <span class="muted">Panchina</span>
               {bench.map((p) => (
-                <button key={p.id} class={`btn btn-block sub-btn${inId === p.id ? ' active' : ''}`} onClick={() => pickIn(p.id)}>
+                <button key={p.id} class={`btn btn-block sub-btn${inId === p.id ? ' active' : ''}`} disabled={(fouls[p.id] ?? 0) >= 5} onClick={() => pickIn(p.id)}>
                   <span class="sub-name">#{p.number} {p.lastName}</span><FoulDots count={fouls[p.id] ?? 0} />
                 </button>
               ))}

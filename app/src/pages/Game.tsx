@@ -85,6 +85,8 @@ export function Game({ id }: { id: string }) {
   const [ft, setFt] = useState(false);
   const [foulChooser, setFoulChooser] = useState(false);
   const [panel, setPanel] = useState<'none' | 'subs' | 'menu'>('none');
+  const [subsOut, setSubsOut] = useState<string | null>(null);
+  const [foulOutDismissed, setFoulOutDismissed] = useState<string | null>(null);
 
   useEffect(() => {
     let disposed = false;
@@ -159,9 +161,23 @@ export function Game({ id }: { id: string }) {
     await onActionTap('FOUL', lg);
   };
 
+  const fouledOutId = lg.fouledOut.value[0] ?? null;
+  const fouledOutPlayer = fouledOutId ? lg.allPlayers.value.find((p) => p.id === fouledOutId) : undefined;
+  const showFoulOut = !!fouledOutId && panel === 'none' && !pendingShot.value && foulOutDismissed !== fouledOutId;
+  const undoFifthFoul = async () => {
+    const e = fouledOutId ? lg.lastFoulOf(fouledOutId) : null;
+    if (!e) return;
+    try {
+      await lg.deleteEvent(e.id);
+      toast('Fallo annullato', 'ok');
+    } catch {
+      toast('Operazione fallita, riprova', 'error');
+    }
+  };
+
   return (
     <div class="game">
-      <TopBar lg={lg} onSubs={() => setPanel('subs')} onMenu={() => setPanel('menu')} />
+      <TopBar lg={lg} onSubs={() => { setSubsOut(null); setPanel('subs'); }} onMenu={() => setPanel('menu')} />
       <div class="side-toggle seg">
         <button class={`seg-btn${side.value === 'US' ? ' active' : ''}`} onClick={() => { side.value = 'US'; resetSelection(); }}>Noi</button>
         <button class={`seg-btn${side.value === 'THEM' ? ' active' : ''}`} onClick={() => { side.value = 'THEM'; resetSelection(); }}>Loro</button>
@@ -199,7 +215,18 @@ export function Game({ id }: { id: string }) {
           </div>
         </div>
       )}
-      {panel === 'subs' && <SubsPanel lg={lg} onClose={() => setPanel('none')} />}
+      {panel === 'subs' && <SubsPanel lg={lg} initialOut={subsOut} onClose={() => { setPanel('none'); setSubsOut(null); }} />}
+      {showFoulOut && fouledOutPlayer && (
+        <div class="popup-backdrop">
+          <div class="popup">
+            <strong class="card-title"><Icon name="alert" size={18} class="err-text" /> Quinto fallo</strong>
+            <span><b>#{fouledOutPlayer.number} {fouledOutPlayer.lastName}</b> ha raggiunto 5 falli e deve uscire. Finché resta in campo non può registrare azioni.</span>
+            <button class="btn btn-primary btn-block btn-icon" onClick={() => { setSubsOut(fouledOutPlayer.id); setPanel('subs'); }}><Icon name="swap" size={18} /> Sostituisci</button>
+            <button class="btn btn-block btn-icon" onClick={undoFifthFoul}><Icon name="undo" size={18} /> Annulla il fallo</button>
+            <button class="btn btn-sm" onClick={() => setFoulOutDismissed(fouledOutPlayer.id)}>Più tardi</button>
+          </div>
+        </div>
+      )}
       {panel === 'menu' && <GameMenu lg={lg} onClose={() => setPanel('none')} />}
     </div>
   );

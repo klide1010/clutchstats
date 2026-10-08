@@ -244,3 +244,24 @@ it('addOpponentNumber persists a new jersey number on the opponent', async () =>
   expect(lg.opponent.value.roster.map((r) => r.number)).toEqual([12]);
   expect((await opponentsRepo.get(lg.opponent.value.id))!.roster).toEqual([{ number: 12 }]);
 });
+
+it('a player with 5 fouls is flagged as fouled out and cannot record further actions until substituted', async () => {
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  for (let i = 0; i < 5; i++) await lg.addEvent({ type: 'FOUL', side: 'US', playerId: ids[0], foulKind: 'PERSONAL' });
+  expect(lg.fouledOut.value).toEqual([ids[0]]);
+  expect(lg.lastFoulOf(ids[0])?.type).toBe('FOUL');
+  await expect(lg.addEvent({ type: 'STEAL', side: 'US', playerId: ids[0] })).rejects.toThrow('5 falli');
+  await expect(lg.addEvent({ type: 'SHOT_2', side: 'US', playerId: ids[0], made: true })).rejects.toThrow('5 falli');
+  await lg.substitute(ids[0], ids[5], 300);
+  expect(lg.fouledOut.value).toEqual([]);
+  await expect(lg.substitute(ids[5], ids[0], 200)).rejects.toThrow('5 falli');
+});
+
+it('undoing the fifth foul clears the fouled-out state', async () => {
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  for (let i = 0; i < 5; i++) await lg.addEvent({ type: 'FOUL', side: 'US', playerId: ids[0], foulKind: 'PERSONAL' });
+  await lg.deleteEvent(lg.lastFoulOf(ids[0])!.id);
+  expect(lg.fouledOut.value).toEqual([]);
+});

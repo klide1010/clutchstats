@@ -27,6 +27,8 @@ export interface LiveGame {
   periodOpen: ReadonlySignal<boolean>;
   /** Partita in corso registrata da un altro dispositivo: chiedere se prenderla in carico. */
   foreignLive: ReadonlySignal<boolean>;
+  /** Giocatori in campo con 5 falli: vanno sostituiti (o si annulla il fallo). */
+  fouledOut: ReadonlySignal<string[]>;
   canUndo: ReadonlySignal<boolean>;
   lastEventLabel: ReadonlySignal<string>;
   addEvent(input: AddEventInput): Promise<GameEvent>;
@@ -40,6 +42,8 @@ export interface LiveGame {
   takeOver(): Promise<void>;
   restartFromScratch(): Promise<void>;
   addOpponentNumber(n: number): Promise<void>;
+  /** Ultimo fallo (non cancellato) fischiato a un giocatore, per annullarlo. */
+  lastFoulOf(playerId: string): GameEvent | null;
   closeGame(): Promise<void>;
   reload(): Promise<void>;
   dispose(): void;
@@ -108,6 +112,13 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
   });
   const boxScore = computed(() => computeBoxScore(game.value, live.value, players.value, nowElapsed.value));
   const foreignLive = computed(() => game.value.status === 'LIVE' && !!game.value.ownerDevice && game.value.ownerDevice !== deviceId);
+  const foulsByPlayer = computed(() => {
+    const m: Record<string, number> = {};
+    for (const e of live.value) if (e.type === 'FOUL' && e.side === 'US' && e.playerId) m[e.playerId] = (m[e.playerId] ?? 0) + 1;
+    return m;
+  });
+  const fouledOut = computed(() => onCourt.value.filter((id) => (foulsByPlayer.value[id] ?? 0) >= 5));
+  const lastFoulOf = (playerId: string): GameEvent | null => [...live.value].reverse().find((e) => e.type === 'FOUL' && e.side === 'US' && e.playerId === playerId) ?? null;
   const undoable = computed(() => [...live.value].reverse().find((e) => e.type !== 'PERIOD_START' && e.type !== 'PERIOD_END') ?? null);
   const canUndo = computed(() => undoable.value !== null);
   const lastEventLabel = computed(() => { const l = live.value; return l.length ? eventLabel(l[l.length - 1], players.value) : ''; });
@@ -134,6 +145,10 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     if (!periodOpen.value && input.type !== 'TIMEOUT' && input.type !== 'SUBSTITUTION') throw new Error('Periodo non aperto');
     if (input.side === 'THEM' && !THEM_ALLOWED_TYPES.has(input.type)) throw new Error('Evento non ammesso per gli avversari');
     if (input.side === 'US' && (input.type === 'SHOT_2' || input.type === 'SHOT_3' || input.type === 'FREE_THROW') && !input.playerId) throw new Error('Seleziona il giocatore');
+    if (input.side === 'US' && input.playerId && input.type !== 'SUBSTITUTION' && (foulsByPlayer.value[input.playerId] ?? 0) >= 5) {
+      const p = allPlayers.value.find((x) => x.id === input.playerId);
+      throw new Error(`${p ? '#' + p.number + ' ' + p.lastName : 'Giocatore'} ha 5 falli: va sostituito`);
+    }
     return persist({ ...input, period: Math.max(1, gm.currentPeriod), clockSec: stampClock(input.clockSec) });
   };
 
@@ -173,6 +188,7 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
   const substitute = async (outId: string, inId: string, clockSec?: number) => {
     if (!onCourt.value.includes(outId)) throw new Error('Giocatore non in campo');
     if (onCourt.value.includes(inId)) throw new Error('Giocatore già in campo');
+    if ((foulsByPlayer.value[inId] ?? 0) >= 5) throw new Error('Ha 5 falli: non può rientrare');
     if (periodOpen.value && !game.value.useClock && clockSec === undefined) throw new Error('Indica il minuto del cambio');
     await addEvent({ type: 'SUBSTITUTION', side: 'US', subOutPlayerId: outId, subInPlayerId: inId, clockSec });
   };
@@ -228,8 +244,8 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
   });
 
   return {
-    game, events, players, allPlayers, opponent, clock, boxScore, onCourt, bench, periodOpen, foreignLive, canUndo, lastEventLabel,
-    addEvent, undo, deleteEvent, startPeriod, endPeriod, substitute, setStarters, setRoster, takeOver, restartFromScratch, addOpponentNumber, closeGame, reload,
+    game, events, players, allPlayers, opponent, clock, boxScore, onCourt, bench, periodOpen, foreignLive, fouledOut, canUndo, lastEventLabel,
+    addEvent, undo, deleteEvent, startPeriod, endPeriod, substitute, setStarters, setRoster, takeOver, restartFromScratch, addOpponentNumber, lastFoulOf, closeGame, reload,
     dispose: () => { stopSyncWatch(); clock.dispose(); },
   };
 }
