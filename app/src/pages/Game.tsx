@@ -15,6 +15,7 @@ import { navigate } from '../router';
 import { SubsPanel } from '../ui/SubsPanel';
 import { GameMenu } from '../ui/GameMenu';
 import { Icon } from '../ui/Icon';
+import { PageTitle } from '../ui/PageTitle';
 
 const FOUL_KINDS: { kind: FoulKind; label: string }[] = [
   { kind: 'PERSONAL', label: 'Personale' },
@@ -25,10 +26,13 @@ const FOUL_KINDS: { kind: FoulKind; label: string }[] = [
 
 function Lineup({ lg }: { lg: LiveGame }) {
   const active = lg.allPlayers.value.filter((p) => p.active);
+  const inactive = lg.allPlayers.value.filter((p) => !p.active);
   const initialRoster = lg.game.value.roster?.length ? lg.game.value.roster : active.map((p) => p.id);
   const [step, setStep] = useState<'roster' | 'starters'>(lg.game.value.roster?.length ? 'starters' : 'roster');
   const [roster, setRoster] = useState<string[]>(initialRoster);
   const [sel, setSel] = useState<string[]>(lg.game.value.starters);
+  const [showInactive, setShowInactive] = useState(initialRoster.some((id) => inactive.some((p) => p.id === id)));
+  const oppName = lg.opponent.value.name;
 
   const confirmRoster = async () => {
     try {
@@ -49,18 +53,23 @@ function Lineup({ lg }: { lg: LiveGame }) {
   };
 
   if (step === 'roster') {
+    const visible = showInactive ? lg.allPlayers.value : active;
     return (
       <main class="page stack">
-        <div class="row">
-          <button class="btn btn-sm" style="flex:0 0 auto" onClick={() => navigate('#/calendar')}>‹</button>
-          <h1 style="margin:0">Convocati</h1>
+        <PageTitle icon="users" onBack={() => navigate('#/calendar')} subtitle={`${lg.game.value.home ? 'vs' : '@'} ${oppName}`}>Convocati</PageTitle>
+        <div class="row pick-summary">
+          <span><b class="display">{roster.length}</b> <span class="muted">convocati · minimo 5</span></span>
+          <div class="row" style="flex:0 0 auto">
+            <button class="btn btn-sm" onClick={() => setRoster(active.map((p) => p.id))}>Tutti</button>
+            <button class="btn btn-sm" onClick={() => setRoster([])}>Nessuno</button>
+          </div>
         </div>
-        <p class="muted">Chi c'è stasera? ({roster.length} selezionati, minimo 5). Le statistiche live mostreranno solo loro.</p>
-        <PlayerPicker players={lg.allPlayers.value} selected={roster} max={lg.allPlayers.value.length} onChange={setRoster} />
-        <div class="row">
-          <button class="btn" onClick={() => setRoster(active.map((p) => p.id))}>Tutti gli attivi</button>
-          <button class="btn btn-primary" disabled={roster.length < 5} onClick={confirmRoster}>Avanti</button>
-        </div>
+        <PlayerPicker players={visible} selected={roster} max={lg.allPlayers.value.length} onChange={setRoster} />
+        {inactive.length > 0 && (
+          <button class="btn btn-sm btn-block" onClick={() => setShowInactive(!showInactive)}>{showInactive ? 'Nascondi inattivi' : `Mostra inattivi (${inactive.length})`}</button>
+        )}
+        <p class="muted" style="margin:0;font-size:0.85rem">Le statistiche live e il box score mostreranno solo i convocati.</p>
+        <button class="btn btn-primary btn-block btn-icon" disabled={roster.length < 5} onClick={confirmRoster}>Avanti: quintetto <Icon name="back" size={18} class="flip" /></button>
       </main>
     );
   }
@@ -68,13 +77,13 @@ function Lineup({ lg }: { lg: LiveGame }) {
   const called = lg.players.value;
   return (
     <main class="page stack">
-      <div class="row">
-        <button class="btn btn-sm" style="flex:0 0 auto" onClick={() => setStep('roster')}>‹ Convocati</button>
-        <h1 style="margin:0">Quintetto iniziale</h1>
+      <PageTitle icon="play" onBack={() => setStep('roster')} subtitle={`${called.length} convocati`}>Quintetto iniziale</PageTitle>
+      <div class="row pick-summary">
+        <span><b class="display">{sel.length}</b><span class="muted">/5 in campo</span></span>
+        <button class="btn btn-sm" style="flex:0 0 auto" onClick={() => setSel([])}>Azzera</button>
       </div>
-      <p class="muted">Scegli 5 tra i {called.length} convocati ({sel.length}/5)</p>
       <PlayerPicker players={called} selected={sel} max={5} onChange={setSel} />
-      <button class="btn btn-primary btn-block" disabled={sel.length !== 5} onClick={start}>Inizia partita</button>
+      <button class="btn btn-primary btn-block btn-icon" disabled={sel.length !== 5} onClick={start}><Icon name="play" size={18} /> Inizia partita</button>
     </main>
   );
 }
@@ -103,7 +112,7 @@ export function Game({ id }: { id: string }) {
     const run = async (fn: () => Promise<void>) => { try { await fn(); } catch (e) { toast(e instanceof Error ? e.message : 'Errore', 'error'); } };
     return (
       <main class="page stack">
-        <h1>Partita in corso su un altro telefono</h1>
+        <PageTitle icon="swap" onBack={() => navigate('#/calendar')}>Partita su un altro telefono</PageTitle>
         <p class="muted">Questa gara è stata registrata da un altro dispositivo e sincronizzata. Cosa vuoi fare?</p>
         <div class="card stack">
           <strong class="card-title"><Icon name="swap" size={18} /> Continua da qui</strong>

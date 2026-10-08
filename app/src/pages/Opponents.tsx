@@ -26,10 +26,7 @@ function OpponentDetail({ o, onBack }: { o: Opponent; onBack: () => void }) {
 
   return (
     <main class="page stack">
-      <div class="row">
-        <button class="btn btn-sm" style="flex:0 0 auto" onClick={onBack}>‹ Indietro</button>
-        <h1 style="margin:0">{o.name}</h1>
-      </div>
+      <PageTitle icon="shield" onBack={onBack} subtitle={`${o.roster.length} numeri di maglia`}>{o.name}</PageTitle>
       <div class="card stack">
         <label>Nome<input value={o.name} onChange={(e) => saveOpponent({ ...o, name: (e.target as HTMLInputElement).value })} /></label>
         <label>Sigla<input value={o.shortName} maxLength={4} onChange={(e) => saveOpponent({ ...o, shortName: (e.target as HTMLInputElement).value.toUpperCase() })} /></label>
@@ -44,7 +41,7 @@ function OpponentDetail({ o, onBack }: { o: Opponent; onBack: () => void }) {
           <li key={r.number}>
             <b style="width:2.2em">#{r.number}</b>
             <span style="flex:1">{r.name ?? <span class="muted">—</span>}</span>
-            <button class="btn btn-sm" onClick={() => saveOpponent({ ...o, roster: o.roster.filter((x) => x.number !== r.number) })}>✕</button>
+            <button class="btn btn-sm btn-icon icon-only" aria-label="Rimuovi" onClick={() => saveOpponent({ ...o, roster: o.roster.filter((x) => x.number !== r.number) })}><Icon name="x" size={16} /></button>
           </li>
         ))}
         {roster.length === 0 && <li class="muted">Nessun numero. Servono per attribuire punti e falli.</li>}
@@ -75,7 +72,7 @@ export function Opponents() {
       <PageTitle icon="shield">Avversari</PageTitle>
       <div class="row">
         <input placeholder="Nome squadra avversaria" value={newName} onInput={(e) => setNewName((e.target as HTMLInputElement).value)} style="margin:0" />
-        <button class="btn" style="flex:0 0 auto" disabled={!newName.trim()} onClick={create}>Aggiungi</button>
+        <button class="btn btn-icon" style="flex:0 0 auto" disabled={!newName.trim()} onClick={create}><Icon name="plus" size={18} /> Aggiungi</button>
       </div>
       <ul class="list">
         {opponents.value.map((o) => (
@@ -84,7 +81,7 @@ export function Opponents() {
               <b>{o.name}</b> <span class="muted">{o.shortName}</span><br />
               <span class="muted">{o.roster.length} numeri</span>
             </span>
-            <button class="btn btn-sm" onClick={() => { if (confirm(`Eliminare ${o.name}?`)) void removeOpponent(o.id); }}>✕</button>
+            <button class="btn btn-sm btn-icon icon-only" aria-label="Elimina" onClick={() => { if (confirm(`Eliminare ${o.name}?`)) void removeOpponent(o.id); }}><Icon name="trash" size={16} /></button>
           </li>
         ))}
         {opponents.value.length === 0 && <li class="muted">Nessun avversario.</li>}

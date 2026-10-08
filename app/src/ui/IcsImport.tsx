@@ -5,6 +5,7 @@ import { findOrCreateOpponent, opponents } from '../state/opponents';
 import { importProposals } from '../state/games';
 import { toast } from '../ui/Toast';
 import { readFileText } from '../model/fileText';
+import { Icon } from './Icon';
 
 interface Row extends GameProposal { include: boolean; opponentChoice: string } // opponentChoice: id esistente oppure 'NEW'
 
@@ -68,7 +69,7 @@ export function IcsImport({ onDone }: { onDone: () => void }) {
   if (!rows && needsName) {
     return (
       <div class="card stack">
-        <strong>Prima di importare</strong>
+        <strong class="card-title"><Icon name="users" size={18} /> Prima di importare</strong>
         <p class="muted">Serve il nome della tua squadra per capire quali partite sono in casa e chi sono gli avversari.</p>
         <label>Come si chiama la tua squadra?<input value={teamName} onInput={(e) => setTeamName((e.target as HTMLInputElement).value)} /></label>
         <div class="row">
@@ -82,7 +83,7 @@ export function IcsImport({ onDone }: { onDone: () => void }) {
   if (!rows) {
     return (
       <div class="card stack">
-        <strong>Importa calendario (.ics)</strong>
+        <strong class="card-title"><Icon name="upload" size={18} /> Importa calendario (.ics)</strong>
         <p class="muted">Squadra: <b>{myTeam.value?.name}</b>. Esporta il calendario da Google Calendar o Outlook e carica il file. Gli avversari nuovi vengono creati in automatico; le partite già importate vengono aggiornate, non duplicate.</p>
         <div class="row">
           <button class="btn" onClick={onDone}>Annulla</button>
@@ -94,7 +95,7 @@ export function IcsImport({ onDone }: { onDone: () => void }) {
 
   return (
     <div class="card stack">
-      <strong>Anteprima ({rows.filter((r) => r.include).length} di {rows.length})</strong>
+      <strong class="card-title"><Icon name="calendar" size={18} /> Anteprima ({rows.filter((r) => r.include).length} di {rows.length})</strong>
       <label class="row" style="color:var(--fg)"><input type="checkbox" style="width:auto;flex:0" checked={useClock} onChange={(e) => setUseClock((e.target as HTMLInputElement).checked)} /> Usa cronometro in queste partite</label>
       {rows.map((r, i) => (
         <div key={r.icsUid} class="card stack" style={r.include ? '' : 'opacity:0.5'}>

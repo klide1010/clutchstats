@@ -1,6 +1,7 @@
 import { useState } from 'preact/hooks';
 import type { Player, Side } from '@bkstats/shared';
 import { JerseyPad } from './JerseyPad';
+import { Icon } from './Icon';
 
 interface Props {
   side: Side;
@@ -42,7 +43,7 @@ export function FreeThrowPopup(p: Props) {
   return (
     <div class="popup-backdrop" onClick={p.onClose}>
       <div class="popup" onClick={(e) => e.stopPropagation()}>
-        <span class="muted">Tiri liberi {p.side === 'US' ? 'nostri' : 'avversari'}</span>
+        <strong class="card-title"><Icon name="target" size={18} /> Tiri liberi {p.side === 'US' ? 'nostri' : 'avversari'}</strong>
         {p.side === 'US' && (
           <div class="chips">
             {p.onCourt.map((pl) => (

@@ -116,6 +116,25 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 0
 .page-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .page-title { display: flex; align-items: center; margin: 0; }
 .page-title > .icon { margin-right: 10px; color: var(--data); }
+.page-title-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.page-subtitle { font-size: 0.85rem; margin-top: 2px; }
+.back-btn { margin-right: 10px; }
+.pick-summary { justify-content: space-between; }
+.pick-summary .display { font-size: 1.6rem; margin-right: 6px; }
+.flip { transform: rotate(180deg); margin-left: 8px; }
+.pick-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-gap: 8px; gap: 8px; }
+.pick-card { display: flex; align-items: center; min-height: 56px; padding: 6px 10px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 10px; color: var(--fg); text-align: left; cursor: pointer; }
+.pick-card.on { border: 2px solid var(--primary); background: var(--primary-soft); padding: 5px 9px; }
+.pick-card.inactive { opacity: 0.6; }
+.pick-card:disabled { opacity: 0.4; }
+.pick-num { font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; line-height: 1; width: 2.1em; flex: 0 0 auto; }
+.pick-card.on .pick-num { color: var(--primary); }
+[data-theme="dark"] .pick-card.on .pick-num, :root:not([data-theme="light"]) .pick-card.on .pick-num { color: var(--fg); }
+.pick-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pick-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pick-role { font-size: 0.7rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pick-check { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border-strong); display: inline-flex; align-items: center; justify-content: center; color: transparent; flex: 0 0 auto; margin-left: 6px; }
+.pick-card.on .pick-check { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
 .foul-dots { display: inline-flex; align-items: center; }
 .foul-dot { width: 7px; height: 7px; border-radius: 1.5px; background: var(--surface-3); border: 1px solid var(--border-strong); margin-right: 2px; }
 .foul-dot:last-child { margin-right: 0; }

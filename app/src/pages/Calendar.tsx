@@ -30,7 +30,7 @@ function NewGameForm({ onDone }: { onDone: () => void }) {
 
   return (
     <div class="card stack">
-      <strong>Nuova partita</strong>
+      <strong class="card-title"><Icon name="plus" size={18} /> Nuova partita</strong>
       <label>Avversario
         <select value={opponentChoice} onChange={(e) => setOpponentChoice((e.target as HTMLSelectElement).value)}>
           {opponents.value.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
@@ -89,7 +89,7 @@ export function Calendar() {
               <b>{fmtDate(g.date)}</b> · {g.home ? 'vs' : '@'} {opponentName(g.opponentId)}<br />
               <span class="muted">{statusLabel(g)}{g.venue ? ` · ${g.venue}` : ''}{g.useClock ? ' · cronometro' : ''}</span>
             </span>
-            {g.status === 'SCHEDULED' && <button class="btn btn-sm" onClick={() => { if (confirm('Eliminare la partita?')) void removeGame(g.id); }}>✕</button>}
+            {g.status === 'SCHEDULED' && <button class="btn btn-sm btn-icon icon-only" aria-label="Elimina" onClick={() => { if (confirm('Eliminare la partita?')) void removeGame(g.id); }}><Icon name="trash" size={16} /></button>}
           </li>
         ))}
         {games.value.length === 0 && <li class="muted">Nessuna partita. Creane una o importa un calendario.</li>}

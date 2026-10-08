@@ -12,6 +12,7 @@ import { updateGame } from '../state/games';
 import { toast } from '../ui/Toast';
 import { SyncButton } from '../ui/SyncButton';
 import { Icon } from '../ui/Icon';
+import { PageTitle } from '../ui/PageTitle';
 
 interface Loaded { game: Game; events: GameEvent[]; players: Player[]; opponent: Opponent; bs: BoxScore }
 
@@ -42,10 +43,7 @@ export function GameStats({ id }: { id: string }) {
 
   return (
     <main class="page stack">
-      <div class="row">
-        <button class="btn btn-sm" style="flex:0 0 auto" onClick={() => navigate('#/calendar')}>‹</button>
-        <h1 style="margin:0;font-size:1.1rem">{game.home ? 'vs' : '@'} {opponent.name}<br /><span class="muted" style="font-size:0.85rem;font-weight:400">{fmtDate(game.date)}{game.venue ? ` · ${game.venue}` : ''}</span></h1>
-      </div>
+      <PageTitle icon="chart" onBack={() => navigate('#/calendar')} subtitle={`${fmtDate(game.date)}${game.venue ? ` · ${game.venue.replace(/^Campo:\s*\d+\s*-\s*/i, '')}` : ''}`}>{game.home ? 'vs' : '@'} {opponent.name}</PageTitle>
       <div class="card">
         <div class="final-score"><span>NOI</span><b>{bs.score.us}</b><span class="muted">–</span><b>{bs.score.them}</b><span>{opponent.shortName}</span></div>
         <div class="row muted" style="font-size:0.85rem;justify-content:center;flex-wrap:wrap">

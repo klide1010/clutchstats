@@ -95,7 +95,7 @@ export function Roster() {
 
       {csv && (
         <div class="card stack">
-          <strong>Anteprima import ({csv.rows.length} righe)</strong>
+          <strong class="card-title"><Icon name="upload" size={18} /> Anteprima import ({csv.rows.length} righe)</strong>
           <ul class="list">
             {csv.rows.map((r) => <li key={r.number}><b>#{r.number}</b> {r.lastName} {r.firstName} <span class="muted">{ROLE_LABELS[r.role]}</span></li>)}
           </ul>
@@ -115,8 +115,8 @@ export function Roster() {
           <li key={p.id} style={p.active ? '' : 'opacity:0.5'}>
             <b style="width:2.2em">#{p.number}</b>
             <span style="flex:1" onClick={() => startEdit(p)}>{p.lastName} {p.firstName}<br /><span class="muted">{ROLE_LABELS[p.role]}</span></span>
-            <button class="btn btn-sm" onClick={() => savePlayer({ ...p, active: !p.active })}>{p.active ? 'Attivo' : 'Inattivo'}</button>
-            <button class="btn btn-sm" onClick={() => { if (confirm(`Eliminare #${p.number} ${p.lastName}?`)) void removePlayer(p.id); }}>✕</button>
+            <button class={`btn btn-sm btn-icon${p.active ? ' ok-text' : ''}`} onClick={() => savePlayer({ ...p, active: !p.active })}><Icon name={p.active ? 'check' : 'x'} size={16} /> {p.active ? 'Attivo' : 'Inattivo'}</button>
+            <button class="btn btn-sm btn-icon icon-only" aria-label="Elimina" onClick={() => { if (confirm(`Eliminare #${p.number} ${p.lastName}?`)) void removePlayer(p.id); }}><Icon name="trash" size={16} /></button>
           </li>
         ))}
         {players.value.length === 0 && <li class="muted">Nessun giocatore. Aggiungi o importa un CSV.</li>}

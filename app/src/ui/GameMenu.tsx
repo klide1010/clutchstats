@@ -35,9 +35,9 @@ export function GameMenu({ lg, onClose, onClosed }: Props) {
     <div class="popup-backdrop" onClick={onClose}>
       <div class="popup" onClick={(e) => e.stopPropagation()} style="max-height:85vh;overflow:auto">
         <div class="row">
-          <strong>{view === 'menu' ? 'Menu' : view === 'history' ? 'Cronologia' : 'Quintetto'}</strong>
-          {view !== 'menu' && <button class="btn btn-sm" style="flex:0 0 auto" onClick={() => setView('menu')}>‹ Menu</button>}
-          <button class="btn btn-sm" style="flex:0 0 auto" onClick={onClose}>Chiudi</button>
+          {view !== 'menu' && <button class="btn btn-sm btn-icon icon-only" style="flex:0 0 auto" aria-label="Indietro" onClick={() => setView('menu')}><Icon name="back" size={18} /></button>}
+          <strong class="card-title"><Icon name={view === 'menu' ? 'menu' : view === 'history' ? 'list' : 'users'} size={18} /> {view === 'menu' ? 'Menu partita' : view === 'history' ? 'Cronologia' : 'Quintetto'}</strong>
+          <button class="btn btn-sm btn-icon icon-only" style="flex:0 0 auto" aria-label="Chiudi" onClick={onClose}><Icon name="x" size={18} /></button>
         </div>
         {view === 'menu' && (
           <>
@@ -52,7 +52,7 @@ export function GameMenu({ lg, onClose, onClosed }: Props) {
             <button class="btn btn-block" onClick={() => setView('history')}>Cronologia eventi</button>
             {g.currentPeriod === 0 && <button class="btn btn-block" onClick={() => setView('lineup')}>Modifica quintetto</button>}
             <button class="btn btn-block" onClick={() => navigate(`#/stats/${g.id}`)}>Statistiche</button>
-            <button class="btn btn-block" style="border-color:var(--err)" onClick={closeGame}>Chiudi partita</button>
+            <button class="btn btn-block btn-icon btn-danger" onClick={closeGame}><Icon name="flag" size={18} /> Chiudi partita</button>
             <button class="btn btn-block btn-sm" onClick={() => navigate('#/calendar')}>Esci (la partita resta in corso)</button>
           </>
         )}
