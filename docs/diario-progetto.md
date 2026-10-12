@@ -45,6 +45,10 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 
 - Codice pubblicato su GitHub privato `klide1010/clutchstats`, storico riscritto con l'identità personale. Cloudflare già personale.
 - Creati `CLAUDE.md` e questo diario come base per le sessioni future.
+- Si lavora in cloud (Claude Code sul web), senza repo locale sul Mac: commit e push diretti su `main`; deploy con il token Cloudflare
+  dell'ambiente (solo account personale). Il repo locale, se usato, va prima aggiornato con `git pull`.
+- Convocati/quintetto: con cognomi lunghi le schede sbordavano su telefono. Colonne `minmax(0, 1fr)` e, sotto i 420px, una colonna sola
+  per leggere cognome, nome e ruolo per intero.
 
 ## Cose aperte
 
