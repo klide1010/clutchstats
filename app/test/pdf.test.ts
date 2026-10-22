@@ -65,3 +65,13 @@ it('lists unsportsmanlike, technical and offensive fouls by player and period', 
   const s = str(gameReportPdf({ teamName: 'Fiore Outlanders', game, events: [...events, ...fouls], players, opponent, bs, dateLabel: 'x' }));
   expect(s).toContain('(Fiore Outlanders: #5 Cognome1: antisportivo \\(Q2\\), tecnico \\(Q4\\))');
 });
+
+it('prints the shooting percentage under made/attempted, none without attempts', () => {
+  const bs = computeBoxScore(game, events, players);
+  const s = str(gameReportPdf({ teamName: 'Fiore Outlanders', game, events, players, opponent, bs, dateLabel: 'x' }));
+  expect(s).toContain('(1/1) Tj');
+  expect(s).toContain('(100%) Tj');
+  expect(s).toContain('(0/1) Tj');
+  expect(s).toContain('(0%) Tj');
+  expect(s).not.toMatch(/\(NaN%\)|\(-\)/);
+});

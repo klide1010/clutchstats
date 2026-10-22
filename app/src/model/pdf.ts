@@ -148,9 +148,12 @@ const RIM: Rgb = [235, 140, 60];
 
 const COLS = ['Giocatore', 'Min', 'PT', 'T2', 'T3', 'TL', 'RO', 'RD', 'RT', 'AS', 'PP', 'PR', 'ST', 'SS', 'FF', 'FS', 'BL', '+/-', 'Val'];
 
+/** Tiro come "segnati/tentati|percentuale": la riga lo scrive su due righe, come nell'app (niente % senza tentativi). */
+const shot = (m: number, a: number) => `${m}/${a}${a > 0 ? `|${Math.round((m / a) * 100)}%` : ''}`;
+
 function cells(l: StatLine): string[] {
   return [
-    String(l.pts), `${l.fg2m}/${l.fg2a}`, `${l.fg3m}/${l.fg3a}`, `${l.ftm}/${l.fta}`,
+    String(l.pts), shot(l.fg2m, l.fg2a), shot(l.fg3m, l.fg3a), shot(l.ftm, l.fta),
     String(l.oreb), String(l.dreb), String(l.reb), String(l.ast), String(l.tov), String(l.stl),
     String(l.blk), String(l.blkR), String(l.pf), String(l.pfd), String(l.screens),
   ];
@@ -285,18 +288,21 @@ export function gameReportPdf({ teamName, game, events, players, opponent, bs, d
   y += 16;
   const nameW = 104;
   const colW = (W - nameW) / (COLS.length - 1);
-  const rowH = 13;
   const colX = (i: number) => (i === 0 ? M + 4 : M + nameW + colW * (i - 1) + colW / 2);
-  const row = (vals: string[], o: { fill?: Rgb; bold?: boolean } = {}) => {
-    need(rowH);
-    if (o.fill) doc.rect(M, y, W, rowH, o.fill);
+  const row = (vals: string[], o: { fill?: Rgb; bold?: boolean; h?: number } = {}) => {
+    const h = o.h ?? 19;
+    need(h);
+    if (o.fill) doc.rect(M, y, W, h, o.fill);
+    const base = y + (h === 13 ? 9.2 : 9);
     vals.forEach((v, i) => {
-      if (i === 0) doc.text(colX(0), y + 9.2, fit(v, nameW - 8, 7.5, o.bold), { size: 7.5, bold: o.bold });
-      else doc.text(colX(i), y + 9.2, v, { size: 7.5, bold: o.bold || i === 2 || i === COLS.length - 1, align: 'center' });
+      const [main, pct] = i === 0 ? [v] : v.split('|');
+      if (i === 0) doc.text(colX(0), base, fit(main, nameW - 8, 7.5, o.bold), { size: 7.5, bold: o.bold });
+      else doc.text(colX(i), base, main, { size: 7.5, bold: o.bold || i === 2 || i === COLS.length - 1, align: 'center' });
+      if (pct) doc.text(colX(i), base + 7.5, pct, { size: 5.8, color: MUTED, align: 'center' });
     });
-    y += rowH;
+    y += h;
   };
-  row(COLS, { fill: HEAD, bold: true });
+  row(COLS, { fill: HEAD, bold: true, h: 13 });
   const byId = new Map(players.map((p) => [p.id, p]));
   bs.players.forEach((l, i) => {
     const p = byId.get(l.playerId);
@@ -307,7 +313,7 @@ export function gameReportPdf({ teamName, game, events, players, opponent, bs, d
   row(['Squadra', '', ...cells(bs.team), '', ''], { bold: true });
   row([opponent.name, '', ...cells(bs.opponent), '', ''], { bold: true, fill: ZEBRA });
   y += 4;
-  const legend = 'PT punti · T2/T3/TL segnati/tentati · RO/RD/RT rimbalzi off./dif./totali · AS assist · PP palle perse · PR palle recuperate · ST stoppate · SS stoppate subite · FF falli fatti · FS falli subiti · BL blocchi · Val valutazione';
+  const legend = 'PT punti · T2/T3/TL segnati/tentati con la percentuale sotto · RO/RD/RT rimbalzi off./dif./totali · AS assist · PP palle perse · PR palle recuperate · ST stoppate · SS stoppate subite · FF falli fatti · FS falli subiti · BL blocchi · Val valutazione';
   for (const l of wrap(legend, W, 6.5)) { need(8); doc.text(M, y + 7, l, { size: 6.5, color: MUTED }); y += 8; }
   y += 6;
   const fouls = Object.entries(bs.opponent.foulsByJersey);

@@ -77,7 +77,9 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - **Box score nella pagina statistiche**: niente più spunta "Mostra percentuali", ogni tiro mostra sempre segnati/tentati con la
   percentuale sotto (nessuna percentuale a 0 tentativi). Falli speciali come colonne dopo FF: FA antisportivi, FT tecnici, FO in attacco
   (`app/src/model/fouls.ts`), mostrate solo se nella partita c'è almeno un fallo di quel tipo, con legenda sotto; FF resta il totale.
-  Il tecnico senza giocatore (panchina) conta nella riga Squadra. CSV e PDF non cambiano.
+  Il tecnico senza giocatore (panchina) conta nella riga Squadra. CSV invariato.
+- Percentuali anche nel **PDF**: sotto T2/T3/TL la percentuale in piccolo, come nell'app (righe un po' più alte; con 12 convocati il
+  referto sta ancora in una pagina).
 
 ## Cose aperte
 
