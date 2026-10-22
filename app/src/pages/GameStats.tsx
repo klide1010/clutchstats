@@ -5,6 +5,7 @@ import { BoxScoreTable } from '../ui/BoxScoreTable';
 import { ShotChart } from '../ui/ShotChart';
 import { boxScoreToCsv, downloadText, gameToJson } from '../model/export';
 import { gameReportPdf } from '../model/pdf';
+import { countSpecialFouls } from '../model/fouls';
 import { ensureTeam } from '../state/team';
 import { eventLabel } from '../state/liveGame';
 import { fmtClock } from '../ui/TopBar';
@@ -21,7 +22,6 @@ interface Loaded { game: Game; events: GameEvent[]; players: Player[]; opponent:
 export function GameStats({ id }: { id: string }) {
   const [data, setData] = useState<Loaded | null>(null);
   const [tab, setTab] = useState<'box' | 'shots' | 'history'>('box');
-  const [pct, setPct] = useState(false);
 
   const load = async () => {
     const game = await gamesRepo.get(id);
@@ -60,8 +60,7 @@ export function GameStats({ id }: { id: string }) {
       </div>
       {tab === 'box' && (
         <>
-          <label class="row" style="color:var(--fg)"><input type="checkbox" style="width:auto;flex:0" checked={pct} onChange={(e) => setPct((e.target as HTMLInputElement).checked)} /> Mostra percentuali</label>
-          <BoxScoreTable bs={bs} players={players} showPct={pct} />
+          <BoxScoreTable bs={bs} players={players} special={countSpecialFouls(events)} />
           {Object.keys(bs.opponent.foulsByJersey).length > 0 && (
             <p class="muted">Falli avversari: {Object.entries(bs.opponent.foulsByJersey).map(([n, f]) => `#${n}: ${f}`).join(', ')}</p>
           )}

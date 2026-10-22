@@ -298,6 +298,7 @@ table.stats th, table.stats td { padding: 7px 6px; text-align: center; border-bo
 table.stats th { color: var(--muted); font-weight: 600; background: var(--surface); position: sticky; top: 0; font-family: var(--font-display); font-size: 0.85rem; letter-spacing: 0.04em; }
 table.stats td.sticky, table.stats th.sticky { position: sticky; left: 0; background: var(--surface); text-align: left; z-index: 1; }
 table.stats tr.total td { font-weight: 700; background: var(--surface-2); }
+table.stats .pct { display: block; font-size: 0.7rem; font-weight: 400; color: var(--muted); line-height: 1.1; }
 .final-score { display: flex; justify-content: center; align-items: baseline; font-size: 1.1rem; font-family: var(--font-display); }
 .final-score > * + * { margin-left: 10px; }
 .final-score b { font-size: 2.4rem; }

@@ -74,6 +74,11 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
   minuti giocati corrispondono. I dati della partita si correggono specchiando `clock_sec` dei cambi (600 − valore): il totale torna a 200.
   La partita con i 46ers (7 ottobre) ha tempi dei cambi non in ordine in nessuna delle due letture: lasciata com'è.
 
+- **Box score nella pagina statistiche**: niente più spunta "Mostra percentuali", ogni tiro mostra sempre segnati/tentati con la
+  percentuale sotto (nessuna percentuale a 0 tentativi). Falli speciali come colonne dopo FF: FA antisportivi, FT tecnici, FO in attacco
+  (`app/src/model/fouls.ts`), mostrate solo se nella partita c'è almeno un fallo di quel tipo, con legenda sotto; FF resta il totale.
+  Il tecnico senza giocatore (panchina) conta nella riga Squadra. CSV e PDF non cambiano.
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).
