@@ -50,6 +50,15 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - Convocati/quintetto: con cognomi lunghi le schede sbordavano su telefono. Colonne `minmax(0, 1fr)` e, sotto i 420px, una colonna sola
   per leggere cognome, nome e ruolo per intero.
 
+## 22 ottobre — convocati inattivi in panchina (partita con Vall Alta)
+
+- Bug trovato in partita: un convocato **inattivo** partito in quintetto, una volta uscito per un cambio, spariva dalla panchina e non
+  poteva più rientrare, nemmeno dopo averlo riattivato nel roster. La panchina filtrava ancora `active`, che serve solo a proporre i
+  convocati di default: ora la panchina è "convocati non in campo". Inoltre `reload()` (dopo ogni sync) rilegge anche il roster, così una
+  modifica fatta da un altro telefono si vede a partita aperta.
+- Nessun dato da sistemare: il cambio era registrato correttamente, mancava solo il giocatore nell'elenco. Dopo il deploy è ricomparso in
+  panchina e la partita è proseguita. Due test nuovi in `app/test/liveGame.test.ts`.
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).
