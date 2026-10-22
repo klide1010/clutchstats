@@ -174,6 +174,26 @@ function wrap(s: string, max: number, size: number): string[] {
   return lines;
 }
 
+const SPECIAL_LABELS: Record<string, string> = { UNSPORTSMANLIKE: 'antisportivo', TECHNICAL: 'tecnico', OFFENSIVE: 'in attacco' };
+
+/** Falli non personali raggruppati per giocatore (noi) o numero di maglia (loro), es. "#7 Rossi: antisportivo (Q2), tecnico (Q4)". */
+export function specialFouls(events: GameEvent[], players: Player[], periodsRegulation: number): { us: string; them: string } {
+  const byId = new Map(players.map((p) => [p.id, p]));
+  const groups = { US: new Map<string, string[]>(), THEM: new Map<string, string[]>() };
+  for (const e of events) {
+    if (e.deleted || e.type !== 'FOUL' || !e.foulKind || !SPECIAL_LABELS[e.foulKind]) continue;
+    let who: string;
+    if (e.side === 'US') { const p = e.playerId ? byId.get(e.playerId) : undefined; who = p ? `#${p.number} ${p.lastName}` : 'Squadra'; }
+    else who = e.jerseyNumber !== undefined ? `#${e.jerseyNumber}` : 'Squadra';
+    const m = groups[e.side];
+    const list = m.get(who) ?? [];
+    list.push(`${SPECIAL_LABELS[e.foulKind]} (${periodLabel(e.period, periodsRegulation)})`);
+    m.set(who, list);
+  }
+  const fmt = (m: Map<string, string[]>) => Array.from(m, ([who, l]) => `${who}: ${l.join(', ')}`).join(' · ');
+  return { us: fmt(groups.US), them: fmt(groups.THEM) };
+}
+
 function distanceM(e: GameEvent): number {
   const xm = (e.x ?? 0.5) * COURT.widthM - COURT.basketX;
   const ym = (e.y ?? 0) * COURT.depthM - COURT.basketY;
@@ -294,6 +314,18 @@ export function gameReportPdf({ teamName, game, events, players, opponent, bs, d
   const pts = Object.entries(bs.opponent.pointsByJersey);
   if (pts.length) { need(12); doc.text(M, y + 8, fit(`Punti ${opponent.name}: ${pts.map(([k, v]) => `#${k} ${v}`).join(', ')}`, W, 7.5), { size: 7.5, color: MUTED }); y += 12; }
   if (fouls.length) { need(12); doc.text(M, y + 8, fit(`Falli ${opponent.name}: ${fouls.map(([k, v]) => `#${k} ${v}`).join(', ')}`, W, 7.5), { size: 7.5, color: MUTED }); y += 12; }
+
+  // Falli non personali: antisportivi, tecnici, in attacco, con il periodo
+  const special = specialFouls(events, players, game.periodsRegulation);
+  need(18);
+  y += 4;
+  doc.text(M, y + 9, 'Falli antisportivi, tecnici e in attacco', { size: 9, bold: true, color: NAVY });
+  y += 13;
+  const lines: string[] = [];
+  if (special.us) lines.push(`${teamName}: ${special.us}`);
+  if (special.them) lines.push(`${opponent.name}: ${special.them}`);
+  if (!lines.length) lines.push('Nessuno');
+  for (const l of lines) for (const w of wrap(l, W, 7.5)) { need(10); doc.text(M, y + 8, w, { size: 7.5 }); y += 10; }
   y += 8;
 
   // Mappa tiri: noi e loro affiancati

@@ -50,3 +50,18 @@ it('encodes accents and dashes in WinAnsi and measures text', () => {
   expect(s).toContain('(Citt\xE0 \x96 \xE8\x85?)');
   expect(textWidth('00', 10)).toBeCloseTo(11.12);
 });
+
+it('lists unsportsmanlike, technical and offensive fouls by player and period', async () => {
+  const { specialFouls } = await import('../src/model/pdf');
+  const fouls = [
+    ev({ type: 'FOUL', playerId: 'b', foulKind: 'UNSPORTSMANLIKE', period: 2 }),
+    ev({ type: 'FOUL', playerId: 'b', foulKind: 'TECHNICAL', period: 4 }),
+    ev({ type: 'FOUL', playerId: 'c', foulKind: 'PERSONAL', period: 1 }),
+    ev({ type: 'FOUL', playerId: 'c', foulKind: 'OFFENSIVE', period: 1, deleted: true }),
+    ev({ type: 'FOUL', side: 'THEM', jerseyNumber: 12, foulKind: 'OFFENSIVE', period: 3 }),
+  ];
+  expect(specialFouls(fouls, players, 4)).toEqual({ us: '#5 Cognome1: antisportivo (Q2), tecnico (Q4)', them: '#12: in attacco (Q3)' });
+  const bs = computeBoxScore(game, [...events, ...fouls], players);
+  const s = str(gameReportPdf({ teamName: 'Fiore Outlanders', game, events: [...events, ...fouls], players, opponent, bs, dateLabel: 'x' }));
+  expect(s).toContain('(Fiore Outlanders: #5 Cognome1: antisportivo \\(Q2\\), tecnico \\(Q4\\))');
+});

@@ -65,6 +65,8 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - **Referto PDF** dalla pagina statistiche (bottone PDF accanto a CSV e JSON): intestazione, punteggio e parziali, box score con legenda,
   punti/falli avversari per numero, mappa tiri noi/loro. Generato da `app/src/model/pdf.ts` senza librerie (Helvetica WinAnsi, solo
   operatori PDF di base), per restare leggeri e compatibili con Chrome 65.
+- Nel PDF anche i **falli antisportivi, tecnici e in attacco**, per giocatore (noi) e numero di maglia (loro), con il periodo
+  (`specialFouls`). La colonna FF del box score resta il totale di tutti i falli.
 
 ## Cose aperte
 
