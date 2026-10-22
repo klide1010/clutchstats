@@ -48,7 +48,7 @@ export function SubsPanel({ lg, onClose, initialOut = null }: Props) {
   const pickIn = (id: string) => { const next = inId === id ? null : id; setInId(next); tryPerform(outId, next); };
 
   const periodLen = periodLengthSec(g, period);
-  const defaultMin = Math.floor(elapsedSec(g, period, undefined) % periodLen / 60);
+  const defaultMin = periodLen / 60 - Math.floor(elapsedSec(g, period, undefined) % periodLen / 60);
 
   return (
     <div class="popup-backdrop" onClick={onClose}>
@@ -58,7 +58,7 @@ export function SubsPanel({ lg, onClose, initialOut = null }: Props) {
           <button class="btn btn-sm btn-icon icon-only btn-ghost" style="flex:0 0 auto" aria-label="Chiudi" onClick={onClose}><Icon name="x" size={18} /></button>
         </div>
         {askMinute && outId && inId ? (
-          <MinutePicker maxMin={periodLen / 60} defaultMin={defaultMin} onConfirm={(m) => perform(periodLen - m * 60)} onCancel={() => setAskMinute(false)} />
+          <MinutePicker maxMin={periodLen / 60} defaultMin={defaultMin} onConfirm={(left) => perform(left * 60)} onCancel={() => setAskMinute(false)} />
         ) : (
           <div class="subs-cols">
             <div>

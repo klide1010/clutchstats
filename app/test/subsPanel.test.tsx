@@ -31,11 +31,13 @@ it('substitution without clock asks for the minute and stamps clockSec', async (
   render(<SubsPanel lg={lg} onClose={() => undefined} />);
   fireEvent.click(screen.getByRole('button', { name: /#4 C0/ }));
   fireEvent.click(screen.getByRole('button', { name: /#9 C5/ }));
-  const slider = screen.getByLabelText('Minuto del periodo') as HTMLInputElement;
+  // Si legge il tabellone, che conta alla rovescia: 6' sul tabellone = mancano 6 minuti.
+  const slider = screen.getByLabelText('Minuti sul tabellone') as HTMLInputElement;
   fireEvent.input(slider, { target: { value: '6' } });
+  expect(screen.getByText(/4' giocati/)).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Conferma' }));
   await waitFor(() => expect(last().type).toBe('SUBSTITUTION'));
-  expect(last()).toMatchObject({ subOutPlayerId: 'p0', subInPlayerId: 'p5', clockSec: 240 });
+  expect(last()).toMatchObject({ subOutPlayerId: 'p0', subInPlayerId: 'p5', clockSec: 360 });
   expect(lg.onCourt.value).toContain('p5');
   expect(lg.onCourt.value).not.toContain('p0');
 });

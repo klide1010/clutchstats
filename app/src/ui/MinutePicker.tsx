@@ -2,25 +2,34 @@ import { useState } from 'preact/hooks';
 
 interface Props {
   maxMin: number;
+  /** Minuti sul tabellone proposti all'apertura. */
   defaultMin: number;
-  onConfirm: (minute: number) => void;
+  /** Minuti che mancano alla fine del periodo, come li mostra il tabellone. */
+  onConfirm: (minutesLeft: number) => void;
   onCancel: () => void;
 }
 
-/** Sceglie il minuto del periodo (0 = inizio) quando il cronometro è spento. */
+/**
+ * Chiede il tempo del cambio quando il cronometro è spento. Si legge il tabellone, che conta alla rovescia
+ * (10' = inizio periodo, 0' = fine): chiedere i minuti giocati portava a inserire comunque quelli del tabellone
+ * e a ribaltare i tempi dei cambi.
+ */
 export function MinutePicker({ maxMin, defaultMin, onConfirm, onCancel }: Props) {
   const [minute, setMinute] = useState(Math.min(maxMin, Math.max(0, defaultMin)));
   return (
     <div class="stack">
       <label>
-        Minuto del periodo
-        <input type="range" min={0} max={maxMin} step={1} value={minute} aria-label="Minuto del periodo" onInput={(e) => setMinute(Number((e.target as HTMLInputElement).value))} />
+        Minuti sul tabellone
+        <input type="range" min={0} max={maxMin} step={1} value={minute} aria-label="Minuti sul tabellone" onInput={(e) => setMinute(Number((e.target as HTMLInputElement).value))} />
       </label>
       <div class="row" style="justify-content:center">
         <button class="btn btn-sm" style="flex:0 0 auto" onClick={() => setMinute(Math.max(0, minute - 1))}>−</button>
         <strong style="text-align:center;font-size:1.6rem;flex:0 0 4em">{minute}'</strong>
         <button class="btn btn-sm" style="flex:0 0 auto" onClick={() => setMinute(Math.min(maxMin, minute + 1))}>+</button>
       </div>
+      <p class="muted" style="margin:0;text-align:center;font-size:0.85rem">
+        {minute === maxMin ? 'inizio periodo' : minute === 0 ? 'fine periodo' : `mancano ${minute}', cioè ${maxMin - minute}' giocati`}
+      </p>
       <div class="row">
         <button class="btn" onClick={onCancel}>Annulla</button>
         <button class="btn btn-primary" onClick={() => onConfirm(minute)}>Conferma</button>
