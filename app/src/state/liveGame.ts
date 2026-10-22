@@ -104,7 +104,9 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     return lastP?.type === 'PERIOD_START';
   });
   const onCourt = computed(() => onCourtAfter(game.value, live.value, Number.MAX_SAFE_INTEGER));
-  const bench = computed(() => players.value.filter((p) => p.active && !onCourt.value.includes(p.id)));
+  // I convocati sono già scelti tra attivi e (volendo) inattivi: qui "attivo" non conta più,
+  // o un convocato inattivo uscito dal campo sparirebbe dalla panchina senza poter rientrare.
+  const bench = computed(() => players.value.filter((p) => !onCourt.value.includes(p.id)));
   const nowElapsed = computed(() => {
     const gm = game.value;
     if (!periodOpen.value || gm.currentPeriod === 0) return undefined;
@@ -235,6 +237,7 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     seqCounter = events.value.reduce((m, e) => Math.max(m, e.seq), seqCounter);
     const fresh = await gamesRepo.get(gameId);
     if (fresh) game.value = fresh;
+    allPlayers.value = await playersRepo.byTeam(game.value.teamId);
   };
 
   let lastSeenSync = syncState.peek().lastAt;

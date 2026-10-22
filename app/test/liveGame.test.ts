@@ -187,6 +187,27 @@ it('setRoster limits bench, box score and starters to the called-up players', as
   expect(lg.boxScore.value.players.map((p) => p.playerId)).toEqual(ids.slice(0, 7));
 });
 
+it('a called-up inactive player stays available on the bench after being subbed out', async () => {
+  await savePlayer({ id: ids[5], firstName: 'N5', lastName: 'Cognome5', number: 9, role: 'ALA', active: false });
+  lg.dispose();
+  lg = await openLiveGame(lg.game.value.id);
+  await lg.setRoster(ids.slice(0, 7));
+  await lg.setStarters([ids[0], ids[1], ids[2], ids[3], ids[5]]);
+  await lg.startPeriod();
+  expect(lg.bench.value.map((p) => p.id)).toEqual([ids[4], ids[6]]);
+  await lg.substitute(ids[5], ids[4], 300);
+  expect(lg.bench.value.map((p) => p.id)).toEqual([ids[5], ids[6]]);
+  await lg.substitute(ids[0], ids[5], 200);
+  expect(lg.onCourt.value).toContain(ids[5]);
+});
+
+it('reload picks up roster changes made while the game is open', async () => {
+  await lg.setRoster(ids.slice(0, 7));
+  await savePlayer({ id: ids[6], firstName: 'N6', lastName: 'Rinominato', number: 10, role: 'ALA', active: true });
+  await lg.reload();
+  expect(lg.players.value.find((p) => p.id === ids[6])?.lastName).toBe('Rinominato');
+});
+
 it('setRoster requires at least 5 players and is locked after period 1', async () => {
   await expect(lg.setRoster(ids.slice(0, 4))).rejects.toThrow();
   await lg.setRoster(ids.slice(0, 6));
