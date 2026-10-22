@@ -68,6 +68,12 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - Nel PDF anche i **falli antisportivi, tecnici e in attacco**, per giocatore (noi) e numero di maglia (loro), con il periodo
   (`specialFouls`). La colonna FF del box score resta il totale di tutti i falli.
 
+- **Minuti sbagliati con Vall'Alta**: senza cronometro il selettore del cambio chiedeva i minuti *giocati* (0 = inizio periodo), ma a
+  bordo campo si leggono quelli del tabellone, che conta alla rovescia. Tutti i cambi della partita sono stati inseriti così: tempi
+  ribaltati, 248 minuti totali su 200 possibili (Chiesa 43' su 40). Ora il selettore chiede "Minuti sul tabellone" e sotto dice a quanti
+  minuti giocati corrispondono. I dati della partita si correggono specchiando `clock_sec` dei cambi (600 − valore): il totale torna a 200.
+  La partita con i 46ers (7 ottobre) ha tempi dei cambi non in ordine in nessuna delle due letture: lasciata com'è.
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).
