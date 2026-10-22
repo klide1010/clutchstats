@@ -36,7 +36,7 @@ export function gameToJson(game: Game, events: GameEvent[], players: Player[], o
   return JSON.stringify({ exportedAt: new Date().toISOString(), game, opponent, players, events: events.filter((e) => !e.deleted), boxScore: bs }, null, 2);
 }
 
-export function downloadText(filename: string, mime: string, text: string): void {
+export function downloadText(filename: string, mime: string, text: string | Uint8Array<ArrayBuffer>): void {
   const blob = new Blob([text], { type: mime });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

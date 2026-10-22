@@ -4,6 +4,8 @@ import { eventsRepo, gamesRepo, opponentsRepo, playersRepo } from '../db';
 import { BoxScoreTable } from '../ui/BoxScoreTable';
 import { ShotChart } from '../ui/ShotChart';
 import { boxScoreToCsv, downloadText, gameToJson } from '../model/export';
+import { gameReportPdf } from '../model/pdf';
+import { ensureTeam } from '../state/team';
 import { eventLabel } from '../state/liveGame';
 import { fmtClock } from '../ui/TopBar';
 import { fmtDate } from '../ui/IcsImport';
@@ -14,7 +16,7 @@ import { SyncButton } from '../ui/SyncButton';
 import { Icon } from '../ui/Icon';
 import { PageTitle } from '../ui/PageTitle';
 
-interface Loaded { game: Game; events: GameEvent[]; players: Player[]; opponent: Opponent; bs: BoxScore }
+interface Loaded { game: Game; events: GameEvent[]; players: Player[]; opponent: Opponent; bs: BoxScore; teamName: string }
 
 export function GameStats({ id }: { id: string }) {
   const [data, setData] = useState<Loaded | null>(null);
@@ -24,15 +26,15 @@ export function GameStats({ id }: { id: string }) {
   const load = async () => {
     const game = await gamesRepo.get(id);
     if (!game) return;
-    const [events, players, opponent] = await Promise.all([eventsRepo.byGame(id), playersRepo.byTeam(game.teamId), opponentsRepo.get(game.opponentId)]);
+    const [events, players, opponent, team] = await Promise.all([eventsRepo.byGame(id), playersRepo.byTeam(game.teamId), opponentsRepo.get(game.opponentId), ensureTeam()]);
     const opp = opponent ?? { id: game.opponentId, name: 'Avversario', shortName: 'AVV', roster: [], updatedAt: 0, deleted: false };
     const called = game.roster && game.roster.length ? players.filter((p) => game.roster!.includes(p.id)) : players;
-    setData({ game, events, players: called, opponent: opp, bs: computeBoxScore(game, events, called) });
+    setData({ game, events, players: called, opponent: opp, bs: computeBoxScore(game, events, called), teamName: team.name });
   };
   useEffect(() => { void load(); }, [id]);
 
   if (!data) return <main class="page"><p class="muted">Caricamento…</p></main>;
-  const { game, events, players, opponent, bs } = data;
+  const { game, events, players, opponent, bs, teamName } = data;
   const slug = `${game.date.slice(0, 10)}_${opponent.shortName}`;
 
   const reopen = async () => {
@@ -80,6 +82,7 @@ export function GameStats({ id }: { id: string }) {
         </ul>
       )}
       <div class="row">
+        <button class="btn btn-icon" onClick={() => { downloadText(`bkstats_${slug}.pdf`, 'application/pdf', gameReportPdf({ teamName, game, events, players, opponent, bs, dateLabel: fmtDate(game.date) })); toast('PDF scaricato'); }}><Icon name="download" size={18} /> PDF</button>
         <button class="btn btn-icon" onClick={() => { downloadText(`bkstats_${slug}.csv`, 'text/csv;charset=utf-8', boxScoreToCsv(bs, players)); toast('CSV esportato'); }}><Icon name="download" size={18} /> CSV</button>
         <button class="btn btn-icon" onClick={() => { downloadText(`bkstats_${slug}.json`, 'application/json', gameToJson(game, events, players, opponent, bs)); toast('JSON esportato'); }}><Icon name="download" size={18} /> JSON</button>
       </div>

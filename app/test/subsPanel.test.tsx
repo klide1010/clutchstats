@@ -51,3 +51,20 @@ it('EventHistory lists events newest first and deletes one', async () => {
   await waitFor(() => expect(lg.boxScore.value.team.tov).toBe(0));
   expect(lg.boxScore.value.team.stl).toBe(1);
 });
+
+it('GameMenu asks who starts the next period and starts it with that five', async () => {
+  const { GameMenu } = await import('../src/ui/GameMenu');
+  await lg.endPeriod();
+  render(<GameMenu lg={lg} onClose={() => undefined} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Inizia periodo' }));
+  expect(screen.getByText('Chi inizia il periodo')).toBeTruthy();
+  const start = screen.getAllByRole('button', { name: /Inizia periodo/ }).pop()!;
+  fireEvent.click(screen.getByRole('button', { name: /^4\s*C0/ }));
+  expect((start as HTMLButtonElement).disabled).toBe(true);
+  fireEvent.click(screen.getByRole('button', { name: /^9\s*C5/ }));
+  fireEvent.click(start);
+  await waitFor(() => expect(lg.game.value.currentPeriod).toBe(2));
+  expect(lg.periodOpen.value).toBe(true);
+  expect(lg.onCourt.value).toContain('p5');
+  expect(lg.onCourt.value).not.toContain('p0');
+});

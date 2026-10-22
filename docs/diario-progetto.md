@@ -59,6 +59,13 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - Nessun dato da sistemare: il cambio era registrato correttamente, mancava solo il giocatore nell'elenco. Dopo il deploy è ricomparso in
   panchina e la partita è proseguita. Due test nuovi in `app/test/liveGame.test.ts`.
 
+- **Quintetto a inizio periodo**: "Inizia periodo" (menu partita) chiede chi parte, con già selezionati i 5 che hanno chiuso il periodo
+  precedente e chi ha 5 falli non selezionabile. Le differenze diventano cambi registrati a periodo chiuso (`setPeriodLineup`), che non
+  spostano i minuti: si conta da chi è in campo al `PERIOD_START`. Prima bisognava fare i cambi uno per uno.
+- **Referto PDF** dalla pagina statistiche (bottone PDF accanto a CSV e JSON): intestazione, punteggio e parziali, box score con legenda,
+  punti/falli avversari per numero, mappa tiri noi/loro. Generato da `app/src/model/pdf.ts` senza librerie (Helvetica WinAnsi, solo
+  operatori PDF di base), per restare leggeri e compatibili con Chrome 65.
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).

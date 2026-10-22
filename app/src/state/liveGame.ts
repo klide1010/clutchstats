@@ -38,6 +38,8 @@ export interface LiveGame {
   endPeriod(): Promise<void>;
   substitute(outId: string, inId: string, clockSec?: number): Promise<void>;
   setStarters(ids: string[]): Promise<void>;
+  /** Tra un periodo e l'altro: i 5 che iniziano il prossimo, registrati come cambi a cronometro fermo. */
+  setPeriodLineup(ids: string[]): Promise<void>;
   setRoster(ids: string[]): Promise<void>;
   takeOver(): Promise<void>;
   restartFromScratch(): Promise<void>;
@@ -203,6 +205,27 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     await saveGame({ starters: ids });
   };
 
+  const setPeriodLineup = async (ids: string[]) => {
+    if (game.value.status === 'CLOSED') throw new Error('Partita chiusa');
+    if (game.value.currentPeriod === 0) throw new Error('Prima del via si sceglie il quintetto iniziale');
+    if (periodOpen.value) throw new Error('Periodo in corso: usa i cambi');
+    if (new Set(ids).size !== 5) throw new Error('Servono esattamente 5 giocatori');
+    const allowed = new Set(players.value.map((p) => p.id));
+    if (!ids.every((id) => allowed.has(id))) throw new Error('Il quintetto deve essere tra i convocati');
+    const fouled = ids.find((id) => (foulsByPlayer.value[id] ?? 0) >= 5);
+    if (fouled) {
+      const p = allPlayers.value.find((x) => x.id === fouled);
+      throw new Error(`${p ? '#' + p.number + ' ' + p.lastName : 'Giocatore'} ha 5 falli: non può rientrare`);
+    }
+    const now = onCourt.value;
+    const outs = now.filter((id) => !ids.includes(id));
+    const ins = ids.filter((id) => !now.includes(id));
+    // A periodo chiuso il cambio non sposta i minuti: conta solo chi è in campo al prossimo PERIOD_START.
+    for (let i = 0; i < Math.max(outs.length, ins.length); i++) {
+      await addEvent({ type: 'SUBSTITUTION', side: 'US', subOutPlayerId: outs[i], subInPlayerId: ins[i] });
+    }
+  };
+
   const setRoster = async (ids: string[]) => {
     if (game.value.currentPeriod !== 0) throw new Error('Convocati modificabili solo prima della partita');
     if (new Set(ids).size < 5) throw new Error('Servono almeno 5 convocati');
@@ -248,7 +271,7 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
 
   return {
     game, events, players, allPlayers, opponent, clock, boxScore, onCourt, bench, periodOpen, foreignLive, fouledOut, canUndo, lastEventLabel,
-    addEvent, undo, deleteEvent, startPeriod, endPeriod, substitute, setStarters, setRoster, takeOver, restartFromScratch, addOpponentNumber, lastFoulOf, closeGame, reload,
+    addEvent, undo, deleteEvent, startPeriod, endPeriod, substitute, setStarters, setPeriodLineup, setRoster, takeOver, restartFromScratch, addOpponentNumber, lastFoulOf, closeGame, reload,
     dispose: () => { stopSyncWatch(); clock.dispose(); },
   };
 }

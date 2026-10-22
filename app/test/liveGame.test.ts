@@ -286,3 +286,31 @@ it('undoing the fifth foul clears the fouled-out state', async () => {
   await lg.deleteEvent(lg.lastFoulOf(ids[0])!.id);
   expect(lg.fouledOut.value).toEqual([]);
 });
+
+it('setPeriodLineup between periods swaps in the chosen five without touching minutes', async () => {
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  await lg.endPeriod();
+  await lg.setPeriodLineup([ids[0], ids[1], ids[5], ids[6], ids[7]]);
+  expect([...lg.onCourt.value].sort()).toEqual([ids[0], ids[1], ids[5], ids[6], ids[7]].sort());
+  const subs = lg.events.value.filter((e) => e.type === 'SUBSTITUTION' && !e.deleted);
+  expect(subs).toHaveLength(3);
+  expect(subs.every((e) => e.period === 1 && e.clockSec === undefined)).toBe(true);
+  // stesso quintetto: nessun evento
+  await lg.setPeriodLineup([ids[0], ids[1], ids[5], ids[6], ids[7]]);
+  expect(lg.events.value.filter((e) => e.type === 'SUBSTITUTION')).toHaveLength(3);
+  await lg.startPeriod();
+  expect(lg.game.value.currentPeriod).toBe(2);
+});
+
+it('setPeriodLineup is refused during a period, with the wrong count or a fouled-out player', async () => {
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  await expect(lg.setPeriodLineup(ids.slice(1, 6))).rejects.toThrow('Periodo in corso');
+  for (let i = 0; i < 5; i++) await lg.addEvent({ type: 'FOUL', side: 'US', playerId: ids[0] });
+  await lg.endPeriod();
+  await expect(lg.setPeriodLineup(ids.slice(1, 5))).rejects.toThrow('5 giocatori');
+  await expect(lg.setPeriodLineup(ids.slice(0, 5))).rejects.toThrow('5 falli');
+  await lg.setPeriodLineup(ids.slice(1, 6));
+  expect(lg.onCourt.value).not.toContain(ids[0]);
+});
