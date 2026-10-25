@@ -4,9 +4,9 @@ import { SPECIAL_COLS, type KindCounts, type SpecialFouls } from '../model/fouls
 
 interface Props { bs: BoxScore; players: Player[]; special?: SpecialFouls }
 
-/** Tiri segnati/tentati con la percentuale sotto (niente percentuale senza tentativi). */
+/** Tiri segnati/tentati con la percentuale sotto (riga vuota senza tentativi, per tenere le righe alte uguali). */
 function Shot({ m, a }: { m: number; a: number }) {
-  return <td>{m}/{a}{a > 0 && <span class="pct">{Math.round((m / a) * 100)}%</span>}</td>;
+  return <td>{m}/{a}<span class="pct">{a > 0 ? `${Math.round((m / a) * 100)}%` : ''}</span></td>;
 }
 
 function Cells({ l, extra }: { l: StatLine; extra: (string | number)[] }) {
@@ -35,7 +35,7 @@ export function BoxScoreTable({ bs, players, special }: Props) {
               const p = byId.get(l.playerId);
               return (
                 <tr key={l.playerId}>
-                  <td class="sticky"><b>{p ? `#${p.number}` : ''}</b> {p?.lastName ?? l.playerId}</td>
+                  <td class="sticky"><span class="name-cell"><b>{p ? `#${p.number}` : ''}</b> {p?.lastName ?? l.playerId}</span></td>
                   <td>{fmtMinutes(l.seconds)}</td>
                   <Cells l={l} extra={extra(special?.byPlayer[l.playerId])} />
                   <td>{l.plusMinus > 0 ? `+${l.plusMinus}` : l.plusMinus}</td><td><b>{l.rating}</b></td>

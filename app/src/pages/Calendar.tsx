@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
-import type { Game } from '@bkstats/shared';
+import { computeBoxScore, type Game } from '@bkstats/shared';
+import { eventsRepo, playersRepo } from '../db';
 import { games, loadGames, createGame, removeGame } from '../state/games';
 import { loadOpponents, opponents, findOrCreateOpponent } from '../state/opponents';
 import { navigate } from '../router';
@@ -7,6 +8,7 @@ import { IcsImport, fmtDate } from '../ui/IcsImport';
 import { toast } from '../ui/Toast';
 import { Icon } from '../ui/Icon';
 import { PageTitle } from '../ui/PageTitle';
+import { groupGames, venueLabel, type Score } from '../model/gameView';
 
 function NewGameForm({ onDone }: { onDone: () => void }) {
   const [opponentChoice, setOpponentChoice] = useState<string>(opponents.value[0]?.id ?? 'NEW');
@@ -57,18 +59,55 @@ function NewGameForm({ onDone }: { onDone: () => void }) {
   );
 }
 
-function statusLabel(g: Game): string {
-  if (g.status === 'LIVE') return 'In corso';
-  if (g.status === 'CLOSED') return 'Chiusa';
-  return 'Programmata';
+function GameRow({ g, name, score, onOpen }: { g: Game; name: string; score?: Score; onOpen: () => void }) {
+  const result = score ? (score.us > score.them ? 'won' : score.us < score.them ? 'lost' : 'tie') : null;
+  return (
+    <li>
+      <span class={`game-dot ${g.status.toLowerCase()}`} aria-hidden="true" />
+      <span style="flex:1;min-width:0" onClick={onOpen}>
+        <b>{g.home ? 'vs' : '@'} {name}</b><br />
+        <span class="muted">{fmtDate(g.date)}{g.venue ? ` · ${venueLabel(g.venue)}` : ''}{g.useClock ? ' · cronometro' : ''}</span>
+      </span>
+      {score && (
+        <span class="game-score" onClick={onOpen}>
+          <b>{score.us}–{score.them}</b>
+          <span class={`result-badge ${result}`}>{result === 'won' ? 'V' : result === 'lost' ? 'P' : 'N'}</span>
+        </span>
+      )}
+      {g.status === 'SCHEDULED' && <button class="btn btn-sm btn-icon icon-only btn-ghost danger" aria-label="Elimina" onClick={() => { if (confirm('Eliminare la partita?')) void removeGame(g.id); }}><Icon name="trash" size={16} /></button>}
+    </li>
+  );
 }
 
 export function Calendar() {
   const [mode, setMode] = useState<'list' | 'new' | 'ics'>('list');
+  const [scores, setScores] = useState<Record<string, Score>>({});
   useEffect(() => { void loadGames(); void loadOpponents(); }, []);
+
+  // Risultato delle partite chiuse, ricalcolato dagli eventi quando cambia l'elenco.
+  useEffect(() => {
+    (async () => {
+      const closed = games.value.filter((g) => g.status === 'CLOSED');
+      const s: Record<string, Score> = {};
+      for (const g of closed) {
+        const [events, players] = await Promise.all([eventsRepo.byGame(g.id), playersRepo.byTeam(g.teamId)]);
+        s[g.id] = computeBoxScore(g, events, players).score;
+      }
+      setScores(s);
+    })();
+  }, [games.value]);
 
   const opponentName = (id: string) => opponents.value.find((o) => o.id === id)?.name ?? 'Avversario';
   const open = (g: Game) => navigate(g.status === 'CLOSED' ? `#/stats/${g.id}` : `#/game/${g.id}`);
+  const { live, upcoming, played } = groupGames(games.value);
+  const section = (title: string, list: Game[]) => list.length > 0 && (
+    <>
+      <h2 class="list-section">{title}</h2>
+      <ul class="list">
+        {list.map((g) => <GameRow key={g.id} g={g} name={opponentName(g.opponentId)} score={scores[g.id]} onOpen={() => open(g)} />)}
+      </ul>
+    </>
+  );
 
   return (
     <main class="page stack">
@@ -81,19 +120,10 @@ export function Calendar() {
       )}
       {mode === 'new' && <NewGameForm onDone={() => setMode('list')} />}
       {mode === 'ics' && <IcsImport onDone={() => setMode('list')} />}
-      <ul class="list">
-        {games.value.map((g) => (
-          <li key={g.id}>
-            <span class={`game-dot ${g.status.toLowerCase()}`} aria-hidden="true" />
-            <span style="flex:1" onClick={() => open(g)}>
-              <b>{fmtDate(g.date)}</b> · {g.home ? 'vs' : '@'} {opponentName(g.opponentId)}<br />
-              <span class="muted">{statusLabel(g)}{g.venue ? ` · ${g.venue}` : ''}{g.useClock ? ' · cronometro' : ''}</span>
-            </span>
-            {g.status === 'SCHEDULED' && <button class="btn btn-sm btn-icon icon-only btn-ghost danger" aria-label="Elimina" onClick={() => { if (confirm('Eliminare la partita?')) void removeGame(g.id); }}><Icon name="trash" size={16} /></button>}
-          </li>
-        ))}
-        {games.value.length === 0 && <li class="muted">Nessuna partita. Creane una o importa un calendario.</li>}
-      </ul>
+      {section('In corso', live)}
+      {section('Prossime', upcoming)}
+      {section('Giocate', played)}
+      {games.value.length === 0 && <p class="muted">Nessuna partita. Creane una o importa un calendario.</p>}
     </main>
   );
 }

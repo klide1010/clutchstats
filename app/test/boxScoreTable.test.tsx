@@ -58,3 +58,12 @@ it('without special fouls the table has no extra columns', () => {
   const { container } = render(<BoxScoreTable bs={bs} players={players} special={countSpecialFouls([])} />);
   expect(header(container)).not.toContain('FA');
 });
+
+it('every shot cell keeps the percentage line, so rows have the same height', () => {
+  const events = [ev({ type: 'PERIOD_START' }), ev({ type: 'SHOT_2', playerId: 'a', made: true, x: 0.5, y: 0.2 })];
+  const bs = computeBoxScore(game, events, players);
+  const { container } = render(<BoxScoreTable bs={bs} players={players} />);
+  const row = rowOf(container, 'C1');
+  for (const col of ['T2', 'T3', 'TL']) expect(row.children[header(container).indexOf(col)].querySelector('.pct')).not.toBeNull();
+  expect(cellAt(container, 'C1', 'T2')).toBe('0/0');
+});

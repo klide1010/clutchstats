@@ -1,3 +1,4 @@
+import { Fragment } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { computeBoxScore, periodLabel, type BoxScore, type Game, type GameEvent, type Opponent, type Player } from '@bkstats/shared';
 import { eventsRepo, gamesRepo, opponentsRepo, playersRepo } from '../db';
@@ -16,6 +17,7 @@ import { toast } from '../ui/Toast';
 import { SyncButton } from '../ui/SyncButton';
 import { Icon } from '../ui/Icon';
 import { PageTitle } from '../ui/PageTitle';
+import { historyByPeriod, opponentByJersey, venueLabel } from '../model/gameView';
 
 interface Loaded { game: Game; events: GameEvent[]; players: Player[]; opponent: Opponent; bs: BoxScore; teamName: string }
 
@@ -36,6 +38,7 @@ export function GameStats({ id }: { id: string }) {
   if (!data) return <main class="page"><p class="muted">Caricamento…</p></main>;
   const { game, events, players, opponent, bs, teamName } = data;
   const slug = `${game.date.slice(0, 10)}_${opponent.shortName}`;
+  const oppRows = opponentByJersey(bs.opponent.pointsByJersey, bs.opponent.foulsByJersey);
 
   const reopen = async () => {
     if (!confirm('Riaprire la partita?')) return;
@@ -45,7 +48,7 @@ export function GameStats({ id }: { id: string }) {
 
   return (
     <main class="page stack">
-      <PageTitle icon="chart" onBack={() => navigate('#/calendar')} subtitle={`${fmtDate(game.date)}${game.venue ? ` · ${game.venue.replace(/^Campo:\s*\d+\s*-\s*/i, '')}` : ''}`}>{game.home ? 'vs' : '@'} {opponent.name}</PageTitle>
+      <PageTitle icon="chart" onBack={() => navigate('#/calendar')} subtitle={`${fmtDate(game.date)}${game.venue ? ` · ${venueLabel(game.venue)}` : ''}`}>{game.home ? 'vs' : '@'} {opponent.name}</PageTitle>
       <div class="card">
         <div class="final-score"><span>NOI</span><b>{bs.score.us}</b><span class="muted">–</span><b>{bs.score.them}</b><span>{opponent.shortName}</span></div>
         <div class="row muted" style="font-size:0.85rem;justify-content:center;flex-wrap:wrap">
@@ -61,22 +64,36 @@ export function GameStats({ id }: { id: string }) {
       {tab === 'box' && (
         <>
           <BoxScoreTable bs={bs} players={players} special={countSpecialFouls(events)} />
-          {Object.keys(bs.opponent.foulsByJersey).length > 0 && (
-            <p class="muted">Falli avversari: {Object.entries(bs.opponent.foulsByJersey).map(([n, f]) => `#${n}: ${f}`).join(', ')}</p>
-          )}
-          {Object.keys(bs.opponent.pointsByJersey).length > 0 && (
-            <p class="muted">Punti avversari: {Object.entries(bs.opponent.pointsByJersey).map(([n, p]) => `#${n}: ${p}`).join(', ')}</p>
+          {oppRows.length > 0 && (
+            <>
+              <h2 class="list-section">Avversari per numero</h2>
+              <div class="table-wrap" style="align-self:flex-start">
+                <table class="stats compact">
+                  <thead><tr><th class="sticky">#</th>{oppRows.map((r) => <th key={r.number}>{r.number}</th>)}</tr></thead>
+                  <tbody>
+                    <tr><td class="sticky">PT</td>{oppRows.map((r) => <td key={r.number}>{r.pts}</td>)}</tr>
+                    <tr><td class="sticky">FF</td>{oppRows.map((r) => <td key={r.number}>{r.fouls}</td>)}</tr>
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </>
       )}
       {tab === 'shots' && <ShotChart game={game} events={events} players={players} />}
       {tab === 'history' && (
         <ul class="list history">
-          {events.filter((e) => !e.deleted).slice().reverse().map((e) => (
-            <li key={e.id}>
-              <span class="muted" style="flex:0 0 3.6em">{periodLabel(e.period, game.periodsRegulation)}{e.clockSec !== undefined ? ` ${fmtClock(e.clockSec)}` : ''}</span>
-              <span style="flex:1">{eventLabel(e, players)}</span>
-            </li>
+          {historyByPeriod(events).map((p) => (
+            <Fragment key={p.period}>
+              <li class="history-period"><span>{periodLabel(p.period, game.periodsRegulation)}</span><span>{p.us} – {p.them}</span></li>
+              {p.rows.map(({ e, score }) => (
+                <li key={e.id}>
+                  {e.clockSec !== undefined && <span class="muted" style="flex:0 0 3em">{fmtClock(e.clockSec)}</span>}
+                  <span style="flex:1">{eventLabel(e, players)}</span>
+                  {score && <span class="run-score">{e.side === 'US' ? <b class="accent-text">{score.us}</b> : score.us}–{e.side === 'THEM' ? <b class="accent-text">{score.them}</b> : score.them}</span>}
+                </li>
+              ))}
+            </Fragment>
           ))}
         </ul>
       )}

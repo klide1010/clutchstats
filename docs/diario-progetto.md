@@ -81,6 +81,17 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - Percentuali anche nel **PDF**: sotto T2/T3/TL la percentuale in piccolo, come nell'app (righe un po' più alte; con 12 convocati il
   referto sta ancora in una pagina).
 
+## 25 ottobre — visualizzazione delle partite
+
+- Dopo percentuali e colonne dei falli speciali il box score su telefono era irregolare: righe alte e basse (percentuale solo con
+  tentativi) e la colonna giocatore larga quanto il cognome più lungo. Ora ogni tiro tiene la riga della percentuale (vuota a 0 tentativi)
+  e il cognome si tronca con "…" oltre 8,5rem; bordo a destra della colonna fissa.
+- "Falli avversari" / "Punti avversari" (due righe di testo) diventano una tabellina **Avversari per numero** (# · PT · FF).
+- **Cronologia** divisa per periodo, dal più recente, con il punteggio a fine periodo nell'intestazione e il punteggio progressivo accanto
+  a ogni canestro (in arancione la squadra che ha segnato). Righe più basse.
+- **Calendario** in tre sezioni: In corso, Prossime (dalla più vicina), Giocate (dalla più recente) con risultato e V/P/N. La palestra
+  perde il prefisso "Campo: N -" ovunque (`venueLabel`, `app/src/model/gameView.ts`).
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).

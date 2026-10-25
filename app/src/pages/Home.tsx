@@ -12,6 +12,7 @@ import { SyncButton } from '../ui/SyncButton';
 import { Icon } from '../ui/Icon';
 import { computeSeason } from '../model/season';
 import { fmtPct } from '../model/export';
+import { venueLabel } from '../model/gameView';
 
 export function Home() {
   const [scores, setScores] = useState<Record<string, { us: number; them: number }>>({});
@@ -70,7 +71,7 @@ export function Home() {
         <div class="card stack">
           <strong class="card-title"><Icon name="calendar" size={18} /> Prossima partita</strong>
           <span class="game-head"><span class="game-opp">{next.home ? 'vs' : '@'} {oppName(next)}</span><span class="muted game-date">{fmtDate(next.date)}</span></span>
-          {next.venue && <span class="muted game-venue">{next.venue.replace(/^Campo:\s*\d+\s*-\s*/i, '')}</span>}
+          {next.venue && <span class="muted game-venue">{venueLabel(next.venue)}</span>}
           <button class="btn btn-block" onClick={() => navigate(`#/game/${next.id}`)}>Apri</button>
         </div>
       )}
