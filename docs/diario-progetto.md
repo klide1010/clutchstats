@@ -104,7 +104,8 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - Prova di Andrea sul browser del Mac (finestra larga ma bassa): pannello destro tagliato in fondo. Ora in orizzontale giocatori e azioni
   si dividono l'altezza (righe tra 40 e 64/72px). Inoltre "Ultime azioni" e la cronologia ordinano per periodo e poi per inserimento:
   un evento aggiunto dopo per un periodo passato (cambi col tempo del tabellone) non finisce più in mezzo al periodo corrente.
-- Pubblicata prima come **versione di anteprima** del Worker (`wrangler versions upload`), senza toccare la produzione, per provarla.
+- Pubblicata prima come **versione di anteprima** del Worker (`wrangler versions upload --preview-alias tablet`), senza toccare la
+  produzione; provata da Andrea, poi unita a `main` e pubblicata in produzione lo stesso giorno.
 
 ## Cose aperte
 
