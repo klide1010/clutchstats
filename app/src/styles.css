@@ -347,6 +347,7 @@ table.stats th, table.stats td { padding: 7px 6px; text-align: center; border-bo
 table.stats th { color: var(--muted); font-weight: 600; background: var(--surface); position: sticky; top: 0; font-family: var(--font-display); font-size: 0.85rem; letter-spacing: 0.04em; }
 table.stats td.sticky, table.stats th.sticky { position: sticky; left: 0; background: var(--surface); text-align: left; z-index: 1; }
 table.stats tr.total td { font-weight: 700; background: var(--surface-2); }
+table.stats tr.dnp td { color: var(--muted); }
 table.stats .pct { display: block; min-height: 1.1em; font-size: 0.7rem; font-weight: 400; color: var(--muted); line-height: 1.1; }
 table.stats td.sticky, table.stats th.sticky { box-shadow: 1px 0 0 var(--border); }
 table.stats .name-cell { display: block; max-width: 8.5rem; overflow: hidden; text-overflow: ellipsis; }
@@ -356,7 +357,7 @@ table.stats.compact { min-width: 0; }
 .list-section { margin: 8px 0 0; }
 .game-score { flex: 0 0 auto; display: flex; align-items: center; font-variant-numeric: tabular-nums; }
 .game-score > * + * { margin-left: 6px; }
-.result-badge { display: inline-block; min-width: 1.6em; padding: 1px 4px; border-radius: 4px; text-align: center; font-size: 0.75rem; font-weight: 700; color: #fff; }
+.result-badge { display: inline-block; min-width: 1.6em; letter-spacing: 0.04em; padding: 1px 4px; border-radius: 4px; text-align: center; font-size: 0.75rem; font-weight: 700; color: #fff; }
 .result-badge.won { background: var(--ok); }
 .result-badge.lost { background: var(--err); }
 .result-badge.tie { background: var(--muted); }

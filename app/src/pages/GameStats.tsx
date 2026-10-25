@@ -17,13 +17,16 @@ import { toast } from '../ui/Toast';
 import { SyncButton } from '../ui/SyncButton';
 import { Icon } from '../ui/Icon';
 import { PageTitle } from '../ui/PageTitle';
-import { historyByPeriod, opponentByJersey, venueLabel } from '../model/gameView';
+import { historyByPeriod, matchesHistoryFilter, opponentByJersey, venueLabel, type HistoryKind } from '../model/gameView';
 
-interface Loaded { game: Game; events: GameEvent[]; players: Player[]; opponent: Opponent; bs: BoxScore; teamName: string }
+interface Loaded { game: Game; events: GameEvent[]; players: Player[]; opponent: Opponent; bs: BoxScore; teamName: string; teamShort: string }
 
 export function GameStats({ id }: { id: string }) {
   const [data, setData] = useState<Loaded | null>(null);
   const [tab, setTab] = useState<'box' | 'shots' | 'history'>('box');
+  const [histKind, setHistKind] = useState<HistoryKind>('ALL');
+  const [histPlayer, setHistPlayer] = useState('ALL');
+  const [moreExports, setMoreExports] = useState(false);
 
   const load = async () => {
     const game = await gamesRepo.get(id);
@@ -31,14 +34,19 @@ export function GameStats({ id }: { id: string }) {
     const [events, players, opponent, team] = await Promise.all([eventsRepo.byGame(id), playersRepo.byTeam(game.teamId), opponentsRepo.get(game.opponentId), ensureTeam()]);
     const opp = opponent ?? { id: game.opponentId, name: 'Avversario', shortName: 'AVV', roster: [], updatedAt: 0, deleted: false };
     const called = game.roster && game.roster.length ? players.filter((p) => game.roster!.includes(p.id)) : players;
-    setData({ game, events, players: called, opponent: opp, bs: computeBoxScore(game, events, called), teamName: team.name });
+    setData({ game, events, players: called, opponent: opp, bs: computeBoxScore(game, events, called), teamName: team.name, teamShort: team.shortName || 'NOI' });
   };
   useEffect(() => { void load(); }, [id]);
 
   if (!data) return <main class="page"><p class="muted">Caricamento…</p></main>;
-  const { game, events, players, opponent, bs, teamName } = data;
+  const { game, events, players, opponent, bs, teamName, teamShort } = data;
   const slug = `${game.date.slice(0, 10)}_${opponent.shortName}`;
   const oppRows = opponentByJersey(bs.opponent.pointsByJersey, bs.opponent.foulsByJersey);
+  const result = bs.score.us > bs.score.them ? 'won' : bs.score.us < bs.score.them ? 'lost' : 'tie';
+  const history = historyByPeriod(events)
+    .map((p) => ({ ...p, rows: p.rows.filter(({ e }) => matchesHistoryFilter(e, histKind, histPlayer)) }))
+    .filter((p) => p.rows.length > 0);
+  const HIST_KINDS: { kind: HistoryKind; label: string }[] = [{ kind: 'ALL', label: 'Tutto' }, { kind: 'SHOTS', label: 'Tiri' }, { kind: 'FOULS', label: 'Falli' }, { kind: 'SUBS', label: 'Cambi' }];
 
   const reopen = async () => {
     if (!confirm('Riaprire la partita?')) return;
@@ -50,7 +58,12 @@ export function GameStats({ id }: { id: string }) {
     <main class="page stack">
       <PageTitle icon="chart" onBack={() => navigate('#/calendar')} subtitle={`${fmtDate(game.date)}${game.venue ? ` · ${venueLabel(game.venue)}` : ''}`}>{game.home ? 'vs' : '@'} {opponent.name}</PageTitle>
       <div class="card">
-        <div class="final-score"><span>NOI</span><b>{bs.score.us}</b><span class="muted">–</span><b>{bs.score.them}</b><span>{opponent.shortName}</span></div>
+        <div class="final-score"><span>{teamShort}</span><b>{bs.score.us}</b><span class="muted">–</span><b>{bs.score.them}</b><span>{opponent.shortName}</span></div>
+        {game.status === 'CLOSED' && (
+          <div style="text-align:center;margin:2px 0 6px">
+            <span class={`result-badge ${result}`}>{result === 'won' ? 'Vittoria' : result === 'lost' ? 'Sconfitta' : 'Pareggio'}</span>
+          </div>
+        )}
         <div class="row muted" style="font-size:0.85rem;justify-content:center;flex-wrap:wrap">
           {bs.scoreByPeriod.map((p) => <span key={p.period} style="flex:0 0 auto">{periodLabel(p.period, game.periodsRegulation)} {p.us}-{p.them}</span>)}
         </div>
@@ -82,8 +95,24 @@ export function GameStats({ id }: { id: string }) {
       )}
       {tab === 'shots' && <ShotChart game={game} events={events} players={players} />}
       {tab === 'history' && (
+        <div class="row">
+          <div class="seg" style="flex:1 1 auto">
+            {HIST_KINDS.map((k) => <button key={k.kind} class={`seg-btn${histKind === k.kind ? ' active' : ''}`} onClick={() => setHistKind(k.kind)}>{k.label}</button>)}
+          </div>
+        </div>
+      )}
+      {tab === 'history' && (
+        <div>
+          <select value={histPlayer} onChange={(e) => setHistPlayer((e.target as HTMLSelectElement).value)} style="margin:0">
+            <option value="ALL">Tutti i giocatori</option>
+            {players.map((p) => <option key={p.id} value={p.id}>#{p.number} {p.lastName}</option>)}
+          </select>
+        </div>
+      )}
+      {tab === 'history' && (
         <ul class="list history">
-          {historyByPeriod(events).map((p) => (
+          {history.length === 0 && <li class="muted">Nessuna azione con questo filtro</li>}
+          {history.map((p) => (
             <Fragment key={p.period}>
               <li class="history-period"><span>{periodLabel(p.period, game.periodsRegulation)}</span><span>{p.us} – {p.them}</span></li>
               {p.rows.map(({ e, score }) => (
@@ -98,10 +127,15 @@ export function GameStats({ id }: { id: string }) {
         </ul>
       )}
       <div class="row">
-        <button class="btn btn-icon" onClick={() => { downloadText(`bkstats_${slug}.pdf`, 'application/pdf', gameReportPdf({ teamName, game, events, players, opponent, bs, dateLabel: fmtDate(game.date) })); toast('PDF scaricato'); }}><Icon name="download" size={18} /> PDF</button>
-        <button class="btn btn-icon" onClick={() => { downloadText(`bkstats_${slug}.csv`, 'text/csv;charset=utf-8', boxScoreToCsv(bs, players)); toast('CSV esportato'); }}><Icon name="download" size={18} /> CSV</button>
-        <button class="btn btn-icon" onClick={() => { downloadText(`bkstats_${slug}.json`, 'application/json', gameToJson(game, events, players, opponent, bs)); toast('JSON esportato'); }}><Icon name="download" size={18} /> JSON</button>
+        <button class="btn btn-icon" style="flex:2 1 0" onClick={() => { downloadText(`bkstats_${slug}.pdf`, 'application/pdf', gameReportPdf({ teamName, game, events, players, opponent, bs, dateLabel: fmtDate(game.date) })); toast('PDF scaricato'); }}><Icon name="file" size={18} /> Referto PDF</button>
+        <button class={`btn btn-icon${moreExports ? ' active' : ''}`} aria-expanded={moreExports} onClick={() => setMoreExports(!moreExports)}><Icon name="download" size={18} /> Dati</button>
       </div>
+      {moreExports && (
+        <div class="row">
+          <button class="btn btn-icon" onClick={() => { downloadText(`bkstats_${slug}.csv`, 'text/csv;charset=utf-8', boxScoreToCsv(bs, players)); toast('CSV esportato'); }}><Icon name="download" size={18} /> CSV</button>
+          <button class="btn btn-icon" onClick={() => { downloadText(`bkstats_${slug}.json`, 'application/json', gameToJson(game, events, players, opponent, bs)); toast('JSON esportato'); }}><Icon name="download" size={18} /> JSON</button>
+        </div>
+      )}
       {game.status === 'CLOSED' && <SyncButton label="Sincronizza ora" />}
       {game.status === 'CLOSED' ? <button class="btn btn-block" onClick={reopen}>Riapri partita</button>
         : <button class="btn btn-block btn-primary" onClick={() => navigate(`#/game/${game.id}`)}>{game.status === 'LIVE' ? 'Torna alla partita' : 'Apri partita'}</button>}

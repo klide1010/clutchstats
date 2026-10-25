@@ -70,3 +70,30 @@ it('historyByPeriod: un evento inserito dopo per un periodo passato finisce nel 
   expect(r[1]).toMatchObject({ us: 2, them: 1 });
   expect(r[0].rows[0].score).toEqual({ us: 5, them: 1 });
 });
+
+it('didNotPlay: zero minuti e nessuna statistica', async () => {
+  const { didNotPlay } = await import('../src/model/gameView');
+  const base = { pts: 0, fg2m: 0, fg2a: 0, fg3m: 0, fg3a: 0, ftm: 0, fta: 0, oreb: 0, dreb: 0, reb: 0, ast: 0, tov: 0, stl: 0, blk: 0, blkR: 0, pf: 0, pfd: 0, screens: 0, playerId: 'x', seconds: 0, plusMinus: 0, rating: 0 };
+  expect(didNotPlay(base)).toBe(true);
+  expect(didNotPlay({ ...base, seconds: 30 })).toBe(false);
+  expect(didNotPlay({ ...base, pf: 1 })).toBe(false);
+});
+
+it('matchesHistoryFilter: tiri, falli, cambi e giocatore (anche assist e cambi)', async () => {
+  const { matchesHistoryFilter } = await import('../src/model/gameView');
+  const shot = ev({ type: 'SHOT_2', made: false, playerId: 'a', assistPlayerId: 'c' });
+  const ft = ev({ type: 'FREE_THROW', made: true, playerId: 'b' });
+  const foul = ev({ type: 'FOUL', playerId: 'a' });
+  const drawn = ev({ type: 'FOUL_DRAWN', playerId: 'b' });
+  const sub = ev({ type: 'SUBSTITUTION', subOutPlayerId: 'a', subInPlayerId: 'd' });
+  const reb = ev({ type: 'REBOUND_DEF', playerId: 'a' });
+  const all = [shot, ft, foul, drawn, sub, reb];
+  const pick = (k: Parameters<typeof matchesHistoryFilter>[1], p = 'ALL') => all.filter((e) => matchesHistoryFilter(e, k, p));
+  expect(pick('ALL')).toHaveLength(6);
+  expect(pick('SHOTS')).toEqual([shot, ft]);
+  expect(pick('FOULS')).toEqual([foul, drawn]);
+  expect(pick('SUBS')).toEqual([sub]);
+  expect(pick('ALL', 'a')).toEqual([shot, foul, sub, reb]);
+  expect(pick('ALL', 'c')).toEqual([shot]);
+  expect(pick('SHOTS', 'b')).toEqual([ft]);
+});

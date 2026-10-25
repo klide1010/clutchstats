@@ -107,6 +107,16 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - Pubblicata prima come **versione di anteprima** del Worker (`wrangler versions upload --preview-alias tablet`), senza toccare la
   produzione; provata da Andrea, poi unita a `main` e pubblicata in produzione lo stesso giorno.
 
+## 25 ottobre — rifiniture delle statistiche
+
+- Box score: i convocati **non entrati** (zero minuti e nessuna statistica) vanno in fondo, in grigio, con "N.E." al posto dei minuti.
+- Punteggio finale con la sigla della squadra al posto di "NOI" e l'etichetta Vittoria/Sconfitta/Pareggio a partita chiusa.
+- Tiri: filtri "Tutti i giocatori" (riga intera), "Tutti i periodi", "Tutti i tiri" (prima tre "Tutti" ambigui e uno troncato).
+- Cronologia filtrabile per tipo (Tutto, Tiri, Falli, Cambi) e per giocatore (conta anche assist e chi entra/esce dal cambio).
+- Esportazioni: in vista "Referto PDF"; CSV e JSON sotto "Dati".
+- Stagione: tiri con la percentuale sotto (nei totali, come nel box score) e colonne FA/FT/FO quando ci sono; nelle medie divise per le
+  partite giocate. Tabella estratta in `SeasonTable` per i test.
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).

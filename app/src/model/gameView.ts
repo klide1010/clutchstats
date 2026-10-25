@@ -1,4 +1,4 @@
-import type { Game, GameEvent } from '@bkstats/shared';
+import { emptyStatLine, type Game, type GameEvent, type PlayerLine, type StatLine } from '@bkstats/shared';
 
 /** Partite divise per l'elenco: in corso, prossime (dalla più vicina), giocate (dalla più recente). */
 export function groupGames(list: Game[]): { live: Game[]; upcoming: Game[]; played: Game[] } {
@@ -49,4 +49,21 @@ export function opponentByJersey(pointsByJersey: Record<number, number>, foulsBy
   const nums = Object.keys(pointsByJersey).concat(Object.keys(foulsByJersey)).map(Number);
   return nums.filter((n, i) => nums.indexOf(n) === i).sort((a, b) => a - b)
     .map((n) => ({ number: n, pts: pointsByJersey[n] ?? 0, fouls: foulsByJersey[n] ?? 0 }));
+}
+
+/** Convocato non entrato: zero minuti e nessuna statistica (sul referto "N.E."). */
+export function didNotPlay(l: PlayerLine): boolean {
+  if (l.seconds > 0) return false;
+  return (Object.keys(emptyStatLine()) as (keyof StatLine)[]).every((k) => l[k] === 0);
+}
+
+export type HistoryKind = 'ALL' | 'SHOTS' | 'FOULS' | 'SUBS';
+
+/** Filtro della cronologia per tipo e giocatore (vale anche chi ha fatto l'assist o è entrato/uscito). */
+export function matchesHistoryFilter(e: GameEvent, kind: HistoryKind, playerId: string): boolean {
+  if (kind === 'SHOTS' && e.type !== 'SHOT_2' && e.type !== 'SHOT_3' && e.type !== 'FREE_THROW') return false;
+  if (kind === 'FOULS' && e.type !== 'FOUL' && e.type !== 'FOUL_DRAWN') return false;
+  if (kind === 'SUBS' && e.type !== 'SUBSTITUTION') return false;
+  if (playerId === 'ALL') return true;
+  return e.playerId === playerId || e.assistPlayerId === playerId || e.subInPlayerId === playerId || e.subOutPlayerId === playerId;
 }

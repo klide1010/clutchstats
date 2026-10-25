@@ -67,3 +67,15 @@ it('every shot cell keeps the percentage line, so rows have the same height', ()
   for (const col of ['T2', 'T3', 'TL']) expect(row.children[header(container).indexOf(col)].querySelector('.pct')).not.toBeNull();
   expect(cellAt(container, 'C1', 'T2')).toBe('0/0');
 });
+
+it('chi non è entrato va in fondo, con N.E. al posto dei minuti', () => {
+  const six = [...players, { ...players[0], id: 'f', lastName: 'C5', number: 1 }];
+  const events = [ev({ type: 'PERIOD_START' }), ev({ type: 'SHOT_2', playerId: 'a', made: true, x: 0.5, y: 0.2 }), ev({ type: 'PERIOD_END' })];
+  const bs = computeBoxScore(game, events, six);
+  const { container } = render(<BoxScoreTable bs={bs} players={six} />);
+  const names = Array.from(container.querySelectorAll('tbody tr')).map((tr) => tr.children[0].textContent);
+  expect(names[5]).toContain('C5');
+  expect(cellAt(container, 'C5', 'Min')).toBe('N.E.');
+  expect(rowOf(container, 'C5').classList.contains('dnp')).toBe(true);
+  expect(rowOf(container, 'C0').classList.contains('dnp')).toBe(false);
+});

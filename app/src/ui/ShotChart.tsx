@@ -38,19 +38,21 @@ export function ShotChart({ game, events, players }: Props) {
           <button class={`seg-btn${sideSel === 'THEM' ? ' active' : ''}`} onClick={() => { setSideSel('THEM'); setPlayerId('ALL'); }}>Loro</button>
         </div>
       </div>
-      <div class="row">
-        {sideSel === 'US' && (
+      {sideSel === 'US' && (
+        <div>
           <select value={playerId} onChange={(e) => setPlayerId((e.target as HTMLSelectElement).value)} style="margin:0">
-            <option value="ALL">Tutti</option>
+            <option value="ALL">Tutti i giocatori</option>
             {players.map((p) => <option key={p.id} value={p.id}>#{p.number} {p.lastName}</option>)}
           </select>
-        )}
+        </div>
+      )}
+      <div class="row">
         <select value={period} onChange={(e) => setPeriod((e.target as HTMLSelectElement).value)} style="margin:0">
           <option value="ALL">Tutti i periodi</option>
           {periods.map((p) => <option key={p} value={String(p)}>{periodLabel(p, game.periodsRegulation)}</option>)}
         </select>
         <select value={outcome} onChange={(e) => setOutcome((e.target as HTMLSelectElement).value as 'ALL' | 'MADE' | 'MISSED')} style="margin:0">
-          <option value="ALL">Tutti</option><option value="MADE">Segnati</option><option value="MISSED">Sbagliati</option>
+          <option value="ALL">Tutti i tiri</option><option value="MADE">Segnati</option><option value="MISSED">Sbagliati</option>
         </select>
       </div>
       <div class="chart-wrap"><Court shots={shots} class="chart" /></div>
