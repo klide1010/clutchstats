@@ -16,7 +16,7 @@ export default defineConfig({
         description: 'Basketball analytics',
         lang: 'it',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'any',
         background_color: '#0E1116',
         theme_color: '#0E1116',
         start_url: '/',

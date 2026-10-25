@@ -8,6 +8,9 @@ import './styles.css';
 import { initTheme } from './state/theme';
 import { App } from './App';
 import { initSession } from './state/session';
+import { lockPortraitOnPhone } from './state/orientation';
+
+lockPortraitOnPhone(screen as unknown as Parameters<typeof lockPortraitOnPhone>[0]);
 
 Promise.all([initSession(), initTheme()]).finally(() => {
   render(<App />, document.getElementById('app')!);

@@ -92,6 +92,17 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - **Calendario** in tre sezioni: In corso, Prossime (dalla più vicina), Giocate (dalla più recente) con risultato e V/P/N. La palestra
   perde il prefisso "Campo: N -" ovunque (`venueLabel`, `app/src/model/gameView.ts`).
 
+## 25 ottobre — partita live su tablet (anteprima)
+
+- Schermata di registrazione con due layout tablet, solo CSS su `.game` (il telefono resta identico):
+  **verticale** (≥700px di larghezza): campo in alto, sotto i 5 in campo in colonna (numero grande, cognome intero, falli) a sinistra e
+  azioni su 3 colonne a destra; **orizzontale** (≥900×560): barra con punteggio, cronometro e Undo/Cambi/menu su una riga, poi
+  "Ultime azioni" (`LiveFeed`, con punteggio progressivo) | campo | pannello Noi/Loro, giocatori, azioni.
+- Manifest `orientation: 'any'` per lasciar ruotare i tablet; sui telefoni (lato corto < 600px) l'app installata si blocca in verticale
+  con `screen.orientation.lock` (`app/src/state/orientation.ts`). I telefoni con l'app già installata prendono il nuovo manifest quando
+  Chrome aggiorna la WebAPK.
+- Pubblicata prima come **versione di anteprima** del Worker (`wrangler versions upload`), senza toccare la produzione, per provarla.
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).

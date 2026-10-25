@@ -16,6 +16,7 @@ import { SubsPanel } from '../ui/SubsPanel';
 import { GameMenu } from '../ui/GameMenu';
 import { Icon } from '../ui/Icon';
 import { PageTitle } from '../ui/PageTitle';
+import { LiveFeed } from '../ui/LiveFeed';
 
 const FOUL_KINDS: { kind: FoulKind; label: string }[] = [
   { kind: 'PERSONAL', label: 'Personale' },
@@ -203,6 +204,7 @@ export function Game({ id }: { id: string }) {
         </div>
       )}
       <ActionGrid side={side.value} pending={pendingAction.value} onAction={(t) => void onActionTap(t, lg)} onFreeThrow={() => setFt(true)} onFoulLongPress={() => setFoulChooser(true)} />
+      <LiveFeed lg={lg} />
 
       {pendingShot.value && (
         <ShotPopup
