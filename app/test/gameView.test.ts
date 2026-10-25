@@ -54,3 +54,19 @@ it('opponentByJersey unisce punti e falli per numero di maglia, in ordine', () =
     { number: 4, pts: 2, fouls: 1 }, { number: 10, pts: 4, fouls: 0 }, { number: 15, pts: 0, fouls: 2 },
   ]);
 });
+
+it('historyByPeriod: un evento inserito dopo per un periodo passato finisce nel suo periodo, senza periodi doppi', () => {
+  const events = [
+    ev({ type: 'PERIOD_START', period: 1, seq: 101 }),
+    ev({ type: 'SHOT_2', made: true, playerId: 'a', period: 1, seq: 102 }),
+    ev({ type: 'PERIOD_START', period: 2, seq: 103 }),
+    ev({ type: 'SHOT_3', made: true, playerId: 'a', period: 2, seq: 104 }),
+    ev({ type: 'FOUL', playerId: 'b', period: 1, seq: 105 }),
+    ev({ type: 'FREE_THROW', made: true, side: 'THEM', jerseyNumber: 4, period: 1, seq: 106 }),
+  ];
+  const r = historyByPeriod(events);
+  expect(r.map((p) => p.period)).toEqual([2, 1]);
+  expect(r[1].rows.map((x) => x.e.type)).toEqual(['FREE_THROW', 'FOUL', 'SHOT_2', 'PERIOD_START']);
+  expect(r[1]).toMatchObject({ us: 2, them: 1 });
+  expect(r[0].rows[0].score).toEqual({ us: 5, them: 1 });
+});

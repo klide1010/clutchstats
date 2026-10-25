@@ -101,6 +101,9 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - Manifest `orientation: 'any'` per lasciar ruotare i tablet; sui telefoni (lato corto < 600px) l'app installata si blocca in verticale
   con `screen.orientation.lock` (`app/src/state/orientation.ts`). I telefoni con l'app già installata prendono il nuovo manifest quando
   Chrome aggiorna la WebAPK.
+- Prova di Andrea sul browser del Mac (finestra larga ma bassa): pannello destro tagliato in fondo. Ora in orizzontale giocatori e azioni
+  si dividono l'altezza (righe tra 40 e 64/72px). Inoltre "Ultime azioni" e la cronologia ordinano per periodo e poi per inserimento:
+  un evento aggiunto dopo per un periodo passato (cambi col tempo del tabellone) non finisce più in mezzo al periodo corrente.
 - Pubblicata prima come **versione di anteprima** del Worker (`wrangler versions upload`), senza toccare la produzione, per provarla.
 
 ## Cose aperte

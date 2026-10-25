@@ -26,12 +26,13 @@ function points(e: GameEvent): number {
 
 /**
  * Cronologia per periodo, dal più recente: ogni canestro porta il punteggio dopo l'azione,
- * ogni periodo il punteggio alla fine (o adesso, se è in corso).
+ * ogni periodo il punteggio alla fine (o adesso, se è in corso). Un evento inserito più tardi
+ * per un periodo già passato (es. un cambio col tempo del tabellone) va nel suo periodo.
  */
 export function historyByPeriod(events: GameEvent[]): HistoryPeriod[] {
   const out: HistoryPeriod[] = [];
   const score: Score = { us: 0, them: 0 };
-  for (const e of events.filter((x) => !x.deleted).sort((a, b) => a.seq - b.seq)) {
+  for (const e of events.filter((x) => !x.deleted).sort((a, b) => a.period - b.period || a.seq - b.seq)) {
     let p = out[out.length - 1];
     if (!p || p.period !== e.period) { p = { period: e.period, us: score.us, them: score.them, rows: [] }; out.push(p); }
     const pts = points(e);
