@@ -124,6 +124,8 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
   layout del telefono. Ora il tablet si riconosce dallo **schermo** (lato corto ≥ 600px, classe `tablet` sulla radice, stessa soglia del
   blocco in verticale dei telefoni) e le soglie sulla finestra sono basse (≥ 800 in orizzontale, ≥ 560 in verticale); sotto i 620px di
   altezza la barra in alto e i pulsanti si compattano. Il telefono non cambia (niente classe `tablet`).
+- Prova in partita (Galaxy Tab 8", orizzontale): giocatori troppo alti, azioni schiacciate. Ora giocatori e azioni si dividono l'altezza
+  4:5 (prima 5:4) e sotto i 620px di altezza le righe giocatore stanno tra 30 e 46px, con numero e cognome un po' più piccoli.
 
 ## Cose aperte
 
