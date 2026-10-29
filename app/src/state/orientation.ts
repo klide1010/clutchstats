@@ -17,3 +17,13 @@ export function lockPortraitOnPhone(s: ScreenLike): void {
     // API presente ma non utilizzabile qui.
   }
 }
+
+/** Tablet (o computer): lato corto dello schermo da 600px in su. Misura lo schermo, non la finestra, che le barre di Chrome accorciano. */
+export function isTabletScreen(width: number, height: number): boolean {
+  return !isPhoneScreen(width, height);
+}
+
+/** Classe `tablet` sulla radice: abilita i layout della partita live per tablet verticale e orizzontale (styles.css). */
+export function markTabletScreen(s: { width: number; height: number }, root: Element): void {
+  if (isTabletScreen(s.width, s.height)) root.classList.add('tablet');
+}

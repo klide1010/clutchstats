@@ -117,6 +117,14 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - Stagione: tiri con la percentuale sotto (nei totali, come nel box score) e colonne FA/FT/FO quando ci sono; nelle medie divise per le
   partite giocate. Tabella estratta in `SeasonTable` per i test.
 
+## 29 ottobre — layout tablet che non partiva
+
+- Andrea: "sul tablet non va". In produzione c'era, ma le soglie erano sulla **finestra** (900×560 orizzontale, 700×900 verticale) e su
+  molti tablet Android, tolte barra di stato e barra di Chrome, la pagina è più piccola (Galaxy Tab A: ~1000×520 e ~600×880): restava il
+  layout del telefono. Ora il tablet si riconosce dallo **schermo** (lato corto ≥ 600px, classe `tablet` sulla radice, stessa soglia del
+  blocco in verticale dei telefoni) e le soglie sulla finestra sono basse (≥ 800 in orizzontale, ≥ 560 in verticale); sotto i 620px di
+  altezza la barra in alto e i pulsanti si compattano. Il telefono non cambia (niente classe `tablet`).
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).
