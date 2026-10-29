@@ -42,6 +42,29 @@ it('substitution without clock asks for the minute and stamps clockSec', async (
   expect(lg.onCourt.value).not.toContain('p0');
 });
 
+it('il minuto proposto è 10 al primo cambio del periodo, poi quello del cambio precedente', async () => {
+  const { unmount } = render(<SubsPanel lg={lg} onClose={() => undefined} />);
+  fireEvent.click(screen.getByRole('button', { name: /#4 C0/ }));
+  fireEvent.click(screen.getByRole('button', { name: /#9 C5/ }));
+  expect((screen.getByLabelText('Minuti sul tabellone') as HTMLInputElement).value).toBe('10');
+  unmount();
+  await lg.substitute('p1', 'p6', 7 * 60);
+  render(<SubsPanel lg={lg} onClose={() => undefined} />);
+  fireEvent.click(screen.getByRole('button', { name: /#4 C0/ }));
+  fireEvent.click(screen.getByRole('button', { name: /#9 C5/ }));
+  expect((screen.getByLabelText('Minuti sul tabellone') as HTMLInputElement).value).toBe('7');
+});
+
+it('avvisa se il tempo è più alto del cambio precedente (il tabellone scende)', async () => {
+  await lg.substitute('p1', 'p6', 1 * 60);
+  render(<SubsPanel lg={lg} onClose={() => undefined} />);
+  fireEvent.click(screen.getByRole('button', { name: /#4 C0/ }));
+  fireEvent.click(screen.getByRole('button', { name: /#9 C5/ }));
+  expect(screen.queryByText(/cambio precedente/)).toBeNull();
+  fireEvent.input(screen.getByLabelText('Minuti sul tabellone'), { target: { value: '5' } });
+  expect(screen.getByText(/cambio precedente era a 1'/)).toBeTruthy();
+});
+
 it('EventHistory lists events newest first and deletes one', async () => {
   await lg.addEvent({ type: 'STEAL', side: 'US', playerId: 'p1' });
   await lg.addEvent({ type: 'TURNOVER', side: 'US', playerId: 'p2' });

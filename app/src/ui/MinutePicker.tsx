@@ -4,6 +4,8 @@ interface Props {
   maxMin: number;
   /** Minuti sul tabellone proposti all'apertura. */
   defaultMin: number;
+  /** Tabellone all'ultimo cambio del periodo: un tempo più alto è quasi sempre un errore (si conta alla rovescia). */
+  prevMin?: number;
   /** Minuti che mancano alla fine del periodo, come li mostra il tabellone. */
   onConfirm: (minutesLeft: number) => void;
   onCancel: () => void;
@@ -14,7 +16,7 @@ interface Props {
  * (10' = inizio periodo, 0' = fine): chiedere i minuti giocati portava a inserire comunque quelli del tabellone
  * e a ribaltare i tempi dei cambi.
  */
-export function MinutePicker({ maxMin, defaultMin, onConfirm, onCancel }: Props) {
+export function MinutePicker({ maxMin, defaultMin, prevMin, onConfirm, onCancel }: Props) {
   const [minute, setMinute] = useState(Math.min(maxMin, Math.max(0, defaultMin)));
   return (
     <div class="stack">
@@ -30,6 +32,9 @@ export function MinutePicker({ maxMin, defaultMin, onConfirm, onCancel }: Props)
       <p class="muted" style="margin:0;text-align:center;font-size:0.85rem">
         {minute === maxMin ? 'inizio periodo' : minute === 0 ? 'fine periodo' : `mancano ${minute}', cioè ${maxMin - minute}' giocati`}
       </p>
+      {prevMin !== undefined && minute > prevMin && (
+        <p class="error" style="margin:0;text-align:center;font-size:0.85rem">Il cambio precedente era a {prevMin}': il tabellone scende, controlla il tempo.</p>
+      )}
       <div class="row">
         <button class="btn" onClick={onCancel}>Annulla</button>
         <button class="btn btn-primary" onClick={() => onConfirm(minute)}>Conferma</button>

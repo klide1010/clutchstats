@@ -127,6 +127,14 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - Prova in partita (Galaxy Tab 8", orizzontale): giocatori troppo alti, azioni schiacciate. Ora giocatori e azioni si dividono l'altezza
   4:5 (prima 5:4) e sotto i 620px di altezza le righe giocatore stanno tra 30 e 46px, con numero e cognome un po' più piccoli.
 
+## 29 ottobre — Colleoni a 0 minuti (partita del 29/10)
+
+- Statistiche di Andrea Colleoni (#23) registrate, ma minuti 0. I primi tre cambi del Q1 (Colleoni per Magro, Storto per Chiesa, Gorla
+  per Lazzaroni, subito dopo l'inizio) erano stati inseriti a **1'** sul tabellone invece di 10': Colleoni risultava uscito (a 5') prima
+  di entrare. Con 1' i minuti di squadra sommano 211 su 200; con 10' esattamente 200.
+- Selettore del minuto del cambio: propone il tempo dell'ultimo cambio del periodo (10' al primo) invece di metà periodo, e avvisa in rosso
+  se si sceglie un tempo più alto del cambio precedente.
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).
