@@ -25,6 +25,8 @@ export interface LiveGame {
   onCourt: ReadonlySignal<string[]>;
   bench: ReadonlySignal<Player[]>;
   periodOpen: ReadonlySignal<boolean>;
+  /** Periodo aperto ma senza ancora un'azione (solo cambi): i cambi correggono il quintetto e valgono dall'inizio periodo. */
+  lineupPhase: ReadonlySignal<boolean>;
   /** Partita in corso registrata da un altro dispositivo: chiedere se prenderla in carico. */
   foreignLive: ReadonlySignal<boolean>;
   /** Giocatori in campo con 5 falli: vanno sostituiti (o si annulla il fallo). */
@@ -104,6 +106,13 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     const l = live.value;
     const lastP = [...l].reverse().find((e) => e.type === 'PERIOD_START' || e.type === 'PERIOD_END');
     return lastP?.type === 'PERIOD_START';
+  });
+  const lineupPhase = computed(() => {
+    if (!periodOpen.value) return false;
+    const l = live.value;
+    let i = l.length - 1;
+    while (i >= 0 && l[i].type !== 'PERIOD_START') i--;
+    return l.slice(i + 1).every((e) => e.type === 'SUBSTITUTION');
   });
   const onCourt = computed(() => onCourtAfter(game.value, live.value, Number.MAX_SAFE_INTEGER));
   // I convocati sono già scelti tra attivi e (volendo) inattivi: qui "attivo" non conta più,
@@ -193,6 +202,8 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     if (!onCourt.value.includes(outId)) throw new Error('Giocatore non in campo');
     if (onCourt.value.includes(inId)) throw new Error('Giocatore già in campo');
     if ((foulsByPlayer.value[inId] ?? 0) >= 5) throw new Error('Ha 5 falli: non può rientrare');
+    // Correzione del quintetto prima della prima azione: senza cronometro vale dall'inizio periodo (tabellone pieno).
+    if (lineupPhase.value && !game.value.useClock && clockSec === undefined) clockSec = periodLengthSec(game.value, game.value.currentPeriod);
     if (periodOpen.value && !game.value.useClock && clockSec === undefined) throw new Error('Indica il minuto del cambio');
     await addEvent({ type: 'SUBSTITUTION', side: 'US', subOutPlayerId: outId, subInPlayerId: inId, clockSec });
   };
@@ -270,7 +281,7 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
   });
 
   return {
-    game, events, players, allPlayers, opponent, clock, boxScore, onCourt, bench, periodOpen, foreignLive, fouledOut, canUndo, lastEventLabel,
+    game, events, players, allPlayers, opponent, clock, boxScore, onCourt, bench, periodOpen, lineupPhase, foreignLive, fouledOut, canUndo, lastEventLabel,
     addEvent, undo, deleteEvent, startPeriod, endPeriod, substitute, setStarters, setPeriodLineup, setRoster, takeOver, restartFromScratch, addOpponentNumber, lastFoulOf, closeGame, reload,
     dispose: () => { stopSyncWatch(); clock.dispose(); },
   };

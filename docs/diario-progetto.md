@@ -134,6 +134,14 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
   di entrare. Con 1' i minuti di squadra sommano 211 su 200; con 10' esattamente 200.
 - Selettore del minuto del cambio: propone il tempo dell'ultimo cambio del periodo (10' al primo) invece di metà periodo, e avvisa in rosso
   se si sceglie un tempo più alto del cambio precedente.
+- Richieste di Andrea dopo la partita:
+  - **Inizio periodo**: la scelta dei 5 parte vuota (prima erano già selezionati quelli che avevano chiuso), con il pulsante
+    "Rimetti i 5 di prima" e il contatore N/5.
+  - **Correzione del quintetto**: finché nel periodo aperto non c'è nessuna azione (solo cambi, `lineupPhase`), un cambio non chiede il
+    minuto e vale dall'inizio periodo (tabellone pieno): chi entra prende tutto il periodo, chi esce zero. È il caso dei tre cambi di
+    Colleoni, Storto e Gorla.
+- Correzione dei dati della partita del 29/10 (tre cambi da 1' a 10'): confermata da Andrea, ma la scrittura su D1 di produzione è stata
+  bloccata dai permessi della sessione cloud; da fare con il suo via libera esplicito.
 
 ## Cose aperte
 

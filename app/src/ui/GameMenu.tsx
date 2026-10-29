@@ -18,7 +18,7 @@ export function GameMenu({ lg, onClose, onClosed }: Props) {
   const [sel, setSel] = useState<string[]>(lg.game.value.starters);
   const g = lg.game.value;
   const open = lg.periodOpen.value;
-  const [next, setNext] = useState<string[]>(lg.onCourt.value);
+  const [next, setNext] = useState<string[]>([]);
   const fouledOut = lg.boxScore.value.players.filter((l) => l.pf >= 5).map((l) => l.playerId);
   const nextLabel = g.currentPeriod >= g.periodsRegulation ? 'Inizia supplementare' : 'Inizia periodo';
   const startNext = () => run(async () => { await lg.setPeriodLineup(next); await lg.startPeriod(); });
@@ -47,7 +47,7 @@ export function GameMenu({ lg, onClose, onClosed }: Props) {
           <>
             {open
               ? <button class="btn btn-block" onClick={() => run(async () => { await lg.endPeriod(); void trySync(); }, 'Periodo chiuso')}>Fine periodo</button>
-              : <button class="btn btn-block btn-primary" onClick={() => { setNext(lg.onCourt.value.filter((id) => !fouledOut.includes(id))); setView('period'); }}>{nextLabel}</button>}
+              : <button class="btn btn-block btn-primary" onClick={() => { setNext([]); setView('period'); }}>{nextLabel}</button>}
             <div class="row">
               <button class="btn" onClick={() => run(() => lg.addEvent({ type: 'TIMEOUT', side: 'US' }).then(() => undefined), 'Timeout noi')}>Timeout noi</button>
               <button class="btn" onClick={() => run(() => lg.addEvent({ type: 'TIMEOUT', side: 'THEM' }).then(() => undefined), 'Timeout loro')}>Timeout loro</button>
@@ -63,7 +63,11 @@ export function GameMenu({ lg, onClose, onClosed }: Props) {
         {view === 'history' && <EventHistory lg={lg} />}
         {view === 'period' && (
           <>
-            <span class="muted">Scegli i 5 in campo all'inizio del periodo: già selezionati quelli che hanno chiuso il precedente.</span>
+            <span class="muted">Scegli i 5 in campo all'inizio del periodo.</span>
+            <div class="row pick-summary">
+              <span><b class="display">{next.length}</b><span class="muted">/5 in campo</span></span>
+              <button class="btn btn-sm btn-icon" style="flex:0 0 auto" onClick={() => setNext(lg.onCourt.value.filter((id) => !fouledOut.includes(id)))}><Icon name="undo" size={16} /> Rimetti i 5 di prima</button>
+            </div>
             <PlayerPicker players={lg.players.value} selected={next} max={5} onChange={setNext} disabled={fouledOut} />
             <button class="btn btn-primary btn-block btn-icon" disabled={next.length !== 5} onClick={startNext}><Icon name="play" size={18} /> {nextLabel}</button>
           </>

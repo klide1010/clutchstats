@@ -28,6 +28,7 @@ beforeEach(async () => {
 });
 
 it('substitution without clock asks for the minute and stamps clockSec', async () => {
+  await lg.addEvent({ type: 'STEAL', side: 'US', playerId: 'p1' }); // periodo iniziato: il cambio chiede il minuto
   render(<SubsPanel lg={lg} onClose={() => undefined} />);
   fireEvent.click(screen.getByRole('button', { name: /#4 C0/ }));
   fireEvent.click(screen.getByRole('button', { name: /#9 C5/ }));
@@ -43,6 +44,7 @@ it('substitution without clock asks for the minute and stamps clockSec', async (
 });
 
 it('il minuto proposto è 10 al primo cambio del periodo, poi quello del cambio precedente', async () => {
+  await lg.addEvent({ type: 'STEAL', side: 'US', playerId: 'p1' }); // periodo iniziato: il cambio chiede il minuto
   const { unmount } = render(<SubsPanel lg={lg} onClose={() => undefined} />);
   fireEvent.click(screen.getByRole('button', { name: /#4 C0/ }));
   fireEvent.click(screen.getByRole('button', { name: /#9 C5/ }));
@@ -56,6 +58,7 @@ it('il minuto proposto è 10 al primo cambio del periodo, poi quello del cambio 
 });
 
 it('avvisa se il tempo è più alto del cambio precedente (il tabellone scende)', async () => {
+  await lg.addEvent({ type: 'STEAL', side: 'US', playerId: 'p1' }); // periodo iniziato: il cambio chiede il minuto
   await lg.substitute('p1', 'p6', 1 * 60);
   render(<SubsPanel lg={lg} onClose={() => undefined} />);
   fireEvent.click(screen.getByRole('button', { name: /#4 C0/ }));
@@ -77,19 +80,46 @@ it('EventHistory lists events newest first and deletes one', async () => {
   expect(lg.boxScore.value.team.stl).toBe(1);
 });
 
-it('GameMenu asks who starts the next period and starts it with that five', async () => {
+it('GameMenu: il quintetto del nuovo periodo parte vuoto, "Rimetti i 5" ripropone chi ha chiuso', async () => {
   const { GameMenu } = await import('../src/ui/GameMenu');
   await lg.endPeriod();
   render(<GameMenu lg={lg} onClose={() => undefined} />);
   fireEvent.click(screen.getByRole('button', { name: 'Inizia periodo' }));
   expect(screen.getByText('Chi inizia il periodo')).toBeTruthy();
-  const start = screen.getAllByRole('button', { name: /Inizia periodo/ }).pop()!;
+  const start = screen.getAllByRole('button', { name: /Inizia periodo/ }).pop()! as HTMLButtonElement;
+  expect(start.disabled).toBe(true);
+  expect(screen.getByText('/5 in campo').previousSibling!.textContent).toBe('0');
+  fireEvent.click(screen.getByRole('button', { name: /Rimetti i 5/ }));
+  expect(start.disabled).toBe(false);
   fireEvent.click(screen.getByRole('button', { name: /^4\s*C0/ }));
-  expect((start as HTMLButtonElement).disabled).toBe(true);
+  expect(start.disabled).toBe(true);
   fireEvent.click(screen.getByRole('button', { name: /^9\s*C5/ }));
   fireEvent.click(start);
   await waitFor(() => expect(lg.game.value.currentPeriod).toBe(2));
   expect(lg.periodOpen.value).toBe(true);
   expect(lg.onCourt.value).toContain('p5');
   expect(lg.onCourt.value).not.toContain('p0');
+});
+
+it('prima della prima azione del periodo i cambi correggono il quintetto: niente minuto, tempo = inizio periodo', async () => {
+  expect(lg.lineupPhase.value).toBe(true);
+  render(<SubsPanel lg={lg} onClose={() => undefined} />);
+  expect(screen.getByText(/correggono il quintetto/)).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: /#4 C0/ }));
+  fireEvent.click(screen.getByRole('button', { name: /#9 C5/ }));
+  await waitFor(() => expect(last().type).toBe('SUBSTITUTION'));
+  expect(screen.queryByLabelText('Minuti sul tabellone')).toBeNull();
+  expect(last()).toMatchObject({ subOutPlayerId: 'p0', subInPlayerId: 'p5', clockSec: 600 });
+  expect(lg.lineupPhase.value).toBe(true);
+  await lg.addEvent({ type: 'STEAL', side: 'US', playerId: 'p1' });
+  expect(lg.lineupPhase.value).toBe(false);
+});
+
+it('un cambio di quintetto non toglie minuti: chi entra gioca il periodo intero', async () => {
+  await lg.substitute('p0', 'p5');
+  await lg.addEvent({ type: 'STEAL', side: 'US', playerId: 'p5' });
+  await lg.endPeriod();
+  const secs = Object.fromEntries(lg.boxScore.value.players.map((l) => [l.playerId, l.seconds]));
+  expect(secs.p5).toBe(600);
+  expect(secs.p0).toBe(0);
 });

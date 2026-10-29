@@ -25,10 +25,10 @@ export function SubsPanel({ lg, onClose, initialOut = null }: Props) {
   const fouls: Record<string, number> = {};
   for (const l of lg.boxScore.value.players) fouls[l.playerId] = l.pf;
 
-  const perform = async (clockSec?: number) => {
-    if (!outId || !inId) return;
+  const perform = async (clockSec: number | undefined, o = outId, i = inId) => {
+    if (!o || !i) return;
     try {
-      await lg.substitute(outId, inId, clockSec);
+      await lg.substitute(o, i, clockSec);
       toast(lg.lastEventLabel.peek(), 'ok');
       setOutId(null); setInId(null); setAskMinute(false);
     } catch (e) {
@@ -39,8 +39,9 @@ export function SubsPanel({ lg, onClose, initialOut = null }: Props) {
 
   const tryPerform = (o: string | null, i: string | null) => {
     if (!o || !i) return;
-    // Con cronometro il tempo è quello del clock; tra un periodo e l'altro non serve; altrimenti chiedi il minuto.
-    if (g.useClock || !lg.periodOpen.value) void perform(undefined);
+    // Con cronometro il tempo è quello del clock; tra un periodo e l'altro, o prima della prima azione (correzione del quintetto), non serve;
+    // altrimenti chiedi il minuto.
+    if (g.useClock || !lg.periodOpen.value || lg.lineupPhase.value) void perform(undefined, o, i);
     else setAskMinute(true);
   };
 
@@ -63,6 +64,8 @@ export function SubsPanel({ lg, onClose, initialOut = null }: Props) {
         {askMinute && outId && inId ? (
           <MinutePicker maxMin={periodLen / 60} defaultMin={defaultMin} prevMin={prevMin} onConfirm={(left) => perform(left * 60)} onCancel={() => setAskMinute(false)} />
         ) : (
+          <>
+          {lg.lineupPhase.value && !g.useClock && <p class="muted" style="margin:0;font-size:0.85rem">Nessuna azione ancora nel periodo: i cambi correggono il quintetto e valgono dall'inizio, senza chiedere il minuto.</p>}
           <div class="subs-cols">
             <div>
               <span class="muted">In campo</span>
@@ -82,6 +85,7 @@ export function SubsPanel({ lg, onClose, initialOut = null }: Props) {
               {bench.length === 0 && <p class="muted">Nessuno in panchina</p>}
             </div>
           </div>
+          </>
         )}
       </div>
     </div>

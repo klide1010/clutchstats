@@ -88,6 +88,7 @@ it('undo soft-deletes last event but never PERIOD_START', async () => {
 it('substitute without clock requires clockSec and updates onCourt', async () => {
   await lg.setStarters(ids.slice(0, 5));
   await lg.startPeriod();
+  await lg.addEvent({ type: 'STEAL', side: 'US', playerId: ids[1] });
   await expect(lg.substitute(ids[0], ids[5])).rejects.toThrow();
   await lg.substitute(ids[0], ids[5], 300);
   expect(lg.onCourt.value).toContain(ids[5]);
