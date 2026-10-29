@@ -140,8 +140,8 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
   - **Correzione del quintetto**: finché nel periodo aperto non c'è nessuna azione (solo cambi, `lineupPhase`), un cambio non chiede il
     minuto e vale dall'inizio periodo (tabellone pieno): chi entra prende tutto il periodo, chi esce zero. È il caso dei tre cambi di
     Colleoni, Storto e Gorla.
-- Correzione dei dati della partita del 29/10 (tre cambi da 1' a 10'): confermata da Andrea, ma la scrittura su D1 di produzione è stata
-  bloccata dai permessi della sessione cloud; da fare con il suo via libera esplicito.
+- Correzione dei dati della partita del 29/10: confermata da Andrea, fatta su D1 (tre cambi `clock_sec` 60 → 600, `updated_at` e
+  `server_updated_at` aggiornati perché i dispositivi la ricevano alla sync). Colleoni 5:00, minuti di squadra 200.
 
 ## Cose aperte
 
