@@ -143,6 +143,14 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - Correzione dei dati della partita del 29/10: confermata da Andrea, fatta su D1 (tre cambi `clock_sec` 60 → 600, `updated_at` e
   `server_updated_at` aggiornati perché i dispositivi la ricevano alla sync). Colleoni 5:00, minuti di squadra 200.
 
+## 31 ottobre — casa/trasferta corrette dal calendario CSI
+
+- Confronto delle 22 partite in D1 con il PDF ufficiale CSI Bergamo (Open Silver / C): date e orari giusti, ma tre coppie
+  andata/ritorno avevano casa/trasferta e palestra scambiate. Corrette direttamente in D1 (solo `home` e `venue`, con `updated_at`
+  e `server_updated_at` nuovi perché i telefoni le ricevano alla sync): Colognola Fly 29/10 trasferta (Colognola) e 04/02 casa (Seriate);
+  Fervens Vertova 05/11 casa e 11/02 trasferta (Vertova); Scanzorosciate 26/11 trasferta (Scanzorosciate) e 04/03 casa.
+- La partita del 29/10 è già giocata: cambiati solo campo e indirizzo, eventi e risultato intatti.
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).
