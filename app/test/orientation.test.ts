@@ -35,3 +35,14 @@ it('markTabletScreen mette la classe tablet sulla radice solo sui tablet', async
   markTabletScreen({ width: 360, height: 760 }, root2);
   expect(root2.classList.contains('tablet')).toBe(false);
 });
+
+it('tablet da 10" economici (1280×800 a densità 1,5 → 853×533) e 16:10 piccoli sono tablet; i telefoni no', async () => {
+  const { isTabletScreen, isPhoneScreen } = await import('../src/state/orientation');
+  expect(isTabletScreen(853, 533)).toBe(true);
+  expect(isTabletScreen(533, 853)).toBe(true);
+  expect(isTabletScreen(640, 400)).toBe(true);   // 16:10 anche a densità 2
+  expect(isTabletScreen(360, 640)).toBe(false);  // telefono 16:9 (Samsung di Andrea)
+  expect(isTabletScreen(412, 915)).toBe(false);  // telefono 20:9
+  expect(isTabletScreen(480, 1040)).toBe(false); // telefono grande
+  expect(isPhoneScreen(853, 533)).toBe(false);   // niente blocco in verticale sul tablet
+});

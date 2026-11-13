@@ -143,6 +143,15 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - Correzione dei dati della partita del 29/10: confermata da Andrea, fatta su D1 (tre cambi `clock_sec` 60 → 600, `updated_at` e
   `server_updated_at` aggiornati perché i dispositivi la ricevano alla sync). Colleoni 5:00, minuti di squadra 200.
 
+## 13 novembre — tablet Duoduogo in orizzontale
+
+- Sul tablet Duoduogo (10", 1280×800 a densità 1,5 → schermo 853×533) in orizzontale restava il layout del telefono: il tablet si
+  riconosceva solo con lato corto ≥ 600px, e da app installata scattava pure il blocco in verticale dei telefoni. Ora è tablet se il lato
+  corto è ≥ 500px oppure se lo schermo è "largo" (rapporto ≤ 1,7, cioè 16:10 o 4:3) con almeno 360px; i telefoni sono 16:9 o più lunghi
+  (360×640, 412×915 restano telefoni).
+- Orizzontale sotto i 1000px di larghezza: niente colonna "Ultime azioni", campo | pannello. Sotto i 500px di altezza (browser sul
+  Duoduogo, ~853×450) tutto più compatto. In verticale sotto i 560px di larghezza resta il layout del telefono.
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).

@@ -274,8 +274,9 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 0
 .live-feed { display: none; }
 
 /* ---- Partita live su tablet ----
-   Attivi solo con la classe `tablet` sulla radice (schermo con lato corto ≥ 600px, vedi state/orientation.ts):
-   le soglie sulla finestra restano basse perché le barre di Chrome rubano altezza (es. Galaxy Tab A: ~1000×520).
+   Attivi solo con la classe `tablet` sulla radice (schermo da tablet, vedi isPhoneScreen in state/orientation.ts):
+   le soglie sulla finestra restano basse perché le barre di Chrome rubano altezza (Galaxy Tab A ~1000×520,
+   tablet 10" economici come il Duoduogo ~853×450). Sotto i 1000px di larghezza niente colonna "Ultime azioni".
    Verticale: campo in alto, sotto giocatori in colonna a sinistra e azioni a destra.
    Orizzontale: ultime azioni | campo | pannello (Noi/Loro, giocatori, azioni), barra in alto su una riga. */
 @media (orientation: portrait) and (min-width: 560px) {
@@ -322,6 +323,11 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 0
   .tablet .live-feed li { font-size: 0.8rem; padding: 6px 0; }
   .tablet .live-feed-time { flex: 0 0 4.4em; font-size: 0.75rem; }
 }
+@media (orientation: landscape) and (min-width: 800px) and (max-width: 999px) {
+  .tablet .game { grid-template-columns: minmax(0, 1.3fr) minmax(300px, 1fr); grid-template-areas: "top top" "court toggle" "court players" "court actions"; }
+  .tablet .live-feed { display: none; }
+  .tablet .game .court-wrap { padding-left: 12px; }
+}
 @media (orientation: landscape) and (min-width: 800px) and (max-height: 620px) {
   .tablet .topbar { padding: 4px 12px; }
   .tablet .score-num { font-size: 2.2rem; }
@@ -334,6 +340,20 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 0
   .tablet .game .player-bar { grid-auto-rows: minmax(30px, 46px); grid-gap: 4px; gap: 4px; }
   .tablet .game .player-num { font-size: 1.35rem; }
   .tablet .game .player-name { font-size: 0.85rem; }
+}
+@media (orientation: landscape) and (min-width: 800px) and (max-height: 500px) {
+  /* Tablet 10" a densità 1,5 nel browser (~853×450): tutto più compatto per far stare giocatori e azioni. */
+  .tablet .topbar { padding: 2px 12px; }
+  .tablet .score-num { font-size: 1.9rem; }
+  .tablet .period-bar { display: none; }
+  .tablet .topbar-actions .btn { min-height: 34px; }
+  .tablet .side-toggle { margin-top: 4px; }
+  .tablet .side-toggle .seg-btn { min-height: 28px; padding: 0 12px; }
+  .tablet .game .player-bar, .tablet .game .action-grid { padding-top: 4px; }
+  .tablet .game .player-bar { grid-auto-rows: minmax(26px, 40px); }
+  .tablet .game .action-grid { grid-auto-rows: minmax(32px, 64px); grid-gap: 4px; gap: 4px; padding-bottom: 4px; }
+  .tablet .game .action-btn { font-size: 0.72rem; padding: 2px; }
+  .tablet .game .player-num { font-size: 1.2rem; }
 }
 .popup-backdrop { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0,0,0,0.55); display: flex; align-items: flex-end; justify-content: center; z-index: 40; }
 .popup { width: 100%; max-width: 520px; background: var(--surface); border-radius: 18px 18px 0 0; padding: 14px; padding-bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; box-shadow: var(--shadow); }
