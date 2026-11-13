@@ -159,8 +159,9 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
   vale per il dispositivo (meta `nameMode`). Con i soprannomi la partita live (barra giocatori, cambi, tiri e liberi, quintetto,
   "Ultime azioni" e cronologia) usa il soprannome, e il cognome per chi non ce l'ha; nel quintetto il cognome resta sotto in piccolo.
   Box score, stagione, PDF e CSV restano con i cognomi.
-- Soprannomi impostati: #1 Magro **Inti**, #23 Colleoni Andrea **Colle**, #33 Locatelli **Ivan**, #35 Lazzaroni **Reggi**,
-  #69 Colleoni Massimo **Max**, #88 Catalano **Fede**.
+- Soprannomi impostati su D1 (con `updated_at`/`server_updated_at` aggiornati per la sync): #1 Magro **Inti**, #6 Piccoli **Psycho**,
+  #8 Gorla **Viola**, #23 Colleoni Andrea **Colle**, #25 Storto **Rico**, #33 Locatelli **Ivan**, #35 Lazzaroni **Reggi**,
+  #69 Colleoni Massimo **Max**, #88 Catalano **Fede**. I cognomi restano: il soprannome è un campo in più.
 - Il salvataggio dal Roster ora parte dal giocatore esistente: non perde più i campi non presenti nel modulo (es. foto).
 
 ## Cose aperte
