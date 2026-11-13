@@ -99,3 +99,10 @@ it('game ownerDevice roundtrips', async () => {
   const pulled = (await (await get('/api/sync/pull?since=0', auth)).json()) as { games: { id: string; ownerDevice?: string }[] };
   expect(pulled.games.find((x) => x.id === 'go')!.ownerDevice).toBe('dev-a');
 });
+
+it('player nickname roundtrips, and is absent when not set', async () => {
+  await post('/api/sync/push', { players: [{ ...player, id: 'pn', nickname: 'Fede', updatedAt: 3000 }, { ...player, id: 'pz', updatedAt: 3000 }] }, auth);
+  const pulled = (await (await get('/api/sync/pull?since=0', auth)).json()) as { players: Player[] };
+  expect(pulled.players.find((p) => p.id === 'pn')!.nickname).toBe('Fede');
+  expect(pulled.players.find((p) => p.id === 'pz')).not.toHaveProperty('nickname');
+});

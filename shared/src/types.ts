@@ -31,6 +31,8 @@ export interface Player extends SyncMeta {
   role: Role;
   active: boolean;
   photoUrl?: string;
+  /** Soprannome (es. "Fede"): in partita lo si può mostrare al posto del cognome. */
+  nickname?: string;
 }
 
 export interface OpponentRosterEntry {

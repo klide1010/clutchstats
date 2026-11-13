@@ -5,6 +5,7 @@ import { MinutePicker } from './MinutePicker';
 import { toast } from './Toast';
 import { FoulDots } from './FoulDots';
 import { Icon } from './Icon';
+import { displayName } from '../state/names';
 
 interface Props {
   lg: LiveGame;
@@ -71,7 +72,7 @@ export function SubsPanel({ lg, onClose, initialOut = null }: Props) {
               <span class="muted">In campo</span>
               {onCourt.map((p) => (
                 <button key={p.id} class={`btn btn-block sub-btn${outId === p.id ? ' active' : ''}`} onClick={() => pickOut(p.id)}>
-                  <span class="sub-name">#{p.number} {p.lastName}</span><FoulDots count={fouls[p.id] ?? 0} />
+                  <span class="sub-name">#{p.number} {displayName(p)}</span><FoulDots count={fouls[p.id] ?? 0} />
                 </button>
               ))}
             </div>
@@ -79,7 +80,7 @@ export function SubsPanel({ lg, onClose, initialOut = null }: Props) {
               <span class="muted">Panchina</span>
               {bench.map((p) => (
                 <button key={p.id} class={`btn btn-block sub-btn${inId === p.id ? ' active' : ''}`} disabled={(fouls[p.id] ?? 0) >= 5} onClick={() => pickIn(p.id)}>
-                  <span class="sub-name">#{p.number} {p.lastName}</span><FoulDots count={fouls[p.id] ?? 0} />
+                  <span class="sub-name">#{p.number} {displayName(p)}</span><FoulDots count={fouls[p.id] ?? 0} />
                 </button>
               ))}
               {bench.length === 0 && <p class="muted">Nessuno in panchina</p>}

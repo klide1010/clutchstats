@@ -1,6 +1,7 @@
 import { useState } from 'preact/hooks';
 import type { Player, Side } from '@bkstats/shared';
 import { JerseyPad } from './JerseyPad';
+import { displayName } from '../state/names';
 
 export interface ShotResult {
   made: boolean;
@@ -47,7 +48,7 @@ export function ShotPopup(p: Props) {
             {p.side === 'US' && (
               <div class="chips">
                 {p.onCourt.map((pl) => (
-                  <button key={pl.id} class={`chip${playerId === pl.id ? ' active' : ''}`} onClick={() => setPlayerId(pl.id)}>#{pl.number} {pl.lastName}</button>
+                  <button key={pl.id} class={`chip${playerId === pl.id ? ' active' : ''}`} onClick={() => setPlayerId(pl.id)}>#{pl.number} {displayName(pl)}</button>
                 ))}
               </div>
             )}
@@ -64,7 +65,7 @@ export function ShotPopup(p: Props) {
             <span class="muted">Assist di…</span>
             <div class="chips">
               {p.onCourt.filter((pl) => pl.id !== playerId).map((pl) => (
-                <button key={pl.id} class="chip" onClick={() => finish(true, pl.id)}>#{pl.number} {pl.lastName}</button>
+                <button key={pl.id} class="chip" onClick={() => finish(true, pl.id)}>#{pl.number} {displayName(pl)}</button>
               ))}
             </div>
             <button class="btn btn-block" onClick={() => finish(true, undefined)}>Nessuno</button>

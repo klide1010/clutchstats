@@ -17,6 +17,8 @@ import { GameMenu } from '../ui/GameMenu';
 import { Icon } from '../ui/Icon';
 import { PageTitle } from '../ui/PageTitle';
 import { LiveFeed } from '../ui/LiveFeed';
+import { displayName } from '../state/names';
+import { NameModeToggle } from '../ui/NameModeToggle';
 
 const FOUL_KINDS: { kind: FoulKind; label: string }[] = [
   { kind: 'PERSONAL', label: 'Personale' },
@@ -65,6 +67,7 @@ function Lineup({ lg }: { lg: LiveGame }) {
             <button class="btn btn-sm" onClick={() => setRoster([])}>Nessuno</button>
           </div>
         </div>
+        <NameModeToggle />
         <PlayerPicker players={visible} selected={roster} max={lg.allPlayers.value.length} onChange={setRoster} />
         {inactive.length > 0 && (
           <button class="btn btn-sm btn-block" onClick={() => setShowInactive(!showInactive)}>{showInactive ? 'Nascondi inattivi' : `Mostra inattivi (${inactive.length})`}</button>
@@ -83,6 +86,7 @@ function Lineup({ lg }: { lg: LiveGame }) {
         <span><b class="display">{sel.length}</b><span class="muted">/5 in campo</span></span>
         <button class="btn btn-sm" style="flex:0 0 auto" onClick={() => setSel([])}>Azzera</button>
       </div>
+      <NameModeToggle />
       <PlayerPicker players={called} selected={sel} max={5} onChange={setSel} />
       <button class="btn btn-primary btn-block btn-icon" disabled={sel.length !== 5} onClick={start}><Icon name="play" size={18} /> Inizia partita</button>
     </main>
@@ -231,7 +235,7 @@ export function Game({ id }: { id: string }) {
         <div class="popup-backdrop">
           <div class="popup">
             <strong class="card-title"><Icon name="alert" size={18} class="err-text" /> Quinto fallo</strong>
-            <span><b>#{fouledOutPlayer.number} {fouledOutPlayer.lastName}</b> ha raggiunto 5 falli e deve uscire. Finché resta in campo non può registrare azioni.</span>
+            <span><b>#{fouledOutPlayer.number} {displayName(fouledOutPlayer)}</b> ha raggiunto 5 falli e deve uscire. Finché resta in campo non può registrare azioni.</span>
             <button class="btn btn-primary btn-block btn-icon" onClick={() => { setSubsOut(fouledOutPlayer.id); setPanel('subs'); }}><Icon name="swap" size={18} /> Sostituisci</button>
             <button class="btn btn-block btn-icon" onClick={undoFifthFoul}><Icon name="undo" size={18} /> Annulla il fallo</button>
             <button class="btn btn-sm" onClick={() => setFoulOutDismissed(fouledOutPlayer.id)}>Più tardi</button>

@@ -35,12 +35,14 @@ export const teamMapper: Mapper<Team> = {
 
 export const playerMapper: Mapper<Player> = {
   table: 'players',
-  columns: ['id', 'team_id', 'first_name', 'last_name', 'number', 'role', 'active', 'photo_url', 'updated_at', 'deleted'],
-  toRow: (p) => [p.id, p.teamId, p.firstName, p.lastName, p.number, p.role, toDb(!!p.active), toDb(p.photoUrl), p.updatedAt, toDb(!!p.deleted)],
+  columns: ['id', 'team_id', 'first_name', 'last_name', 'number', 'role', 'active', 'photo_url', 'nickname', 'updated_at', 'deleted'],
+  toRow: (p) => [p.id, p.teamId, p.firstName, p.lastName, p.number, p.role, toDb(!!p.active), toDb(p.photoUrl), toDb(p.nickname), p.updatedAt, toDb(!!p.deleted)],
   fromRow: (r) => {
     const p: Player = { id: r.id as string, teamId: r.team_id as string, firstName: r.first_name as string, lastName: r.last_name as string, number: r.number as number, role: r.role as Player['role'], active: bool(r.active), updatedAt: r.updated_at as number, deleted: bool(r.deleted) };
     const photo = opt<string>(r.photo_url);
     if (photo !== undefined) p.photoUrl = photo;
+    const nick = opt<string>(r.nickname);
+    if (nick !== undefined) p.nickname = nick;
     return p;
   },
   validate: (x): x is Player => baseValid(x) && typeof (x as Player).teamId === 'string' && typeof (x as Player).number === 'number' && typeof (x as Player).role === 'string',

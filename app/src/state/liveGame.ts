@@ -9,6 +9,7 @@ import { loadGames } from './games';
 import { syncState } from '../api/sync';
 import { getDeviceId } from './device';
 import { addNumbers } from './opponents';
+import { displayName } from './names';
 
 export type AddEventInput = Omit<GameEvent, 'id' | 'gameId' | 'seq' | 'period' | 'updatedAt' | 'deleted' | 'createdAt' | 'clockSec'> & { clockSec?: number };
 
@@ -63,7 +64,7 @@ const FOUL_LABELS: Record<string, string> = { PERSONAL: '', UNSPORTSMANLIKE: ' a
 
 export function eventLabel(e: GameEvent, players: Player[]): string {
   const byId = new Map(players.map((p) => [p.id, p]));
-  const who = (id?: string) => { const p = id ? byId.get(id) : undefined; return p ? `#${p.number} ${p.lastName}` : 'Noi'; };
+  const who = (id?: string) => { const p = id ? byId.get(id) : undefined; return p ? `#${p.number} ${displayName(p)}` : 'Noi'; };
   if (e.type === 'SUBSTITUTION') return `Cambio: esce ${who(e.subOutPlayerId).replace(/ .*/, '')} entra ${who(e.subInPlayerId).replace(/ .*/, '')}`;
   if (e.type === 'PERIOD_START' || e.type === 'PERIOD_END') return `${TYPE_LABELS[e.type]} ${e.period}`;
   const subject = e.side === 'US' ? who(e.playerId) : e.jerseyNumber !== undefined ? `Loro #${e.jerseyNumber}` : 'Loro';
@@ -160,7 +161,7 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     if (input.side === 'US' && (input.type === 'SHOT_2' || input.type === 'SHOT_3' || input.type === 'FREE_THROW') && !input.playerId) throw new Error('Seleziona il giocatore');
     if (input.side === 'US' && input.playerId && input.type !== 'SUBSTITUTION' && (foulsByPlayer.value[input.playerId] ?? 0) >= 5) {
       const p = allPlayers.value.find((x) => x.id === input.playerId);
-      throw new Error(`${p ? '#' + p.number + ' ' + p.lastName : 'Giocatore'} ha 5 falli: va sostituito`);
+      throw new Error(`${p ? '#' + p.number + ' ' + displayName(p) : 'Giocatore'} ha 5 falli: va sostituito`);
     }
     return persist({ ...input, period: Math.max(1, gm.currentPeriod), clockSec: stampClock(input.clockSec) });
   };
@@ -226,7 +227,7 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     const fouled = ids.find((id) => (foulsByPlayer.value[id] ?? 0) >= 5);
     if (fouled) {
       const p = allPlayers.value.find((x) => x.id === fouled);
-      throw new Error(`${p ? '#' + p.number + ' ' + p.lastName : 'Giocatore'} ha 5 falli: non può rientrare`);
+      throw new Error(`${p ? '#' + p.number + ' ' + displayName(p) : 'Giocatore'} ha 5 falli: non può rientrare`);
     }
     const now = onCourt.value;
     const outs = now.filter((id) => !ids.includes(id));

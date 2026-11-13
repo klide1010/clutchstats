@@ -152,6 +152,17 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - Orizzontale sotto i 1000px di larghezza: niente colonna "Ultime azioni", campo | pannello. Sotto i 500px di altezza (browser sul
   Duoduogo, ~853×450) tutto più compatto. In verticale sotto i 560px di larghezza resta il layout del telefono.
 
+## 13 novembre — soprannomi
+
+- **Soprannome** per giocatore (`Player.nickname`, colonna `players.nickname`, migrazione 0006), modificabile dal Roster e mostrato
+  in lista tra «». Prima della partita, in Convocati e Quintetto iniziale, la scelta **"In partita mostra: Cognomi / Soprannomi"**:
+  vale per il dispositivo (meta `nameMode`). Con i soprannomi la partita live (barra giocatori, cambi, tiri e liberi, quintetto,
+  "Ultime azioni" e cronologia) usa il soprannome, e il cognome per chi non ce l'ha; nel quintetto il cognome resta sotto in piccolo.
+  Box score, stagione, PDF e CSV restano con i cognomi.
+- Soprannomi impostati: #1 Magro **Inti**, #23 Colleoni Andrea **Colle**, #33 Locatelli **Ivan**, #35 Lazzaroni **Reggi**,
+  #69 Colleoni Massimo **Max**, #88 Catalano **Fede**.
+- Il salvataggio dal Roster ora parte dal giocatore esistente: non perde più i campi non presenti nel modulo (es. foto).
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).

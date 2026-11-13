@@ -8,11 +8,12 @@ import './styles.css';
 import { initTheme } from './state/theme';
 import { App } from './App';
 import { initSession } from './state/session';
+import { initNameMode } from './state/names';
 import { lockPortraitOnPhone, markTabletScreen } from './state/orientation';
 
 lockPortraitOnPhone(screen as unknown as Parameters<typeof lockPortraitOnPhone>[0]);
 markTabletScreen(screen, document.documentElement);
 
-Promise.all([initSession(), initTheme()]).finally(() => {
+Promise.all([initSession(), initTheme(), initNameMode()]).finally(() => {
   render(<App />, document.getElementById('app')!);
 });

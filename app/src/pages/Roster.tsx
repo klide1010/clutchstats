@@ -7,9 +7,9 @@ import { readFileText } from '../model/fileText';
 import { Icon } from '../ui/Icon';
 import { PageTitle } from '../ui/PageTitle';
 
-interface Draft { id: string; number: string; lastName: string; firstName: string; role: Role; active: boolean }
+interface Draft { id: string; number: string; lastName: string; firstName: string; nickname: string; role: Role; active: boolean }
 
-const emptyDraft = (): Draft => ({ id: newId(), number: '', lastName: '', firstName: '', role: 'PLAY', active: true });
+const emptyDraft = (): Draft => ({ id: newId(), number: '', lastName: '', firstName: '', nickname: '', role: 'PLAY', active: true });
 
 function PlayerForm({ draft, onChange, onSave, onCancel }: { draft: Draft; onChange: (d: Draft) => void; onSave: () => void; onCancel: () => void }) {
   const valid = /^\d+$/.test(draft.number) && draft.lastName.trim() !== '';
@@ -27,6 +27,7 @@ function PlayerForm({ draft, onChange, onSave, onCancel }: { draft: Draft; onCha
         <label>Cognome<input value={draft.lastName} onInput={(e) => onChange({ ...draft, lastName: (e.target as HTMLInputElement).value })} /></label>
         <label>Nome<input value={draft.firstName} onInput={(e) => onChange({ ...draft, firstName: (e.target as HTMLInputElement).value })} /></label>
       </div>
+      <label>Soprannome<input value={draft.nickname} placeholder="es. Fede" onInput={(e) => onChange({ ...draft, nickname: (e.target as HTMLInputElement).value })} /></label>
       <div class="row">
         <button class="btn" onClick={onCancel}>Annulla</button>
         <button class="btn btn-primary" disabled={!valid} onClick={onSave}>Salva</button>
@@ -42,11 +43,12 @@ export function Roster() {
 
   useEffect(() => { void loadPlayers(); }, []);
 
-  const startEdit = (p?: Player) => setDraft(p ? { id: p.id, number: String(p.number), lastName: p.lastName, firstName: p.firstName, role: p.role, active: p.active } : emptyDraft());
+  const startEdit = (p?: Player) => setDraft(p ? { id: p.id, number: String(p.number), lastName: p.lastName, firstName: p.firstName, nickname: p.nickname ?? '', role: p.role, active: p.active } : emptyDraft());
 
   const save = async () => {
     if (!draft) return;
-    await savePlayer({ id: draft.id, number: Number(draft.number), lastName: draft.lastName.trim(), firstName: draft.firstName.trim(), role: draft.role, active: draft.active });
+    const prev = players.value.find((p) => p.id === draft.id);
+    await savePlayer({ ...prev, id: draft.id, number: Number(draft.number), lastName: draft.lastName.trim(), firstName: draft.firstName.trim(), nickname: draft.nickname.trim() || undefined, role: draft.role, active: draft.active });
     setDraft(null);
     toast('Giocatore salvato');
   };
@@ -114,7 +116,7 @@ export function Roster() {
         {players.value.map((p) => (
           <li key={p.id} style={p.active ? '' : 'opacity:0.5'}>
             <b style="width:2.2em">#{p.number}</b>
-            <span style="flex:1" onClick={() => startEdit(p)}>{p.lastName} {p.firstName}<br /><span class="muted">{ROLE_LABELS[p.role]}</span></span>
+            <span style="flex:1" onClick={() => startEdit(p)}>{p.lastName} {p.firstName}{p.nickname ? <span class="muted"> «{p.nickname}»</span> : null}<br /><span class="muted">{ROLE_LABELS[p.role]}</span></span>
             <button class={`btn btn-sm btn-icon${p.active ? ' ok-text' : ''}`} onClick={() => savePlayer({ ...p, active: !p.active })}><Icon name={p.active ? 'check' : 'x'} size={16} /> {p.active ? 'Attivo' : 'Inattivo'}</button>
             <button class="btn btn-sm btn-icon icon-only btn-ghost danger" aria-label="Elimina" onClick={() => { if (confirm(`Eliminare #${p.number} ${p.lastName}?`)) void removePlayer(p.id); }}><Icon name="trash" size={16} /></button>
           </li>

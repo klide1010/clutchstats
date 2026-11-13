@@ -22,7 +22,7 @@ Nome pubblico **ClutchStats**; `bkstats` resta il nome tecnico (repo, Worker, UR
   Stato partita in `src/state/liveGame.ts`: la partita è una lista di eventi immutabili, undo = soft delete, tutto derivato dagli eventi.
 - `worker/`: Cloudflare Worker (Hono) + D1. Login con password unica → JWT 30 giorni; `POST /api/sync/push` e `GET /api/sync/pull`
   (last-write-wins su `updatedAt` del client, cursore di pull su `server_updated_at`); API allenatore `X-Api-Key` sotto `/api/v1/read/*`.
-  Migrazioni in `worker/migrations/` (0001–0005), test con `@cloudflare/vitest-pool-workers`.
+  Migrazioni in `worker/migrations/` (0001–0006), test con `@cloudflare/vitest-pool-workers`.
 - Design "Analytics Mono": token in `app/src/styles.css`, tema chiaro/scuro (`data-theme`), colore squadra derivato a runtime con
   contrasto garantito (`app/src/model/color.ts`), icone SVG inline (`app/src/ui/Icon.tsx`), font Barlow Condensed + Montserrat (fontsource, solo latin).
 

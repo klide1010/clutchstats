@@ -1,5 +1,6 @@
 import { ROLE_LABELS, type Player } from '@bkstats/shared';
 import { Icon } from './Icon';
+import { displayName } from '../state/names';
 
 interface Props {
   players: Player[];
@@ -24,7 +25,7 @@ export function PlayerPicker({ players, selected, max, onChange, disabled = [] }
         return (
           <button key={p.id} class={`pick-card${on ? ' on' : ''}${p.active ? '' : ' inactive'}`} disabled={off} aria-pressed={on} onClick={() => toggle(p.id)}>
             <span class="pick-num">{p.number}</span>
-            <span class="pick-text"><span class="pick-name">{p.lastName}</span><span class="pick-role">{p.firstName ? `${p.firstName} · ` : ''}{ROLE_LABELS[p.role]}</span></span>
+            <span class="pick-text"><span class="pick-name">{displayName(p)}</span><span class="pick-role">{displayName(p) !== p.lastName ? `${p.lastName} · ` : p.firstName ? `${p.firstName} · ` : ''}{ROLE_LABELS[p.role]}</span></span>
             <span class="pick-check"><Icon name="check" size={16} /></span>
           </button>
         );

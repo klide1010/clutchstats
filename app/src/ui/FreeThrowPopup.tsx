@@ -2,6 +2,7 @@ import { useState } from 'preact/hooks';
 import type { Player, Side } from '@bkstats/shared';
 import { JerseyPad } from './JerseyPad';
 import { Icon } from './Icon';
+import { displayName } from '../state/names';
 
 interface Props {
   side: Side;
@@ -47,7 +48,7 @@ export function FreeThrowPopup(p: Props) {
         {p.side === 'US' && (
           <div class="chips">
             {p.onCourt.map((pl) => (
-              <button key={pl.id} class={`chip${playerId === pl.id ? ' active' : ''}`} onClick={() => setPlayerId(pl.id)}>#{pl.number} {pl.lastName}</button>
+              <button key={pl.id} class={`chip${playerId === pl.id ? ' active' : ''}`} onClick={() => setPlayerId(pl.id)}>#{pl.number} {displayName(pl)}</button>
             ))}
           </div>
         )}
