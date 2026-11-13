@@ -164,6 +164,13 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
   #69 Colleoni Massimo **Max**, #88 Catalano **Fede**. I cognomi restano: il soprannome è un campo in più.
 - Il salvataggio dal Roster ora parte dal giocatore esistente: non perde più i campi non presenti nel modulo (es. foto).
 
+## 13 novembre — partita con Potascè registrata su Vertova
+
+- La partita di stasera con Potascè' Basket (13/11, Cologne) era stata registrata aprendo per sbaglio quella con Fervens Vertova del 5/11,
+  mai giocata. Spostati su D1 i 323 eventi sulla partita Potascè, copiati stato (chiusa), periodo, quintetto, convocati e dispositivo;
+  la partita con Vertova del 5/11 torna "programmata" e vuota. `updated_at`/`server_updated_at` aggiornati per la sync. Risultato 57–62.
+  Copia di sicurezza fatta prima della modifica (partite ed eventi originali).
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).
