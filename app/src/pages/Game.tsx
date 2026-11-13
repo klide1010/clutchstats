@@ -19,13 +19,7 @@ import { PageTitle } from '../ui/PageTitle';
 import { LiveFeed } from '../ui/LiveFeed';
 import { displayName } from '../state/names';
 import { NameModeToggle } from '../ui/NameModeToggle';
-
-const FOUL_KINDS: { kind: FoulKind; label: string }[] = [
-  { kind: 'PERSONAL', label: 'Personale' },
-  { kind: 'OFFENSIVE', label: 'In attacco' },
-  { kind: 'UNSPORTSMANLIKE', label: 'Antisportivo' },
-  { kind: 'TECHNICAL', label: 'Tecnico' },
-];
+import { FoulChooser } from '../ui/FoulChooser';
 
 function Lineup({ lg }: { lg: LiveGame }) {
   const active = lg.allPlayers.value.filter((p) => p.active);
@@ -175,8 +169,23 @@ export function Game({ id }: { id: string }) {
     await onActionTap('FOUL', lg);
   };
 
+  // Tecnico di allenatore o panchina: nessun giocatore da scegliere; avvisa se l'allenatore è espulso.
+  const coachFoul = async (kind: FoulKind) => {
+    setFoulChooser(false);
+    const s = side.value;
+    try {
+      await lg.addEvent({ type: 'FOUL', side: s, foulKind: kind });
+      resetSelection();
+      if (lg.coach.peek()[s].disqualified) toast(`Allenatore ${s === 'US' ? 'nostro' : 'avversario'} espulso`, 'error', 4000);
+      else toast(lg.lastEventLabel.peek(), 'ok');
+    } catch (e) {
+      toast(e instanceof Error && (e.message === 'Periodo non aperto' || e.message === 'Partita chiusa') ? e.message : 'Salvataggio fallito, riprova', 'error');
+    }
+  };
+
   const fouledOutId = lg.fouledOut.value[0] ?? null;
   const fouledOutPlayer = fouledOutId ? lg.allPlayers.value.find((p) => p.id === fouledOutId) : undefined;
+  const foulOutDisq = !!fouledOutId && !!lg.foulStatus.value[fouledOutId]?.disqualified;
   const showFoulOut = !!fouledOutId && panel === 'none' && !pendingShot.value && foulOutDismissed !== fouledOutId;
   const undoFifthFoul = async () => {
     const e = fouledOutId ? lg.lastFoulOf(fouledOutId) : null;
@@ -222,20 +231,13 @@ export function Game({ id }: { id: string }) {
         <FreeThrowPopup side={side.value} onCourt={onCourtPlayers} selectedPlayerId={selectedPlayerId.value} jerseyNumbers={jerseyNumbers} selectedJersey={selectedJersey.value}
           onShot={freeThrow} onClose={() => { setFt(false); resetSelection(); }} />
       )}
-      {foulChooser && (
-        <div class="popup-backdrop" onClick={() => setFoulChooser(false)}>
-          <div class="popup" onClick={(e) => e.stopPropagation()}>
-            <span class="muted">Tipo di fallo</span>
-            {FOUL_KINDS.map((f) => <button key={f.kind} class="btn btn-block" onClick={() => chooseFoul(f.kind)}>{f.label}</button>)}
-          </div>
-        </div>
-      )}
+      {foulChooser && <FoulChooser side={side.value} onPlayerFoul={(k) => void chooseFoul(k)} onCoachFoul={(k) => void coachFoul(k)} onClose={() => setFoulChooser(false)} />}
       {panel === 'subs' && <SubsPanel lg={lg} initialOut={subsOut} onClose={() => { setPanel('none'); setSubsOut(null); }} />}
       {showFoulOut && fouledOutPlayer && (
         <div class="popup-backdrop">
           <div class="popup">
-            <strong class="card-title"><Icon name="alert" size={18} class="err-text" /> Quinto fallo</strong>
-            <span><b>#{fouledOutPlayer.number} {displayName(fouledOutPlayer)}</b> ha raggiunto 5 falli e deve uscire. Finché resta in campo non può registrare azioni.</span>
+            <strong class="card-title"><Icon name="alert" size={18} class="err-text" /> {foulOutDisq ? 'Espulso' : 'Quinto fallo'}</strong>
+            <span><b>#{fouledOutPlayer.number} {displayName(fouledOutPlayer)}</b> {foulOutDisq ? 'è espulso' : 'ha raggiunto 5 falli'} e deve uscire. Finché resta in campo non può registrare azioni.</span>
             <button class="btn btn-primary btn-block btn-icon" onClick={() => { setSubsOut(fouledOutPlayer.id); setPanel('subs'); }}><Icon name="swap" size={18} /> Sostituisci</button>
             <button class="btn btn-block btn-icon" onClick={undoFifthFoul}><Icon name="undo" size={18} /> Annulla il fallo</button>
             <button class="btn btn-sm" onClick={() => setFoulOutDismissed(fouledOutPlayer.id)}>Più tardi</button>

@@ -1,7 +1,7 @@
 import { computed, effect, signal, type ReadonlySignal, type Signal } from '@preact/signals';
 import {
-  computeBoxScore, elapsedSec, newId, onCourtAfter, periodLengthSec, THEM_ALLOWED_TYPES,
-  type BoxScore, type Game, type GameEvent, type Opponent, type Player,
+  coachStatus, computeBoxScore, elapsedSec, newId, onCourtAfter, periodLengthSec, playerFoulStatus, THEM_ALLOWED_TYPES,
+  type PlayerFoulStatus, type BoxScore, type Game, type GameEvent, type Opponent, type Player,
 } from '@bkstats/shared';
 import { eventsRepo, gamesRepo, opponentsRepo, playersRepo } from '../db';
 import { createClock, type GameClock } from './clock';
@@ -30,8 +30,12 @@ export interface LiveGame {
   lineupPhase: ReadonlySignal<boolean>;
   /** Partita in corso registrata da un altro dispositivo: chiedere se prenderla in carico. */
   foreignLive: ReadonlySignal<boolean>;
-  /** Giocatori in campo con 5 falli: vanno sostituiti (o si annulla il fallo). */
+  /** Giocatori in campo con 5 falli o espulsi: vanno sostituiti (o si annulla il fallo). */
   fouledOut: ReadonlySignal<string[]>;
+  /** Falli per giocatore secondo le regole FIBA 2026: 5 falli, espulsione. */
+  foulStatus: ReadonlySignal<Record<string, PlayerFoulStatus>>;
+  /** Tecnici di allenatore (C) e panchina (B) per lato, ed espulsione dell'allenatore. */
+  coach: ReadonlySignal<Record<'US' | 'THEM', { coach: number; bench: number; disqualified: boolean }>>;
   canUndo: ReadonlySignal<boolean>;
   lastEventLabel: ReadonlySignal<string>;
   addEvent(input: AddEventInput): Promise<GameEvent>;
@@ -60,7 +64,11 @@ const TYPE_LABELS: Record<string, string> = {
   TIMEOUT: 'Timeout', PERIOD_START: 'Inizio periodo', PERIOD_END: 'Fine periodo',
 };
 
-const FOUL_LABELS: Record<string, string> = { PERSONAL: '', UNSPORTSMANLIKE: ' antisportivo', TECHNICAL: ' tecnico', OFFENSIVE: ' in attacco' };
+const FOUL_LABELS: Record<string, string> = {
+  PERSONAL: 'Fallo', OFFENSIVE: 'Fallo in attacco', DISRUPTIVE: 'Fallo disruptive', FLAGRANT: 'Fallo flagrante',
+  TECHNICAL: 'Fallo tecnico', TECHNICAL_2: 'Fallo tecnico cat. 2', DISQUALIFYING: 'Fallo da espulsione',
+  COACH_TECHNICAL: 'Tecnico allenatore (C)', BENCH_TECHNICAL: 'Tecnico panchina (B)', UNSPORTSMANLIKE: 'Fallo antisportivo',
+};
 
 export function eventLabel(e: GameEvent, players: Player[]): string {
   const byId = new Map(players.map((p) => [p.id, p]));
@@ -71,7 +79,7 @@ export function eventLabel(e: GameEvent, players: Player[]): string {
   let what: string;
   if (e.type === 'SHOT_2' || e.type === 'SHOT_3') what = `T${e.type === 'SHOT_3' ? 3 : 2} ${e.made ? 'segnato' : 'sbagliato'}`;
   else if (e.type === 'FREE_THROW') what = `TL ${e.made ? 'segnato' : 'sbagliato'}`;
-  else if (e.type === 'FOUL') what = `Fallo${FOUL_LABELS[e.foulKind ?? 'PERSONAL'] ?? ''}`;
+  else if (e.type === 'FOUL') what = FOUL_LABELS[e.foulKind ?? 'PERSONAL'] ?? 'Fallo';
   else what = TYPE_LABELS[e.type] ?? e.type;
   return `${subject} · ${what}`;
 }
@@ -126,12 +134,19 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
   });
   const boxScore = computed(() => computeBoxScore(game.value, live.value, players.value, nowElapsed.value));
   const foreignLive = computed(() => game.value.status === 'LIVE' && !!game.value.ownerDevice && game.value.ownerDevice !== deviceId);
-  const foulsByPlayer = computed(() => {
-    const m: Record<string, number> = {};
-    for (const e of live.value) if (e.type === 'FOUL' && e.side === 'US' && e.playerId) m[e.playerId] = (m[e.playerId] ?? 0) + 1;
+  const foulStatus = computed(() => {
+    const m: Record<string, PlayerFoulStatus> = {};
+    for (const p of allPlayers.value) m[p.id] = playerFoulStatus(live.value, p.id);
     return m;
   });
-  const fouledOut = computed(() => onCourt.value.filter((id) => (foulsByPlayer.value[id] ?? 0) >= 5));
+  const coach = computed(() => ({ US: coachStatus(live.value, 'US'), THEM: coachStatus(live.value, 'THEM') }));
+  /** Perché un giocatore non può più giocare, già pronto per i messaggi ("ha 5 falli" / "è espulso"), o null. */
+  const outReason = (id: string): string | null => {
+    const st = foulStatus.value[id];
+    return !st || !st.out ? null : st.disqualified ? 'è espulso' : 'ha 5 falli';
+  };
+  const nameOf = (id: string) => { const p = allPlayers.value.find((x) => x.id === id); return p ? '#' + p.number + ' ' + displayName(p) : 'Giocatore'; };
+  const fouledOut = computed(() => onCourt.value.filter((id) => foulStatus.value[id]?.out));
   const lastFoulOf = (playerId: string): GameEvent | null => [...live.value].reverse().find((e) => e.type === 'FOUL' && e.side === 'US' && e.playerId === playerId) ?? null;
   const undoable = computed(() => [...live.value].reverse().find((e) => e.type !== 'PERIOD_START' && e.type !== 'PERIOD_END') ?? null);
   const canUndo = computed(() => undoable.value !== null);
@@ -159,10 +174,8 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     if (!periodOpen.value && input.type !== 'TIMEOUT' && input.type !== 'SUBSTITUTION') throw new Error('Periodo non aperto');
     if (input.side === 'THEM' && !THEM_ALLOWED_TYPES.has(input.type)) throw new Error('Evento non ammesso per gli avversari');
     if (input.side === 'US' && (input.type === 'SHOT_2' || input.type === 'SHOT_3' || input.type === 'FREE_THROW') && !input.playerId) throw new Error('Seleziona il giocatore');
-    if (input.side === 'US' && input.playerId && input.type !== 'SUBSTITUTION' && (foulsByPlayer.value[input.playerId] ?? 0) >= 5) {
-      const p = allPlayers.value.find((x) => x.id === input.playerId);
-      throw new Error(`${p ? '#' + p.number + ' ' + displayName(p) : 'Giocatore'} ha 5 falli: va sostituito`);
-    }
+    const reason = input.side === 'US' && input.playerId && input.type !== 'SUBSTITUTION' ? outReason(input.playerId) : null;
+    if (reason) throw new Error(`${nameOf(input.playerId!)} ${reason}: va sostituito`);
     return persist({ ...input, period: Math.max(1, gm.currentPeriod), clockSec: stampClock(input.clockSec) });
   };
 
@@ -202,7 +215,8 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
   const substitute = async (outId: string, inId: string, clockSec?: number) => {
     if (!onCourt.value.includes(outId)) throw new Error('Giocatore non in campo');
     if (onCourt.value.includes(inId)) throw new Error('Giocatore già in campo');
-    if ((foulsByPlayer.value[inId] ?? 0) >= 5) throw new Error('Ha 5 falli: non può rientrare');
+    const reason = outReason(inId);
+    if (reason) throw new Error(`${nameOf(inId)} ${reason}: non può rientrare`);
     // Correzione del quintetto prima della prima azione: senza cronometro vale dall'inizio periodo (tabellone pieno).
     if (lineupPhase.value && !game.value.useClock && clockSec === undefined) clockSec = periodLengthSec(game.value, game.value.currentPeriod);
     if (periodOpen.value && !game.value.useClock && clockSec === undefined) throw new Error('Indica il minuto del cambio');
@@ -224,11 +238,8 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
     if (new Set(ids).size !== 5) throw new Error('Servono esattamente 5 giocatori');
     const allowed = new Set(players.value.map((p) => p.id));
     if (!ids.every((id) => allowed.has(id))) throw new Error('Il quintetto deve essere tra i convocati');
-    const fouled = ids.find((id) => (foulsByPlayer.value[id] ?? 0) >= 5);
-    if (fouled) {
-      const p = allPlayers.value.find((x) => x.id === fouled);
-      throw new Error(`${p ? '#' + p.number + ' ' + displayName(p) : 'Giocatore'} ha 5 falli: non può rientrare`);
-    }
+    const fouled = ids.find((id) => outReason(id));
+    if (fouled) throw new Error(`${nameOf(fouled)} ${outReason(fouled)}: non può rientrare`);
     const now = onCourt.value;
     const outs = now.filter((id) => !ids.includes(id));
     const ins = ids.filter((id) => !now.includes(id));
@@ -282,7 +293,7 @@ export async function openLiveGame(gameId: string): Promise<LiveGame> {
   });
 
   return {
-    game, events, players, allPlayers, opponent, clock, boxScore, onCourt, bench, periodOpen, lineupPhase, foreignLive, fouledOut, canUndo, lastEventLabel,
+    game, events, players, allPlayers, opponent, clock, boxScore, onCourt, bench, periodOpen, lineupPhase, foreignLive, fouledOut, foulStatus, coach, canUndo, lastEventLabel,
     addEvent, undo, deleteEvent, startPeriod, endPeriod, substitute, setStarters, setPeriodLineup, setRoster, takeOver, restartFromScratch, addOpponentNumber, lastFoulOf, closeGame, reload,
     dispose: () => { stopSyncWatch(); clock.dispose(); },
   };

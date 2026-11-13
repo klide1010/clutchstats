@@ -75,3 +75,17 @@ it('prints the shooting percentage under made/attempted, none without attempts',
   expect(s).toContain('(0%) Tj');
   expect(s).not.toMatch(/\(NaN%\)|\(-\)/);
 });
+
+it('referto: falli FIBA 2026 e tecnici di allenatore/panchina', async () => {
+  const { specialFouls } = await import('../src/model/pdf');
+  const fouls = [
+    ev({ type: 'FOUL', playerId: 'b', foulKind: 'FLAGRANT', period: 1 }),
+    ev({ type: 'FOUL', playerId: 'b', foulKind: 'DISRUPTIVE', period: 2 }),
+    ev({ type: 'FOUL', foulKind: 'COACH_TECHNICAL', period: 3 }),
+    ev({ type: 'FOUL', side: 'THEM', foulKind: 'BENCH_TECHNICAL', period: 2 }),
+  ];
+  expect(specialFouls(fouls, players, 4)).toEqual({
+    us: '#5 Cognome1: flagrante (Q1), disruptive (Q2) · Allenatore/panchina: tecnico allenatore (C) (Q3)',
+    them: 'Allenatore/panchina: tecnico panchina (B) (Q2)',
+  });
+});

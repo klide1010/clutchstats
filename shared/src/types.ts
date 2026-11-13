@@ -90,7 +90,17 @@ export type EventType =
   | 'PERIOD_START'
   | 'PERIOD_END';
 
-export type FoulKind = 'PERSONAL' | 'UNSPORTSMANLIKE' | 'TECHNICAL' | 'OFFENSIVE';
+/**
+ * Tipi di fallo secondo le regole FIBA 2026 (in vigore dal 1° ottobre 2026, recepite da FIP e CSI):
+ * - giocatore: PERSONAL (P), OFFENSIVE (P in attacco), DISRUPTIVE (DI), FLAGRANT (FL), TECHNICAL = tecnico di categoria 1 (T),
+ *   TECHNICAL_2 = tecnico di categoria 2 (T), DISQUALIFYING = da espulsione (D);
+ * - allenatore e panchina: COACH_TECHNICAL (C), BENCH_TECHNICAL (B), sempre di categoria 1.
+ * UNSPORTSMANLIKE (U) resta per le partite registrate prima del 2026: conta come il flagrante.
+ */
+export type FoulKind =
+  | 'PERSONAL' | 'OFFENSIVE' | 'DISRUPTIVE' | 'FLAGRANT' | 'TECHNICAL' | 'TECHNICAL_2' | 'DISQUALIFYING'
+  | 'COACH_TECHNICAL' | 'BENCH_TECHNICAL'
+  | 'UNSPORTSMANLIKE';
 
 export interface GameEvent extends SyncMeta {
   gameId: string;

@@ -1,6 +1,7 @@
 import type { Game, GameEvent, Player } from './types';
 import { computeSecondsPlayed, liveEvents } from './minutes';
 import { legaRating } from './rating';
+import { isCoachFoul, teamFoulPeriod } from './fouls';
 
 export interface StatLine {
   pts: number;
@@ -81,7 +82,7 @@ function applyToLine(l: StatLine, e: GameEvent): void {
     case 'STEAL': l.stl++; break;
     case 'BLOCK': l.blk++; break;
     case 'BLOCK_RECEIVED': l.blkR++; break;
-    case 'FOUL': l.pf++; break;
+    case 'FOUL': if (!isCoachFoul(e.foulKind)) l.pf++; break;
     case 'FOUL_DRAWN': l.pfd++; break;
     case 'SCREEN': l.screens++; break;
     default: break;
@@ -133,15 +134,19 @@ export function computeBoxScore(game: Game, events: GameEvent[], players: Player
           team.ast++;
         }
       }
-      if (e.type === 'FOUL') team.foulsByPeriod[e.period] = (team.foulsByPeriod[e.period] ?? 0) + 1;
+      if (e.type === 'FOUL' && !isCoachFoul(e.foulKind)) {
+        const fp = teamFoulPeriod(e.period, game.periodsRegulation);
+        team.foulsByPeriod[fp] = (team.foulsByPeriod[fp] ?? 0) + 1;
+      }
       if (pts > 0) {
         if (periodScore) periodScore.us += pts;
         for (const id of onCourt) ensure(id).plusMinus += pts;
       }
     } else {
       applyToLine(opponent, e);
-      if (e.type === 'FOUL') {
-        opponent.foulsByPeriod[e.period] = (opponent.foulsByPeriod[e.period] ?? 0) + 1;
+      if (e.type === 'FOUL' && !isCoachFoul(e.foulKind)) {
+        const fp = teamFoulPeriod(e.period, game.periodsRegulation);
+        opponent.foulsByPeriod[fp] = (opponent.foulsByPeriod[fp] ?? 0) + 1;
         if (e.jerseyNumber !== undefined) opponent.foulsByJersey[e.jerseyNumber] = (opponent.foulsByJersey[e.jerseyNumber] ?? 0) + 1;
       }
       if (pts > 0) {

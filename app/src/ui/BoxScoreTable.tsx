@@ -51,7 +51,7 @@ export function BoxScoreTable({ bs, players, special }: Props) {
           </tbody>
         </table>
       </div>
-      {cols.length > 0 && <p class="muted" style="margin:0;font-size:0.8rem">{cols.map((c) => `${c.abbr} ${c.label}`).join(' · ')} (già contati in FF)</p>}
+      {cols.length > 0 && <p class="muted" style="margin:0;font-size:0.8rem">{cols.map((c) => `${c.abbr} ${c.label}`).join(' · ')} ({cols.some((c) => c.kind === 'TA') ? 'gli altri sono già contati in FF' : 'già contati in FF'})</p>}
     </>
   );
 }

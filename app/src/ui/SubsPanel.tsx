@@ -79,7 +79,7 @@ export function SubsPanel({ lg, onClose, initialOut = null }: Props) {
             <div>
               <span class="muted">Panchina</span>
               {bench.map((p) => (
-                <button key={p.id} class={`btn btn-block sub-btn${inId === p.id ? ' active' : ''}`} disabled={(fouls[p.id] ?? 0) >= 5} onClick={() => pickIn(p.id)}>
+                <button key={p.id} class={`btn btn-block sub-btn${inId === p.id ? ' active' : ''}`} disabled={!!lg.foulStatus.value[p.id]?.out} onClick={() => pickIn(p.id)}>
                   <span class="sub-name">#{p.number} {displayName(p)}</span><FoulDots count={fouls[p.id] ?? 0} />
                 </button>
               ))}

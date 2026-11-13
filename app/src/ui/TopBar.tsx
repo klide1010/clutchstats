@@ -1,4 +1,4 @@
-import { periodLengthSec } from '@bkstats/shared';
+import { periodLengthSec, teamFoulPeriod } from '@bkstats/shared';
 import type { LiveGame } from '../state/liveGame';
 import { useRef } from 'preact/hooks';
 import { myTeam } from '../state/team';
@@ -25,8 +25,10 @@ export function TopBar({ lg, onSubs, onMenu }: Props) {
   const g = lg.game.value;
   const bs = lg.boxScore.value;
   const period = Math.max(1, g.currentPeriod);
-  const usFouls = bs.team.foulsByPeriod[period] ?? 0;
-  const themFouls = bs.opponent.foulsByPeriod[period] ?? 0;
+  // Falli di squadra (FIBA): i supplementari si sommano all'ultimo quarto; dal 4° la squadra è in bonus (gli avversari tirano i liberi).
+  const foulPeriod = teamFoulPeriod(period, g.periodsRegulation);
+  const usFouls = bs.team.foulsByPeriod[foulPeriod] ?? 0;
+  const themFouls = bs.opponent.foulsByPeriod[foulPeriod] ?? 0;
   const usTO = bs.team.timeouts;
   const themTO = bs.opponent.timeouts;
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -53,7 +55,7 @@ export function TopBar({ lg, onSubs, onMenu }: Props) {
     <header class="topbar">
       <div class="score">
         <span class="score-team">{myTeam.value?.logoUrl ? <img src={myTeam.value.logoUrl} alt="" class="score-logo" /> : null}{myTeam.value?.name ?? 'Noi'}</span>
-        <span class="score-row"><span class="score-num">{bs.score.us}</span><span class="score-meta"><span class={`fouls${usFouls >= 5 ? ' bonus' : ''}`}>F{usFouls}</span> · <span class="timeouts" title="Timeout noi">TO {usTO}</span></span></span>
+        <span class="score-row"><span class="score-num">{bs.score.us}</span><span class="score-meta"><span class={`fouls${usFouls >= 4 ? ' bonus' : ''}`}>F{usFouls}</span> · <span class="timeouts" title="Timeout noi">TO {usTO}</span></span></span>
       </div>
       <div class="center">
         <span class="period">{periodName(g.currentPeriod, g.periodsRegulation)}</span>
@@ -66,7 +68,7 @@ export function TopBar({ lg, onSubs, onMenu }: Props) {
       </div>
       <div class="score them">
         <span class="score-team">{lg.opponent.value.name}</span>
-        <span class="score-row"><span class="score-meta"><span class="timeouts" title="Timeout loro">TO {themTO}</span> · <span class={`fouls${themFouls >= 5 ? ' bonus' : ''}`}>F{themFouls}</span></span><span class="score-num">{bs.score.them}</span></span>
+        <span class="score-row"><span class="score-meta"><span class="timeouts" title="Timeout loro">TO {themTO}</span> · <span class={`fouls${themFouls >= 4 ? ' bonus' : ''}`}>F{themFouls}</span></span><span class="score-num">{bs.score.them}</span></span>
       </div>
       <div class="topbar-actions">
         <button class="btn btn-sm btn-icon" disabled={!lg.canUndo.value} onClick={() => void lg.undo()}><Icon name="undo" size={16} class="ic-data" /> Undo</button>

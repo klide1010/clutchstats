@@ -171,6 +171,23 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
   la partita con Vertova del 5/11 torna "programmata" e vuota. `updated_at`/`server_updated_at` aggiornati per la sync. Risultato 57–62.
   Copia di sicurezza fatta prima della modifica (partite ed eventi originali).
 
+## 14 novembre — falli secondo le regole FIBA 2026
+
+- Dal 1° ottobre 2026 valgono le nuove regole FIBA (recepite da FIP; il CSI le adotta con eventuali adattamenti dei comitati):
+  l'**antisportivo non esiste più**, sostituito da **disruptive (DI)** e **flagrante (FL)**; i tecnici sono di **categoria 1** (contano
+  per l'espulsione) o **2** (no). Fonti: documenti FIBA/FIP/CSI 2026 trovati in ricerca (i PDF non erano raggiungibili dalla sessione).
+- Tenendo premuto "Fallo": Personale, In attacco, Disruptive, Flagrante, Tecnico cat. 1, Tecnico cat. 2, Da espulsione, con sigla e
+  conseguenze; poi si sceglie il giocatore come col tocco breve. In fondo **Tecnico allenatore (C)** e **Tecnico panchina (B)**: si
+  registrano subito, senza giocatore, anche per gli avversari (`app/src/ui/FoulChooser.tsx`).
+- Regole applicate (`shared/src/fouls.ts`): tutti i falli da giocatore contano per i 5 falli e per i falli di squadra; **espulsione**
+  con 2 tra tecnici cat. 1 e flagranti o con un fallo da espulsione (popup "Espulso", non può rientrare); l'antisportivo delle partite
+  vecchie conta come flagrante. **Allenatore espulso** con 2 C o 3 tra B e C (avviso). C e B non sono falli di squadra né FF.
+- Falli di squadra: **bonus dal 4°** (prima il rosso scattava al 5°); nei **supplementari** si sommano a quelli del 4° quarto.
+- Box score e stagione: colonne FO, DI, FL, FA (solo partite vecchie), FT (tecnici), FE (espulsione), TA (tecnici allenatore e
+  panchina, solo nelle righe di squadra e fuori da FF). Referto PDF con i nuovi tipi.
+- Non fatto: avvisi per i giocatori avversari espulsi o a 5 falli; numero di tiri liberi automatico (si registrano a mano come prima).
+  Le penalità per i tecnici all'allenatore possono variare tra comitati CSI: nell'app non sono indicate.
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).

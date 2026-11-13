@@ -19,7 +19,7 @@ export function GameMenu({ lg, onClose, onClosed }: Props) {
   const g = lg.game.value;
   const open = lg.periodOpen.value;
   const [next, setNext] = useState<string[]>([]);
-  const fouledOut = lg.boxScore.value.players.filter((l) => l.pf >= 5).map((l) => l.playerId);
+  const fouledOut = Object.keys(lg.foulStatus.value).filter((id) => lg.foulStatus.value[id].out);
   const nextLabel = g.currentPeriod >= g.periodsRegulation ? 'Inizia supplementare' : 'Inizia periodo';
   const startNext = () => run(async () => { await lg.setPeriodLineup(next); await lg.startPeriod(); });
 

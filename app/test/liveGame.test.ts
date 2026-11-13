@@ -280,6 +280,34 @@ it('a player with 5 fouls is flagged as fouled out and cannot record further act
   await expect(lg.substitute(ids[5], ids[0], 200)).rejects.toThrow('5 falli');
 });
 
+it('FIBA 2026: espulso con 2 tecnici cat. 1 (o flagranti), non con disruptive e tecnici cat. 2; non può rientrare', async () => {
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  await lg.addEvent({ type: 'FOUL', side: 'US', playerId: ids[1], foulKind: 'DISRUPTIVE' });
+  await lg.addEvent({ type: 'FOUL', side: 'US', playerId: ids[1], foulKind: 'TECHNICAL_2' });
+  await lg.addEvent({ type: 'FOUL', side: 'US', playerId: ids[1], foulKind: 'TECHNICAL' });
+  expect(lg.fouledOut.value).toEqual([]);
+  await lg.addEvent({ type: 'FOUL', side: 'US', playerId: ids[1], foulKind: 'FLAGRANT' });
+  expect(lg.fouledOut.value).toEqual([ids[1]]);
+  expect(lg.foulStatus.value[ids[1]]).toMatchObject({ disqualified: true, fouls: 4 });
+  await expect(lg.addEvent({ type: 'STEAL', side: 'US', playerId: ids[1] })).rejects.toThrow('espulso');
+  await lg.substitute(ids[1], ids[5], 300);
+  await expect(lg.substitute(ids[5], ids[1], 200)).rejects.toThrow('espulso');
+});
+
+it('tecnico all\'allenatore o alla panchina senza giocatore; allenatore espulso con 2 C', async () => {
+  await lg.setStarters(ids.slice(0, 5));
+  await lg.startPeriod();
+  await lg.addEvent({ type: 'FOUL', side: 'US', foulKind: 'COACH_TECHNICAL' });
+  expect(eventLabel(last(), lg.players.value)).toBe('Noi · Tecnico allenatore (C)');
+  await lg.addEvent({ type: 'FOUL', side: 'THEM', foulKind: 'BENCH_TECHNICAL' });
+  expect(eventLabel(last(), lg.players.value)).toBe('Loro · Tecnico panchina (B)');
+  expect(lg.coach.value.US.disqualified).toBe(false);
+  await lg.addEvent({ type: 'FOUL', side: 'US', foulKind: 'COACH_TECHNICAL' });
+  expect(lg.coach.value.US).toMatchObject({ coach: 2, disqualified: true });
+  expect(lg.boxScore.value.team.pf).toBe(0);
+});
+
 it('undoing the fifth foul clears the fouled-out state', async () => {
   await lg.setStarters(ids.slice(0, 5));
   await lg.startPeriod();

@@ -406,3 +406,8 @@ table.stats.compact { min-width: 0; }
 .legend-made { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--ok); vertical-align: middle; }
 .game-dot.scheduled { background: var(--data); }
 .legend-missed { color: var(--err); font-weight: 700; }
+.foul-chooser { max-height: 90vh; overflow-y: auto; }
+.foul-chooser > * + * { margin-top: 6px; }
+.foul-choice { justify-content: space-between; min-height: 44px; padding: 6px 12px; text-align: left; }
+.foul-choice-label { flex: 0 0 auto; font-weight: 700; }
+.foul-choice-note { flex: 1 1 auto; margin-left: 10px; text-align: right; font-size: 0.75rem; font-weight: 500; color: var(--muted); }

@@ -1,4 +1,4 @@
-import { COURT, periodLabel, type BoxScore, type Game, type GameEvent, type Opponent, type Player, type StatLine } from '@bkstats/shared';
+import { COURT, isCoachFoul, periodLabel, type BoxScore, type Game, type GameEvent, type Opponent, type Player, type StatLine } from '@bkstats/shared';
 import { shotPosition } from '../ui/Court';
 import { fmtMinutes } from './export';
 
@@ -177,7 +177,10 @@ function wrap(s: string, max: number, size: number): string[] {
   return lines;
 }
 
-const SPECIAL_LABELS: Record<string, string> = { UNSPORTSMANLIKE: 'antisportivo', TECHNICAL: 'tecnico', OFFENSIVE: 'in attacco' };
+const SPECIAL_LABELS: Record<string, string> = {
+  OFFENSIVE: 'in attacco', DISRUPTIVE: 'disruptive', FLAGRANT: 'flagrante', TECHNICAL: 'tecnico', TECHNICAL_2: 'tecnico cat. 2',
+  DISQUALIFYING: 'da espulsione', COACH_TECHNICAL: 'tecnico allenatore (C)', BENCH_TECHNICAL: 'tecnico panchina (B)', UNSPORTSMANLIKE: 'antisportivo',
+};
 
 /** Falli non personali raggruppati per giocatore (noi) o numero di maglia (loro), es. "#7 Rossi: antisportivo (Q2), tecnico (Q4)". */
 export function specialFouls(events: GameEvent[], players: Player[], periodsRegulation: number): { us: string; them: string } {
@@ -186,7 +189,8 @@ export function specialFouls(events: GameEvent[], players: Player[], periodsRegu
   for (const e of events) {
     if (e.deleted || e.type !== 'FOUL' || !e.foulKind || !SPECIAL_LABELS[e.foulKind]) continue;
     let who: string;
-    if (e.side === 'US') { const p = e.playerId ? byId.get(e.playerId) : undefined; who = p ? `#${p.number} ${p.lastName}` : 'Squadra'; }
+    if (isCoachFoul(e.foulKind)) who = 'Allenatore/panchina';
+    else if (e.side === 'US') { const p = e.playerId ? byId.get(e.playerId) : undefined; who = p ? `#${p.number} ${p.lastName}` : 'Squadra'; }
     else who = e.jerseyNumber !== undefined ? `#${e.jerseyNumber}` : 'Squadra';
     const m = groups[e.side];
     const list = m.get(who) ?? [];
