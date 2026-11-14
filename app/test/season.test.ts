@@ -1,6 +1,6 @@
 import { it, expect } from 'vitest';
 import type { Game, GameEvent, Player } from '@bkstats/shared';
-import { computeSeason } from '../src/model/season';
+import { computeSeason, seasonGames, seasonOf, seasonsOf } from '../src/model/season';
 
 const mk = (id: string, status: Game['status']): Game => ({ id, updatedAt: 1, deleted: false, teamId: 't1', opponentId: 'o1', date: '2026-10-18T18:30:00.000Z', home: true, status, useClock: false, periodLengthMin: 10, periodsRegulation: 4, currentPeriod: 4, source: 'MANUAL', starters: ['p1', 'p2', 'p3', 'p4', 'p5'] });
 const players: Player[] = Array.from({ length: 6 }, (_, i) => ({ id: `p${i + 1}`, teamId: 't1', firstName: 'M', lastName: `R${i + 1}`, number: 4 + i, role: 'ALA', active: true, updatedAt: 1, deleted: false }));
@@ -22,4 +22,34 @@ it('aggregates only CLOSED games, counts record and games played', () => {
   expect(p6.pts).toBe(3);
   expect(s.team.pts).toBe(7);
   expect(s.opponentPts).toBe(6);
+});
+
+it('una partita "solo risultato" conta in record e punti ma non nelle statistiche', () => {
+  const r: Game = { ...mk('g9', 'CLOSED'), scoreUs: 70, scoreThem: 50 };
+  const s = computeSeason([mk('g1', 'CLOSED'), r], { g1 }, players);
+  expect(s.record).toEqual({ won: 2, lost: 0 });
+  expect(s.results).toBe(2);
+  expect(s.gamesPlayed).toBe(1);
+  expect(s.pointsFor).toBe(74);
+  expect(s.opponentPts).toBe(52);
+  expect(s.team.pts).toBe(4);
+  expect(s.players.find((p) => p.playerId === 'p1')!.gamesPlayed).toBe(1);
+});
+
+it('seasonOf: la stagione va da agosto a luglio', () => {
+  expect(seasonOf('2026-10-18T18:30:00.000Z')).toBe('2026/27');
+  expect(seasonOf('2027-03-01T18:30:00.000Z')).toBe('2026/27');
+  expect(seasonOf('2026-08-20T18:30:00.000Z')).toBe('2026/27');
+  expect(seasonOf('2026-07-10T18:30:00.000Z')).toBe('2025/26');
+  expect(seasonOf('2099-12-01T10:00:00.000Z')).toBe('2099/00');
+});
+
+it('seasonGames: per stagione, campionato o amichevoli; seasonsOf dalla più recente', () => {
+  const a = { ...mk('a', 'CLOSED'), date: '2025-11-01T18:00:00.000Z' };
+  const b = mk('b', 'CLOSED');
+  const c = { ...mk('c', 'CLOSED'), friendly: true };
+  expect(seasonsOf([a, b, c])).toEqual(['2026/27', '2025/26']);
+  expect(seasonGames([a, b, c], '2026/27', false).map((x) => x.id)).toEqual(['b']);
+  expect(seasonGames([a, b, c], '2026/27', true).map((x) => x.id)).toEqual(['c']);
+  expect(seasonGames([a, b, c], '2025/26', false).map((x) => x.id)).toEqual(['a']);
 });

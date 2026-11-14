@@ -37,6 +37,12 @@ it('games list has opponent name and score, deleted events excluded', async () =
   expect(games[0]).toMatchObject({ id: 'g1', opponentName: 'Basket Verdi', score: { us: 5, them: 2 } });
 });
 
+it('games list: una partita "solo risultato" porta il punteggio scritto a mano', async () => {
+  await post('/api/sync/push', { games: [{ ...game, id: 'g2', date: '2026-10-25T18:30:00.000Z', scoreUs: 60, scoreThem: 48, friendly: true, updatedAt: 3000 }] }, auth);
+  const { games } = (await (await get('/api/v1/read/games', coach)).json()) as { games: (Game & { score: { us: number; them: number } })[] };
+  expect(games.find((g) => g.id === 'g2')).toMatchObject({ friendly: true, score: { us: 60, them: 48 } });
+});
+
 it('boxscore returns game, opponent, players and the shared BoxScore', async () => {
   const r = await get('/api/v1/read/games/g1/boxscore', coach);
   expect(r.status).toBe(200);

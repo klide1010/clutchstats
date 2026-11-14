@@ -68,6 +68,11 @@ export interface Game extends SyncMeta {
   /** Dispositivo che sta registrando la partita (presa in carico tra telefoni). */
   ownerDevice?: string;
   notes?: string;
+  /** Amichevole: non conta nelle statistiche di stagione (ha la sua sezione "Amichevoli"). */
+  friendly?: boolean;
+  /** Solo risultato: punteggio inserito a mano, senza statistiche (la partita è CLOSED e senza eventi). */
+  scoreUs?: number;
+  scoreThem?: number;
 }
 
 export type Side = 'US' | 'THEM';

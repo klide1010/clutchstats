@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'preact/hooks';
-import type { GameEvent, Player } from '@bkstats/shared';
+import { isResultOnly, type Game, type GameEvent, type Player } from '@bkstats/shared';
 import { eventsRepo } from '../db';
 import { games, loadGames } from '../state/games';
 import { loadPlayers, players } from '../state/team';
-import { computeSeason, type Season as SeasonData } from '../model/season';
+import { computeSeason, seasonGames, seasonOf, seasonsOf, type Season as SeasonData } from '../model/season';
 import { fmtMinutes, fmtPct } from '../model/export';
 import { SPECIAL_COLS, countSpecialFouls, type KindCounts, type SpecialFouls } from '../model/fouls';
 import { Shot } from '../ui/BoxScoreTable';
@@ -54,36 +54,65 @@ export function SeasonTable({ season, players: list, avg, special }: TableProps)
 }
 
 export function Season() {
-  const [season, setSeason] = useState<SeasonData | null>(null);
-  const [special, setSpecial] = useState<SpecialFouls | null>(null);
+  const [byGame, setByGame] = useState<Record<string, GameEvent[]> | null>(null);
+  const [closed, setClosed] = useState<Game[]>([]);
+  const [chosen, setChosen] = useState<string | null>(null);
+  const [friendly, setFriendly] = useState(false);
   const [avg, setAvg] = useState(false);
 
   useEffect(() => {
     (async () => {
       await Promise.all([loadGames(), loadPlayers()]);
-      const closed = games.value.filter((g) => g.status === 'CLOSED');
-      const byGame: Record<string, GameEvent[]> = {};
-      for (const g of closed) byGame[g.id] = await eventsRepo.byGame(g.id);
-      setSeason(computeSeason(closed, byGame, players.value));
-      setSpecial(countSpecialFouls(closed.reduce((all, g) => all.concat(byGame[g.id]), [] as GameEvent[])));
+      const list = games.value.filter((g) => g.status === 'CLOSED');
+      const ev: Record<string, GameEvent[]> = {};
+      for (const g of list) ev[g.id] = isResultOnly(g) ? [] : await eventsRepo.byGame(g.id);
+      setClosed(list);
+      setByGame(ev);
     })();
   }, []);
 
-  if (!season || !special) return <main class="page"><p class="muted">Caricamento…</p></main>;
+  if (!byGame) return <main class="page"><p class="muted">Caricamento…</p></main>;
+  const seasons = seasonsOf(closed);
+  const current = seasonOf(new Date().toISOString());
+  if (seasons.indexOf(current) < 0) seasons.unshift(current);
+  const sel = chosen ?? seasons[0];
+  const list = seasonGames(closed, sel, friendly);
+  const season: SeasonData = computeSeason(list, byGame, players.value);
+  const special: SpecialFouls = countSpecialFouls(list.reduce((all, g) => all.concat(byGame[g.id] ?? []), [] as GameEvent[]));
   const gp = season.gamesPlayed;
+  const n = season.results;
+  const resultOnly = n - gp;
 
   return (
     <main class="page stack">
       <PageTitle icon="trophy">Stagione</PageTitle>
+      {seasons.length > 1 && (
+        <label>Stagione
+          <select value={sel} onChange={(e) => setChosen((e.target as HTMLSelectElement).value)}>
+            {seasons.map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+        </label>
+      )}
+      <div class="seg" role="tablist">
+        <button role="tab" aria-selected={!friendly} class={`seg-btn${!friendly ? ' active' : ''}`} onClick={() => setFriendly(false)}>Campionato</button>
+        <button role="tab" aria-selected={friendly} class={`seg-btn${friendly ? ' active' : ''}`} onClick={() => setFriendly(true)}>Amichevoli</button>
+      </div>
       <div class="card">
         <div class="final-score"><b>{season.record.won}</b><span class="muted">V</span><span class="muted">–</span><b>{season.record.lost}</b><span class="muted">P</span></div>
-        <p class="muted" style="text-align:center;margin:4px 0 0">{gp} partite chiuse · PT {season.team.pts} fatti, {season.opponentPts} subiti{gp ? ` · media ${(season.team.pts / gp).toFixed(1)} – ${(season.opponentPts / gp).toFixed(1)}` : ''}</p>
+        <p class="muted" style="text-align:center;margin:4px 0 0">
+          {seasons.length === 1 ? `${sel} · ` : ''}{n} {friendly ? (n === 1 ? 'amichevole' : 'amichevoli') : (n === 1 ? 'partita' : 'partite')} · PT {season.pointsFor} fatti, {season.opponentPts} subiti{n ? ` · media ${(season.pointsFor / n).toFixed(1)} – ${(season.opponentPts / n).toFixed(1)}` : ''}
+        </p>
+        {resultOnly > 0 && <p class="muted" style="text-align:center;margin:4px 0 0;font-size:0.8rem">{resultOnly} con il solo risultato: contano nel record e nei punti, non nelle statistiche dei giocatori.</p>}
       </div>
-      <div class="seg">
-        <button class={`seg-btn${!avg ? ' active' : ''}`} onClick={() => setAvg(false)}>Totali</button>
-        <button class={`seg-btn${avg ? ' active' : ''}`} onClick={() => setAvg(true)}>Medie</button>
-      </div>
-      <SeasonTable season={season} players={players.value} avg={avg} special={special} />
+      {gp > 0 ? (
+        <>
+          <div class="seg">
+            <button class={`seg-btn${!avg ? ' active' : ''}`} onClick={() => setAvg(false)}>Totali</button>
+            <button class={`seg-btn${avg ? ' active' : ''}`} onClick={() => setAvg(true)}>Medie</button>
+          </div>
+          <SeasonTable season={season} players={players.value} avg={avg} special={special} />
+        </>
+      ) : <p class="muted">{n ? 'Nessuna partita con le statistiche.' : friendly ? 'Nessuna amichevole giocata in questa stagione.' : 'Nessuna partita giocata in questa stagione.'}</p>}
     </main>
   );
 }

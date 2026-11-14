@@ -58,8 +58,8 @@ export const opponentMapper: Mapper<Opponent> = {
 
 export const gameMapper: Mapper<Game> = {
   table: 'games',
-  columns: ['id', 'team_id', 'opponent_id', 'date', 'home', 'competition', 'venue', 'status', 'use_clock', 'period_length_min', 'periods_regulation', 'current_period', 'source', 'ics_uid', 'starters', 'roster', 'owner_device', 'notes', 'updated_at', 'deleted'],
-  toRow: (g) => [g.id, g.teamId, g.opponentId, g.date, toDb(!!g.home), toDb(g.competition), toDb(g.venue), g.status, toDb(!!g.useClock), g.periodLengthMin, g.periodsRegulation, g.currentPeriod, g.source, toDb(g.icsUid), JSON.stringify(g.starters ?? []), JSON.stringify(g.roster ?? []), toDb(g.ownerDevice), toDb(g.notes), g.updatedAt, toDb(!!g.deleted)],
+  columns: ['id', 'team_id', 'opponent_id', 'date', 'home', 'competition', 'venue', 'status', 'use_clock', 'period_length_min', 'periods_regulation', 'current_period', 'source', 'ics_uid', 'starters', 'roster', 'owner_device', 'notes', 'friendly', 'score_us', 'score_them', 'updated_at', 'deleted'],
+  toRow: (g) => [g.id, g.teamId, g.opponentId, g.date, toDb(!!g.home), toDb(g.competition), toDb(g.venue), g.status, toDb(!!g.useClock), g.periodLengthMin, g.periodsRegulation, g.currentPeriod, g.source, toDb(g.icsUid), JSON.stringify(g.starters ?? []), JSON.stringify(g.roster ?? []), toDb(g.ownerDevice), toDb(g.notes), toDb(!!g.friendly), toDb(g.scoreUs), toDb(g.scoreThem), g.updatedAt, toDb(!!g.deleted)],
   fromRow: (r) => {
     const g: Game = {
       id: r.id as string, teamId: r.team_id as string, opponentId: r.opponent_id as string, date: r.date as string, home: bool(r.home),
@@ -72,6 +72,10 @@ export const gameMapper: Mapper<Game> = {
       const v = opt<string>(r[col]);
       if (v !== undefined) (g as unknown as Record<string, unknown>)[k] = v;
     }
+    if (bool(r.friendly)) g.friendly = true;
+    const us = opt<number>(r.score_us);
+    const them = opt<number>(r.score_them);
+    if (us !== undefined && them !== undefined) { g.scoreUs = us; g.scoreThem = them; }
     return g;
   },
   validate: (x): x is Game => baseValid(x) && typeof (x as Game).teamId === 'string' && typeof (x as Game).opponentId === 'string' && typeof (x as Game).date === 'string' && typeof (x as Game).status === 'string',

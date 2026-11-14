@@ -106,3 +106,13 @@ it('player nickname roundtrips, and is absent when not set', async () => {
   expect(pulled.players.find((p) => p.id === 'pn')!.nickname).toBe('Fede');
   expect(pulled.players.find((p) => p.id === 'pz')).not.toHaveProperty('nickname');
 });
+
+it('game friendly e risultato a mano roundtrip, assenti se non impostati', async () => {
+  const base = { teamId: 't1', opponentId: 'o1', date: '2026-10-18T18:30:00.000Z', home: true, useClock: false, periodLengthMin: 10, periodsRegulation: 4, currentPeriod: 0, source: 'MANUAL', starters: [], updatedAt: 4000, deleted: false };
+  await post('/api/sync/push', { games: [{ ...base, id: 'gf', status: 'CLOSED', friendly: true, scoreUs: 61, scoreThem: 58 }, { ...base, id: 'gn', status: 'SCHEDULED' }] }, auth);
+  const pulled = (await (await get('/api/sync/pull?since=0', auth)).json()) as { games: Record<string, unknown>[] };
+  expect(pulled.games.find((x) => x.id === 'gf')).toMatchObject({ friendly: true, scoreUs: 61, scoreThem: 58 });
+  const gn = pulled.games.find((x) => x.id === 'gn')!;
+  expect(gn).not.toHaveProperty('friendly');
+  expect(gn).not.toHaveProperty('scoreUs');
+});

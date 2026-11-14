@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { computeBoxScore, type Game, type GameEvent } from '@bkstats/shared';
+import { computeBoxScore, isResultOnly, manualScore, type Game, type GameEvent } from '@bkstats/shared';
 import { eventsRepo } from '../db';
 import { games, loadGames } from '../state/games';
 import { loadOpponents, opponents } from '../state/opponents';
@@ -10,7 +10,7 @@ import { navigate } from '../router';
 import { fmtDate } from '../ui/IcsImport';
 import { SyncButton } from '../ui/SyncButton';
 import { Icon } from '../ui/Icon';
-import { computeSeason } from '../model/season';
+import { computeSeason, seasonGames, seasonOf } from '../model/season';
 import { fmtPct } from '../model/export';
 import { venueLabel } from '../model/gameView';
 
@@ -26,13 +26,15 @@ export function Home() {
       await Promise.all([loadGames(), loadOpponents(), loadPlayers()]);
       const allClosed = games.value.filter((g) => g.status === 'CLOSED');
       const byGame: Record<string, GameEvent[]> = {};
-      for (const g of allClosed) byGame[g.id] = await eventsRepo.byGame(g.id);
+      for (const g of allClosed) byGame[g.id] = isResultOnly(g) ? [] : await eventsRepo.byGame(g.id);
       const s: Record<string, { us: number; them: number }> = {};
-      for (const g of allClosed.slice(-3)) s[g.id] = computeBoxScore(g, byGame[g.id], players.value).score;
+      for (const g of allClosed.slice(-3)) s[g.id] = manualScore(g) ?? computeBoxScore(g, byGame[g.id], players.value).score;
       setScores(s);
-      if (allClosed.length) {
-        const se = computeSeason(allClosed, byGame, players.value);
-        const n = se.gamesPlayed || 1;
+      // Riquadri: stagione in corso, solo partite di campionato con le statistiche.
+      const official = seasonGames(allClosed, seasonOf(new Date().toISOString()), false);
+      const se = computeSeason(official, byGame, players.value);
+      if (se.gamesPlayed) {
+        const n = se.gamesPlayed;
         setTiles({ ppg: (se.team.pts / n).toFixed(1), p3: fmtPct(se.team.fg3m, se.team.fg3a), rpg: (se.team.reb / n).toFixed(1) });
       }
     })();
@@ -42,7 +44,7 @@ export function Home() {
   const live = games.value.find((g) => g.status === 'LIVE');
   const next = games.value.filter((g) => g.status === 'SCHEDULED').sort((a, b) => a.date.localeCompare(b.date))[0];
   const recent = games.value.filter((g) => g.status === 'CLOSED').slice(-3).reverse();
-  const record = recent.reduce((r, g) => { const s = scores[g.id]; if (s) { if (s.us > s.them) r.won++; else if (s.us < s.them) r.lost++; } return r; }, { won: 0, lost: 0 });
+  const record = recent.filter((g) => !g.friendly).reduce((r, g) => { const s = scores[g.id]; if (s) { if (s.us > s.them) r.won++; else if (s.us < s.them) r.lost++; } return r; }, { won: 0, lost: 0 });
 
   return (
     <main class="page stack">
@@ -86,8 +88,8 @@ export function Home() {
           <h2 class="with-icon"><Icon name="trophy" size={16} /> Ultime partite</h2>
           <ul class="list">
             {recent.map((g) => (
-              <li key={g.id} onClick={() => navigate(`#/stats/${g.id}`)}>
-                <span style="flex:1">{g.home ? 'vs' : '@'} {oppName(g)}<br /><span class="muted">{fmtDate(g.date)}</span></span>
+              <li key={g.id} onClick={() => navigate(isResultOnly(g) ? '#/calendar' : `#/stats/${g.id}`)}>
+                <span style="flex:1">{g.home ? 'vs' : '@'} {oppName(g)}{g.friendly && <span class="tag">Amichevole</span>}<br /><span class="muted">{fmtDate(g.date)}</span></span>
                 <b>{scores[g.id] ? `${scores[g.id].us} – ${scores[g.id].them}` : ''}</b>
               </li>
             ))}

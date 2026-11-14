@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { computeBoxScore, newId, parseRole, type Game, type GameEvent, type Opponent, type Player, type Team } from '@bkstats/shared';
+import { computeBoxScore, manualScore, newId, parseRole, type Game, type GameEvent, type Opponent, type Player, type Team } from '@bkstats/shared';
 import type { AppVariables, Env } from './env';
 import { eventMapper, gameMapper, opponentMapper, playerMapper, teamMapper } from './mappers';
 import { upsertMany } from './sync';
@@ -36,8 +36,8 @@ export async function listGames(c: AppContext): Promise<Response> {
   const out = [];
   for (const g of games) {
     if (!playersByTeam.has(g.teamId)) playersByTeam.set(g.teamId, await teamPlayers(db, g.teamId));
-    const bs = computeBoxScore(g, await liveEvents(db, g.id), gamePlayers(g, playersByTeam.get(g.teamId)!));
-    out.push({ ...g, opponentName: opponents.get(g.opponentId)?.name ?? 'Avversario', score: bs.score });
+    const score = manualScore(g) ?? computeBoxScore(g, await liveEvents(db, g.id), gamePlayers(g, playersByTeam.get(g.teamId)!)).score;
+    out.push({ ...g, opponentName: opponents.get(g.opponentId)?.name ?? 'Avversario', score });
   }
   return c.json({ games: out });
 }

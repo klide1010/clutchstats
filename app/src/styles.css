@@ -411,3 +411,9 @@ table.stats.compact { min-width: 0; }
 .foul-choice { justify-content: space-between; min-height: 44px; padding: 6px 12px; text-align: left; }
 .foul-choice-label { flex: 0 0 auto; font-weight: 700; }
 .foul-choice-note { flex: 1 1 auto; margin-left: 10px; text-align: right; font-size: 0.75rem; font-weight: 500; color: var(--muted); }
+
+/* Calendario: amichevole, modifica in linea (matita) */
+.tag { display: inline-block; margin-left: 6px; padding: 0 6px; border: 1px solid var(--border-strong); border-radius: 4px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); vertical-align: 2px; }
+.list li.edit-row { display: block; padding: 4px 0 12px; }
+.list li.edit-row > * + * { margin-left: 0; }
+.score-inputs input { font-size: 1.3rem; font-weight: 700; text-align: center; }

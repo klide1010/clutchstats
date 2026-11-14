@@ -6,3 +6,4 @@ export * from './minutes';
 export * from './rating';
 export * from './boxscore';
 export * from './fouls';
+export * from './result';

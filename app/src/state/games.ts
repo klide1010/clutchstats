@@ -16,6 +16,7 @@ export interface CreateGameInput {
   periodLengthMin?: number;
   source?: 'MANUAL' | 'ICS';
   icsUid?: string;
+  friendly?: boolean;
 }
 
 export async function loadGames(): Promise<void> {
@@ -46,6 +47,7 @@ export async function createGame(input: CreateGameInput): Promise<Game> {
     source: input.source ?? 'MANUAL',
     icsUid: input.icsUid,
     starters: [],
+    ...(input.friendly ? { friendly: true } : {}),
   });
   await loadGames();
   return game;
@@ -55,6 +57,21 @@ export async function updateGame(id: string, patch: Partial<Game>): Promise<Game
   const existing = await gamesRepo.get(id);
   if (!existing) return undefined;
   const saved = await gamesRepo.put({ ...existing, ...patch, id });
+  await loadGames();
+  return saved;
+}
+
+/** Solo risultato: la partita diventa chiusa con il punteggio scritto a mano, senza statistiche. */
+export async function setResult(id: string, us: number, them: number): Promise<Game | undefined> {
+  return updateGame(id, { status: 'CLOSED', scoreUs: us, scoreThem: them });
+}
+
+/** Toglie il risultato scritto a mano: la partita torna da giocare. */
+export async function clearResult(id: string): Promise<Game | undefined> {
+  const existing = await gamesRepo.get(id);
+  if (!existing) return undefined;
+  const { scoreUs: _u, scoreThem: _t, ...rest } = existing;
+  const saved = await gamesRepo.put({ ...rest, status: 'SCHEDULED' });
   await loadGames();
   return saved;
 }

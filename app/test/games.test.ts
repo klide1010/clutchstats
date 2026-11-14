@@ -1,6 +1,6 @@
 import { it, expect, beforeEach } from 'vitest';
 import { resetDb, meta } from '../src/db';
-import { createGame, games, importProposals, loadGames, updateGame, removeGame } from '../src/state/games';
+import { clearResult, createGame, games, importProposals, loadGames, setResult, updateGame, removeGame } from '../src/state/games';
 import { ensureTeam } from '../src/state/team';
 
 beforeEach(async () => { await resetDb(); games.value = []; await ensureTeam(); });
@@ -37,4 +37,15 @@ it('games are sorted by date, updateGame patches, removeGame hides', async () =>
   expect(games.value[0].status).toBe('LIVE');
   await removeGame(b.id);
   expect(games.value).toHaveLength(1);
+});
+
+it('setResult chiude la partita col solo risultato, clearResult la riporta da giocare', async () => {
+  const g = await createGame({ opponentId: 'o1', date: '2026-10-18T18:30:00.000Z', home: true, useClock: false, friendly: true });
+  expect(g.friendly).toBe(true);
+  const r = await setResult(g.id, 61, 58);
+  expect(r).toMatchObject({ status: 'CLOSED', scoreUs: 61, scoreThem: 58, friendly: true });
+  const back = await clearResult(g.id);
+  expect(back!.status).toBe('SCHEDULED');
+  expect(back).not.toHaveProperty('scoreUs');
+  expect(back).not.toHaveProperty('scoreThem');
 });

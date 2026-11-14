@@ -188,6 +188,20 @@ Storico delle decisioni prese insieme a Claude. Serve come base per riprendere i
 - Non fatto: avvisi per i giocatori avversari espulsi o a 5 falli; numero di tiri liberi automatico (si registrano a mano come prima).
   Le penalità per i tecnici all'allenatore possono variare tra comitati CSI: nell'app non sono indicate.
 
+## 14 novembre — calendario a tab, amichevoli, solo risultato
+
+- **Calendario a tab**: "Da giocare (n)" (in corso + prossime) e "Giocate (n)" al posto dell'elenco unico da scorrere. La tab resta
+  quella scelta tornando dalle statistiche, finché l'app è aperta.
+- **Matita** su ogni partita non in corso: per quelle da giocare (o già "solo risultato") si scrivono i punteggi Noi/Loro e la partita
+  diventa chiusa **senza statistiche** (`Game.scoreUs/scoreThem`); svuotando i punteggi torna da giocare. Si può eliminare (cestino) anche
+  una partita "solo risultato". Per le partite registrate la matita cambia solo "Amichevole".
+- **Amichevole** (`Game.friendly`): si segna nella nuova partita o con la matita; etichetta "Amichevole" in calendario e in Home.
+- **Stagioni**: derivate dalla data, da agosto a luglio ("2026/27"). La pagina Stagione ha la scelta della stagione (se ce n'è più di una)
+  e le tab **Campionato / Amichevoli**: le amichevoli non entrano nel campionato ma hanno il loro riepilogo. Le partite "solo risultato"
+  contano in record e punti fatti/subiti, non nelle statistiche dei giocatori né nelle medie della tabella.
+- Home: riquadri (punti, da 3, rimbalzi) sulla stagione in corso, solo campionato; "V/P nelle ultime" senza le amichevoli.
+- Migrazione **0007** (`games.friendly`, `score_us`, `score_them`); API allenatore: `score` è quello scritto a mano se c'è.
+
 ## Cose aperte
 
 - Roster: numeri di maglia di Gabriele Giuliano, Ripamonti, Silvi e Storto (ora 90–93, inattivi).
